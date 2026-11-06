@@ -3,12 +3,9 @@ import { transformAmount } from "@/components/home/Hero";
 import { policies, policyReview } from "@/content/policies";
 
 describe("hero skin transformation", () => {
-  it("starts fully on the Before photo", () => expect(transformAmount(0)).toBe(0));
-  it("ends fully on the After photo", () => expect(transformAmount(1)).toBe(1));
-  it("is halfway at mid-scroll and reverses with scroll", () => {
-    expect(transformAmount(0.48)).toBeCloseTo(0.5, 2);
-    expect(transformAmount(0.3)).toBeLessThan(transformAmount(0.6));
-  });
+  it("starts fully on the Before photo at the top", () => expect(transformAmount(0, 800)).toBe(0));
+  it("is complete after 55% of one viewport of scrolling", () => expect(transformAmount(440, 800)).toBe(1));
+  it("reverses when scrolling back up", () => expect(transformAmount(100, 800)).toBeLessThan(transformAmount(300, 800)));
 });
 
 describe("policies", () => {
