@@ -35,3 +35,5 @@ use the editor.
 - Homepage hero uses the BeforeAfter image slider (AI images allowed there only, by user approval); no 3D in the hero.
 - Product photos are registered by slug in `src/lib/product-images.ts` (files `src/assets/products/<slug>-<n>.webp`) and passed via `ProductVisual src`; the SVG drawing is only the fallback — one source so every page shows the same photo.
 - Scroll/text/image reveals use `src/components/motion/Reveal.tsx` (one shared IntersectionObserver + one parallax loop) with CSS in `styles.css`; content is hidden only under `html.motion-ok`, so reduced-motion users and no-JS still see everything. Use `motion/react` only for enter/exit (cart lines, gallery, price swaps).
+- Public testimonials come only from `testimonialService` entries that are verified + consented + published (managed at `/admin/testimonials`); never hardcode review copy — avoids fabricated reviews.
+- Concern and curated-collection (De-Tan, Combos) membership lives in `src/lib/concerns.ts`; empty lists render the shared empty state — never add products just to fill a page.

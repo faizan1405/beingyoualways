@@ -31,7 +31,7 @@ export function Newsletter() {
 }
 
 const cols = [
-  { title: "Shop", links: [["/shop", "Shop All"], ["/skincare", "Skincare"], ["/haircare", "Haircare"], ["/colour-cosmetics", "Colour Cosmetics"]] },
+  { title: "Shop", links: [["/shop", "Shop All"], ["/skincare", "Skincare"], ["/haircare", "Haircare"], ["/de-tan-care", "De-Tan Care"], ["/colour-cosmetics", "Colour Cosmetics"], ["/combos", "Combos"]] },
   { title: "Help", links: [["/faq", "FAQs"], ["/contact", "Contact Us"], ["/shipping-policy", "Shipping Policy"], ["/refund-policy", "Refund Policy"]] },
   { title: "Brand", links: [["/about", "About Us"], ["/login", "My Account"], ["/privacy-policy", "Privacy Policy"], ["/terms", "Terms & Conditions"]] },
 ] as const;

@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import before from "@/assets/hero-before.jpg";
-import after from "@/assets/hero-after.jpg";
+import before from "@/assets/hero-pig-before.jpg";
+import after from "@/assets/hero-pig-after.jpg";
 
 export function BeforeAfter() {
   const ref = useRef<HTMLDivElement>(null);
@@ -25,10 +25,10 @@ export function BeforeAfter() {
       onPointerUp={() => setDragging(false)}
       onPointerCancel={() => setDragging(false)}
     >
-      <img src={after} alt="After: clearer, smoother, brighter skin" width={1024} height={1280} draggable={false} className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+      <img src={after} alt="Illustrative after: more even-looking skin tone with reduced pigmentation" width={1024} height={1280} draggable={false} className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
       <img
         src={before}
-        alt="Before: skin with blemishes and uneven texture"
+        alt="Illustrative before: skin with dark spots and uneven tone"
         width={1024}
         height={1280}
         draggable={false}
@@ -57,7 +57,7 @@ export function BeforeAfter() {
       >
         <ChevronLeft className="size-4" /><ChevronRight className="-ml-1 size-4" />
       </button>
-      <p className="pointer-events-none absolute inset-x-0 bottom-4 text-center text-[10px] uppercase tracking-[0.2em] text-background/90">Drag to compare · Illustrative image</p>
+      <p className="pointer-events-none absolute inset-x-0 bottom-4 text-center text-[10px] uppercase tracking-[0.2em] text-background/90">Drag to compare · Illustrative imagery — not actual product results</p>
     </div>
   );
 }

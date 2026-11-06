@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { FounderQuote, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
-import { RealResults, Testimonials } from "@/components/home/Testimonials";
+import { Testimonials } from "@/components/home/Testimonials";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
@@ -24,15 +24,10 @@ export const Route = createFileRoute("/_site/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async () => ({ featured: await productService.featured(), categories: await productService.categories() }),
+  loader: async () => ({ featured: await productService.featured() }),
   component: Home,
 });
 
-const catVisual = {
-  skincare: { shape: "dropper", tint: "oklch(0.82 0.06 20)" },
-  haircare: { shape: "bottle", tint: "oklch(0.72 0.09 85)" },
-  "colour-cosmetics": { shape: "lipstick", tint: "oklch(0.58 0.12 40)" },
-} as const;
 
 function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string; link?: { to: "/shop"; label: string } | undefined }) {
   return (
@@ -47,29 +42,10 @@ function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string;
 }
 
 function Home() {
-  const { featured, categories } = Route.useLoaderData();
+  const { featured } = Route.useLoaderData();
   return (
     <>
       <Hero />
-
-      <section className="container-lux py-20 md:py-28">
-        <SectionHead eyebrow="Shop by category" title="Find your ritual" />
-        <div className="grid gap-5 md:grid-cols-3">
-          {categories.map((c, i) => (
-            <ImageReveal key={c.slug} delay={i * 110} className="rounded-xl">
-            <Link to={`/${c.slug}` as "/skincare"} className="group relative block overflow-hidden rounded-xl">
-              <ProductVisual {...catVisual[c.slug]} label={c.name} variant={i + 1} tag={false} className="aspect-[4/5] transition-transform duration-[1200ms] ease-[var(--ease-lux)] group-hover:scale-[1.06] md:aspect-[3/4]" />
-              <div className="bg-veil absolute inset-0 transition-opacity duration-500 group-hover:opacity-90" />
-              <div className="absolute inset-x-0 bottom-0 p-6 text-primary-foreground transition-transform duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-2">
-                <p className="text-[11px] uppercase tracking-[0.2em] opacity-85">{c.tagline}</p>
-                <h3 className="mt-1 text-4xl tracking-normal transition-[letter-spacing] duration-500 group-hover:tracking-wide">{c.name}</h3>
-                <span className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]">Explore <ArrowRight className="arrow-nudge size-3.5" /></span>
-              </div>
-            </Link>
-            </ImageReveal>
-          ))}
-        </div>
-      </section>
 
       <ShopByConcern />
 
@@ -90,16 +66,12 @@ function Home() {
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Our story</RevealOnScroll>
             <TextReveal by="line" text={["Made for the you", <em key="e">that's always been there.</em>]} className="mt-3 text-4xl leading-tight md:text-6xl" />
             <RevealOnScroll as="p" delay={300} className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Being You – Always began with a simple belief: beauty should feel honest, gentle and personal. We create plant-based formulas inspired by Indian botanicals, designed to fit into real routines. (Draft brand copy — to be refined with the client.)
+              Being You – Always is a family-led Indian brand making plant-based skin and hair care — gentle, honest and effective products the founders trust for their own family, from their daughter to their mother.
             </RevealOnScroll>
             <RevealOnScroll delay={420}><Button variant="luxOutline" size="xl" className="group mt-8" asChild><Link to="/about">Read our story <ArrowRight className="arrow-nudge" /></Link></Button></RevealOnScroll>
           </div>
         </div>
       </section>
-
-      <RealResults />
-
-      <Testimonials />
 
       <section className="container-lux py-20 md:py-28">
         <SectionHead eyebrow="Featured collections" title="Explore the range" link={{ to: "/shop", label: "Shop all" }} />
@@ -114,6 +86,8 @@ function Home() {
           ))}
         </StaggerContainer>
       </section>
+
+      <Testimonials />
 
       <WhyChooseUs />
 
