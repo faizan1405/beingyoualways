@@ -32,8 +32,8 @@ function Testimonials() {
   const up = (patch: Partial<Testimonial>) => setDraft({ ...draft, ...patch });
 
   const save = () => {
-    if (!draft.name.trim() || !draft.quote.trim()) return toast.error("Add the customer's name and their exact words.");
-    if (draft.published && !(draft.verified && draft.consent)) return toast.error("A review can only be published once it is verified and the customer has given permission.");
+    if (!draft.name.trim() || !draft.quote.trim()) { toast.error("Add the customer's name and their exact words."); return; }
+    if (draft.published && !(draft.verified && draft.consent)) { toast.error("A review can only be published once it is verified and the customer has given permission."); return; }
     testimonialService.save(draft);
     toast.success(isPublic(draft) ? "Saved — now visible on the homepage (demo, resets on reload)." : "Saved as draft — not shown publicly.");
     setDraft(blank());
