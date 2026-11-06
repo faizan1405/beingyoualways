@@ -16,7 +16,7 @@ function Settings() {
     <AdminPage title="Settings" subtitle="Frontend placeholders — values are not saved.">
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Store details"><div className="space-y-3"><F id="sn" label="Store name" value="Being You – Always" /><F id="se" label="Support email" value="hello@example.com" /><F id="sp" label="Support WhatsApp" value="+91 XXXXX XXXXX" /></div></Panel>
-        <Panel title="Branding"><div className="space-y-3"><F id="al" label="Announcement bar" value="Complimentary shipping on orders above ₹999" /><div><p className={adminLabel}>Logo</p><div className="rounded-md border border-dashed border-input p-6 text-center text-sm text-muted-foreground">Logo upload — awaiting brand assets</div></div></div></Panel>
+        <Panel title="Branding"><div className="space-y-3"><F id="al" label="Announcement bar" value="Naturally you, beautifully always" /><div><p className={adminLabel}>Logo</p><div className="rounded-md border border-dashed border-input p-6 text-center text-sm text-muted-foreground">Logo upload — awaiting brand assets</div></div></div></Panel>
         <Panel title="Shipping"><div className="space-y-3"><F id="ft" label="Free shipping above (₹)" value={FREE_SHIPPING_THRESHOLD} /><F id="sf" label="Flat shipping fee (₹)" value={SHIPPING_FEE} /></div></Panel>
         <Panel title="Integrations">
           <ul className="space-y-3 text-sm">

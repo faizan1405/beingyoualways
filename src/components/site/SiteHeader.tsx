@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useShop } from "@/lib/shop-store";
 
-export const ANNOUNCEMENT = "Complimentary shipping on orders above ₹999 · Sample promotion";
+export const ANNOUNCEMENT = "Naturally you, beautifully always · Plant-based skin, hair & colour care";
 
 const nav = [
   { to: "/", label: "Home" },
