@@ -2,8 +2,8 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { ShoppingBag } from "lucide-react";
 
 import { CartLines } from "@/components/site/CartLines";
+import { OrderTotals } from "@/components/site/OrderTotals";
 import { Button } from "@/components/ui/button";
-import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 
 export const Route = createFileRoute("/_site/cart")({
@@ -18,17 +18,6 @@ export const Route = createFileRoute("/_site/cart")({
   }),
   component: CartPage,
 });
-
-export function OrderTotals() {
-  const { subtotal, shipping, total } = useShop();
-  return (
-    <dl className="space-y-3 text-sm">
-      <div className="flex justify-between"><dt>Subtotal</dt><dd>{inr(subtotal)}</dd></div>
-      <div className="flex justify-between"><dt>Shipping</dt><dd>{shipping === 0 ? "Free" : inr(shipping)}</dd></div>
-      <div className="flex justify-between border-t border-border pt-3 text-base font-semibold"><dt>Total</dt><dd>{inr(total)}</dd></div>
-    </dl>
-  );
-}
 
 function CartPage() {
   const { lines, count } = useShop();

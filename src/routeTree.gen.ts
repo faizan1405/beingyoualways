@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
+import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
 import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
@@ -31,6 +32,11 @@ const SiteIndexRoute = SiteIndexRouteImport.update({
 const SiteCartRoute = SiteCartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCheckoutRoute = SiteCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteColourCosmeticsRoute = SiteColourCosmeticsRouteImport.update({
@@ -67,6 +73,7 @@ const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
   '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/haircare': typeof SiteHaircareRoute
   '/shop': typeof SiteShopRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/haircare': typeof SiteHaircareRoute
   '/shop': typeof SiteShopRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
   '/_site/cart': typeof SiteCartRoute
+  '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/_site/haircare': typeof SiteHaircareRoute
   '/_site/shop': typeof SiteShopRoute
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cart'
+    | '/checkout'
     | '/colour-cosmetics'
     | '/haircare'
     | '/shop'
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cart'
+    | '/checkout'
     | '/colour-cosmetics'
     | '/haircare'
     | '/shop'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_site'
     | '/_site/cart'
+    | '/_site/checkout'
     | '/_site/colour-cosmetics'
     | '/_site/haircare'
     | '/_site/shop'
@@ -155,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof SiteCartRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/checkout': {
+      id: '/_site/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof SiteCheckoutRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/colour-cosmetics': {
@@ -204,6 +223,7 @@ declare module '@tanstack/react-router' {
 
 interface SiteRouteChildren {
   SiteCartRoute: typeof SiteCartRoute
+  SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
   SiteHaircareRoute: typeof SiteHaircareRoute
   SiteShopRoute: typeof SiteShopRoute
@@ -215,6 +235,7 @@ interface SiteRouteChildren {
 
 const SiteRouteChildren: SiteRouteChildren = {
   SiteCartRoute: SiteCartRoute,
+  SiteCheckoutRoute: SiteCheckoutRoute,
   SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
   SiteHaircareRoute: SiteHaircareRoute,
   SiteShopRoute: SiteShopRoute,

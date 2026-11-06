@@ -9,7 +9,7 @@ import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 import { INDIAN_STATES, validateCheckout, type CheckoutErrors, type CheckoutForm } from "@/lib/checkout-validation";
 import { cn } from "@/lib/utils";
-import { OrderTotals } from "./_site.cart";
+import { OrderTotals } from "@/components/site/OrderTotals";
 
 export const Route = createFileRoute("/_site/checkout")({
   head: () => ({
