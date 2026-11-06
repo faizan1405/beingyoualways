@@ -1,45 +1,9 @@
-import { ClientOnly, Link } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { ProductVisual } from "@/components/shop/ProductVisual";
+import { BeforeAfter } from "./BeforeAfter";
 import { Parallax } from "@/components/motion/Reveal";
 import { ArrowRight } from "lucide-react";
-
-const HeroScene = lazy(() => import("./HeroScene"));
-
-function canWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
-
-function StaticFallback() {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <ProductVisual shape="dropper" tint="oklch(0.7 0.07 40)" label="Being You serum" className="w-[70%] max-w-xs rounded-full !bg-transparent" />
-    </div>
-  );
-}
-
-function Scene() {
-  const [ok, setOk] = useState<boolean | null>(null);
-  const [still, setStill] = useState(false);
-  useEffect(() => {
-    setOk(canWebGL());
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setStill(mq.matches);
-  }, []);
-  if (!ok) return <StaticFallback />;
-  return (
-    <Suspense fallback={<StaticFallback />}>
-      <HeroScene still={still} />
-    </Suspense>
-  );
-}
 
 export function Hero() {
   return (
@@ -58,7 +22,7 @@ export function Hero() {
             )}
           </h1>
           <p className="hero-in mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mx-0" style={{ animationDelay: "800ms" }}>
-            Botanical skincare, haircare and colour — gentle rituals for every day.
+            See the transformation. Botanical skincare, haircare and colour — gentle rituals for every day.
           </p>
           <div className="hero-in mt-9 flex flex-col items-center gap-3 sm:flex-row md:justify-start" style={{ animationDelay: "950ms" }}>
             <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
@@ -66,10 +30,8 @@ export function Hero() {
           </div>
           </Parallax>
         </div>
-        <div className="hero-in order-1 h-[52vh] min-h-[320px] md:order-2 md:h-[min(78vh,720px)]" aria-label="Rotating 3D view of a Being You serum bottle" role="img">
-          <ClientOnly fallback={<StaticFallback />}>
-            <Scene />
-          </ClientOnly>
+        <div className="hero-in order-1 mx-auto aspect-[4/5] w-full max-w-[min(100%,440px)] md:order-2 md:max-h-[min(78vh,680px)] md:max-w-[520px]" style={{ animationDelay: "300ms" }}>
+          <BeforeAfter />
         </div>
       </div>
     </section>

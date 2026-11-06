@@ -257,3 +257,6 @@
 
 @keyframes word-up { from { transform: translateY(105%); opacity: 0; } to { transform: none; opacity: 1; } }
 .hero-word { display: inline-block; animation: word-up 1s var(--ease-lux) both; }
+
+.ba-handle { box-shadow: 0 6px 24px -6px color-mix(in oklab, var(--primary) 45%, transparent); }
+.ba-handle:hover, .ba-handle:focus-visible { box-shadow: 0 0 0 8px color-mix(in oklab, var(--background) 35%, transparent), 0 8px 28px -6px color-mix(in oklab, var(--primary) 55%, transparent); }
