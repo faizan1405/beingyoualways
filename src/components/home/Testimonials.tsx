@@ -5,7 +5,8 @@ import { MessageSquareQuote, Quote, Star } from "lucide-react";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 import { testimonialCategories, testimonialService, type TestimonialCategory } from "@/services/testimonialService";
 
-const getServer = () => [] as ReturnType<typeof testimonialService.publicList>;
+const EMPTY: ReturnType<typeof testimonialService.publicList> = [];
+const getServer = () => EMPTY;
 
 /** Public customer stories. Shows only verified, consented, published entries — never placeholder copy. */
 export function Testimonials() {
