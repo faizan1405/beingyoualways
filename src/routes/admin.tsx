@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Bot, Menu, MessageCircle, Package, Settings, ShoppingCart, Timer, Users, X } from "lucide-react";
+import { Quote, BarChart3, Bot, Menu, MessageCircle, Package, Settings, ShoppingCart, Timer, Users, X } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/admin")({
@@ -20,6 +20,7 @@ const nav = [
   { to: "/admin/products", label: "Products", I: Package },
   { to: "/admin/orders", label: "Orders", I: ShoppingCart },
   { to: "/admin/customers", label: "Customers", I: Users },
+  { to: "/admin/testimonials", label: "Customer Stories", I: Quote },
   { to: "/admin/whatsapp", label: "WhatsApp Marketing", I: MessageCircle },
   { to: "/admin/abandoned-cart", label: "Abandoned Cart", I: Timer },
   { to: "/admin/chatbot", label: "Chatbot", I: Bot },
