@@ -37,6 +37,5 @@ export const deTanSlugs: string[] = ["tomato-face-wash", "volcanic-scrub", "face
 /** Combos / bundles listed on the original site. */
 export const comboSlugs: string[] = ["wax-powder-aloe-vera-gel-combo"];
 
- comboSlugs: string[] = [];
 
 export const getConcern = (slug: string) => concerns.find((c) => c.slug === slug) ?? null;
