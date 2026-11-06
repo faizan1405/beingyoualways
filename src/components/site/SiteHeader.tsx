@@ -12,7 +12,9 @@ const nav = [
   { to: "/shop", label: "Shop All" },
   { to: "/skincare", label: "Skincare" },
   { to: "/haircare", label: "Haircare" },
+  { to: "/de-tan-care", label: "De-Tan Care" },
   { to: "/colour-cosmetics", label: "Colour Cosmetics" },
+  { to: "/combos", label: "Combos" },
   { to: "/about", label: "About Us" },
 ] as const;
 
