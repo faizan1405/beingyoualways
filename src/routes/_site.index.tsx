@@ -51,7 +51,7 @@ function Home() {
         <div className="grid gap-5 md:grid-cols-3">
           {categories.map((c, i) => (
             <Link key={c.slug} to={`/${c.slug}` as "/skincare"} className="group relative block overflow-hidden rounded-xl">
-              <ProductVisual {...catVisual[c.slug]} label={c.name} variant={i + 1} className="aspect-[4/5] transition-transform duration-700 group-hover:scale-[1.04] md:aspect-[3/4]" />
+              <ProductVisual {...catVisual[c.slug]} label={c.name} variant={i + 1} tag={false} className="aspect-[4/5] transition-transform duration-700 group-hover:scale-[1.04] md:aspect-[3/4]" />
               <div className="bg-veil absolute inset-0" />
               <div className="absolute inset-x-0 bottom-0 p-6 text-primary-foreground">
                 <p className="text-[11px] uppercase tracking-[0.2em] opacity-85">{c.tagline}</p>
@@ -95,7 +95,7 @@ function Home() {
             { name: "Everyday Colour", copy: "Soft shades for lips and cheeks.", shape: "compact", tint: "oklch(0.7 0.1 10)", to: "/colour-cosmetics" },
           ].map((c, i) => (
             <Link key={c.name} to={c.to as "/skincare"} className="group relative flex min-h-[340px] items-end overflow-hidden rounded-xl bg-card md:min-h-[420px]">
-              <ProductVisual shape={c.shape as "dropper"} tint={c.tint} label={c.name} variant={i + 2} className="absolute inset-0 !aspect-auto h-full w-full transition-transform duration-700 group-hover:scale-[1.03]" />
+              <ProductVisual shape={c.shape as "dropper"} tint={c.tint} label={c.name} variant={i + 2} tag={false} className="absolute inset-0 !aspect-auto h-full w-full transition-transform duration-700 group-hover:scale-[1.03]" />
               <div className="bg-veil absolute inset-0" />
               <div className="relative p-8 text-primary-foreground">
                 <h3 className="text-4xl md:text-5xl">{c.name}</h3>
