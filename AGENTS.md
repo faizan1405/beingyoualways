@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Storefront is frontend-only; pages read data via `src/services/*Service.ts`, never mock arrays directly — so services can be swapped for Hostinger REST calls.
+- Storefront routes live under the `_site` pathless layout (header/footer); `/admin/*` has its own shell — keeps admin chrome separate.
+- Custom 3D (React Three Fiber) is allowed only in the homepage hero, lazy-loaded behind ClientOnly with a static fallback.
+- Product imagery uses the replaceable `ProductVisual` SVG placeholder until real photos arrive; do not generate AI images.
