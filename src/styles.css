@@ -206,12 +206,10 @@
 .motion-ok [data-reveal="scale"]:not(.is-in) { opacity: 0; transform: scale(0.96); }
 
 /* Masked image reveal: wipe up from bottom + gentle scale-down of the inner layer */
-.motion-ok [data-reveal="image"] { clip-path: inset(0 0 0 0); }
-.motion-ok [data-reveal="image"]:not(.is-in) { clip-path: inset(100% 0 0 0); }
-.motion-ok [data-reveal="image"] > .reveal-inner { transition: transform 1.4s var(--ease-lux); transition-delay: var(--reveal-delay, 0ms); }
-.motion-ok [data-reveal="image"]:not(.is-in) > .reveal-inner { transform: scale(1.14); }
-.motion-ok [data-reveal="image-left"] { clip-path: inset(0 0 0 0); }
-.motion-ok [data-reveal="image-left"]:not(.is-in) { clip-path: inset(0 100% 0 0); }
+/* Clip the inner layer (not the observed element) so IntersectionObserver still sees it. */
+.motion-ok [data-reveal^="image"] > .reveal-inner { clip-path: inset(0 0 0 0); transition: clip-path 1.2s var(--ease-lux), transform 1.4s var(--ease-lux); transition-delay: var(--reveal-delay, 0ms); }
+.motion-ok [data-reveal="image"]:not(.is-in) > .reveal-inner { clip-path: inset(100% 0 0 0); transform: scale(1.14); }
+.motion-ok [data-reveal="image-left"]:not(.is-in) > .reveal-inner { clip-path: inset(0 100% 0 0); }
 
 /* Masked text: each line/word slides up inside an overflow-hidden mask */
 .text-mask { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
