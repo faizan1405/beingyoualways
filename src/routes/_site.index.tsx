@@ -59,9 +59,10 @@ function Home() {
 
       <section className="bg-secondary">
         <div className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
-          <div className="grid grid-cols-2 gap-4">
-            <Parallax speed={-0.06}><ImageReveal className="mt-12 rounded-xl"><ProductVisual src={productImages("face-serum")[1]} shape="dropper" tint="oklch(0.82 0.08 70)" label="Being You Face Serum" variant={2} /></ImageReveal></Parallax>
-            <Parallax speed={0.06}><ImageReveal from="left" delay={150} className="rounded-xl"><ProductVisual shape="bottle" tint="oklch(0.78 0.05 120)" label="Being You Hair Oil" variant={0} className="!bg-card" src={productImages("hair-oil")[1]} /></ImageReveal></Parallax>
+          <div className="relative mx-auto w-full max-w-lg pb-16 pr-10 md:pb-20 md:pr-16">
+            <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("face-wash")[0]} alt="Being You face wash among fresh botanicals" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
+            <Parallax speed={0.08} className="absolute bottom-0 right-0 w-[48%]"><ImageReveal from="left" delay={200} className="overflow-hidden rounded-2xl border-[6px] border-secondary shadow-lift"><img src={productImages("aloe-vera-gel")[0]} alt="Being You aloe vera gel with fresh aloe leaves" loading="lazy" decoding="async" className="aspect-square w-full object-cover" /></ImageReveal></Parallax>
+            <span aria-hidden className="absolute -left-3 top-8 hidden rounded-full bg-background/90 px-4 py-2 font-serif text-sm italic text-foreground shadow-[var(--shadow-soft)] backdrop-blur md:block">Naturally you</span>
           </div>
           <div>
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Our story</RevealOnScroll>
@@ -78,10 +79,16 @@ function Home() {
         <SectionHead eyebrow="Featured collections" title="Explore the range" link={{ to: "/shop", label: "Shop all" }} />
         <StaggerContainer step={70} className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {collections.map((c, i) => (
-            <Link key={c.name} to={c.to} className={`group relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-2xl p-6 transition-transform duration-500 hover:-translate-y-1 md:min-h-[300px] ${i % 2 ? "bg-secondary" : "bg-primary text-primary-foreground"} ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
-              <span className="absolute right-5 top-5 font-serif text-5xl italic opacity-20">0{i + 1}</span>
+            <Link key={c.name} to={c.to} className={`group relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl p-6 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift md:min-h-[340px] ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
+              <div className={`absolute inset-0 -z-10 grid ${c.images.length > 1 ? "grid-rows-2" : ""}`}>
+                {c.images.map((src, j) => (
+                  <img key={j} src={src} alt="" loading="lazy" decoding="async" style={{ objectPosition: c.pos }} className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]" />
+                ))}
+              </div>
+              <div aria-hidden className="absolute inset-0 -z-10 transition-opacity duration-500 group-hover:opacity-90" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${c.tone} 92%, transparent) 0%, color-mix(in oklab, ${c.tone} 55%, transparent) 38%, transparent 72%)` }} />
+              <span className="absolute right-5 top-4 font-serif text-5xl italic opacity-80 [text-shadow:0_2px_12px_oklch(0_0_0/0.35)]">0{i + 1}</span>
               <h3 className="text-3xl leading-tight">{c.name}</h3>
-              <p className="mt-1 text-xs opacity-75">{c.copy}</p>
+              <p className="mt-1 text-xs opacity-85">{c.copy}</p>
               <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]">Discover <ArrowRight className="arrow-nudge size-3" /></span>
             </Link>
           ))}
