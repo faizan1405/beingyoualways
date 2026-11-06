@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Plus } from "lucide-react";
+import { Check, Heart, Plus } from "lucide-react";
+import { useState } from "react";
 
 import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
@@ -12,6 +13,8 @@ import { ProductVisual } from "./ProductVisual";
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number | undefined}) {
   const { add, toggleWish, isWished } = useShop();
   const wished = isWished(product.id);
+  const [pop, setPop] = useState(0);
+  const [added, setAdded] = useState(false);
   const first = product.variants.find((v) => v.stock > 0) ?? product.variants[0]!;
   const out = totalStock(product) === 0;
   const cat = categories.find((c) => c.slug === product.category)?.name;
@@ -19,31 +22,31 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
   return (
     <article className="group relative flex flex-col">
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden rounded-lg ring-1 ring-transparent transition-[box-shadow,transform] duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-1 group-hover:shadow-lift group-hover:ring-border">
         <Link to="/product/$slug" params={{ slug: product.slug }} aria-label={product.name}>
           <ProductVisual
             shape={product.shape} tint={product.tint} label={product.name} variant={index}
-            className="transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            className="transition-transform duration-[1100ms] ease-[var(--ease-lux)] group-hover:scale-[1.06]"
           />
         </Link>
         <button
           type="button"
-          onClick={() => toggleWish(product.id)}
+          onClick={() => { toggleWish(product.id); setPop((n) => n + 1); }}
           aria-pressed={wished}
           aria-label={wished ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
-          className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-card/90 shadow-soft backdrop-blur transition hover:scale-105"
+          className="press absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-card/90 shadow-soft backdrop-blur transition hover:scale-110"
         >
-          <Heart className={cn("size-4", wished ? "fill-accent text-accent" : "text-foreground")} />
+          <Heart key={pop} className={cn("size-4 transition-colors", pop > 0 && "heart-pop", wished ? "fill-accent text-accent" : "text-foreground")} />
         </button>
         {out && <span className="absolute left-3 top-3 rounded-full bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-background">Sold out</span>}
         {!out && compare && <span className="absolute left-3 top-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">Offer</span>}
         <button
           type="button"
           disabled={out}
-          onClick={() => add(product.id, first.id)}
-          className="absolute inset-x-3 bottom-3 flex h-10 translate-y-0 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground opacity-100 shadow-lift transition-all disabled:opacity-0 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
+          onClick={() => { add(product.id, first.id); setAdded(true); setTimeout(() => setAdded(false), 1400); }}
+          className="absolute inset-x-3 bottom-3 flex h-10 translate-y-0 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground opacity-100 shadow-lift transition-all duration-300 ease-[var(--ease-lux)] active:scale-[0.97] disabled:opacity-0 md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100"
         >
-          <Plus className="size-3.5" /> Add {first.label}
+          {added ? <><Check className="size-3.5" /> Added</> : <><Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" /> Add {first.label}</>}
         </button>
       </div>
       <div className="mt-4 flex flex-col gap-1">
@@ -73,10 +76,10 @@ export function ProductGridSkeleton({ n = 8 }: { n?: number | undefined}) {
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: n }).map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="aspect-[4/5] rounded-lg bg-secondary" />
-          <div className="mt-4 h-3 w-16 rounded bg-secondary" />
-          <div className="mt-2 h-5 w-3/4 rounded bg-secondary" />
+        <div key={i}>
+          <div className="skeleton-shimmer aspect-[4/5] rounded-lg" />
+          <div className="skeleton-shimmer mt-4 h-3 w-16 rounded" />
+          <div className="skeleton-shimmer mt-2 h-5 w-3/4 rounded" />
         </div>
       ))}
     </div>

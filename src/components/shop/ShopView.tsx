@@ -9,6 +9,7 @@ import type { CategorySlug, Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { filterProducts, type SortKey } from "@/services/productService";
 import { ProductCard } from "./ProductCard";
+import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 
 const MAX = 1600;
 
@@ -29,9 +30,9 @@ export function ShopView({
     <div>
       <section className="bg-secondary py-14 text-center md:py-20">
         <div className="container-lux">
-          <p className="eyebrow">Collection · sample catalogue</p>
-          <h1 className="mt-3 text-5xl md:text-7xl">{title}</h1>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">{intro}</p>
+          <p className="eyebrow hero-in">Collection · sample catalogue</p>
+          <TextReveal as="h1" text={title} className="mt-3 text-5xl md:text-7xl" />
+          <p className="hero-in mx-auto mt-4 max-w-lg text-sm text-muted-foreground" style={{ animationDelay: "300ms" }}>{intro}</p>
         </div>
       </section>
 
@@ -44,7 +45,7 @@ export function ShopView({
                   key={c.name}
                   onClick={() => setCat(c.slug as CategorySlug | undefined)}
                   aria-pressed={cat === c.slug}
-                  className={cn("h-9 shrink-0 rounded-full border px-4 text-xs font-semibold uppercase tracking-wider transition",
+                  className={cn("press h-9 shrink-0 rounded-full border px-4 text-xs font-semibold uppercase tracking-wider transition-all duration-200",
                     cat === c.slug ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary")}
                 >{c.name}</button>
               ))}
@@ -74,7 +75,7 @@ export function ShopView({
         <p className="py-6 text-sm text-muted-foreground" aria-live="polite">{list.length} {list.length === 1 ? "product" : "products"}</p>
 
         {list.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 py-24 text-center">
+          <div className="animate-in fade-in zoom-in-95 flex flex-col items-center gap-4 py-24 text-center duration-500">
             <SearchX className="size-10 text-muted-foreground" strokeWidth={1.2} />
             <p className="font-serif text-3xl">Nothing matches just yet</p>
             <p className="text-sm text-muted-foreground">Try a different search or widen your price range.</p>
@@ -82,7 +83,7 @@ export function ShopView({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
-            {list.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            {list.map((p, i) => <RevealOnScroll key={p.id} delay={(i % 4) * 70}><ProductCard product={p} index={i} /></RevealOnScroll>)}
           </div>
         )}
 

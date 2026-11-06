@@ -31,12 +31,12 @@ function Field({ id, label, error, children }: { id: string; label: string; erro
     <div>
       <label htmlFor={id} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
       {children}
-      {error && <p id={`${id}-err`} className="mt-1.5 text-xs text-destructive">{error}</p>}
+      {error && <p id={`${id}-err`} role="alert" className="animate-in fade-in slide-in-from-top-1 mt-1.5 text-xs text-destructive duration-200">{error}</p>}
     </div>
   );
 }
 
-const inputCls = (err?: string) => cn("h-12 w-full rounded-md border bg-card px-4 text-sm outline-none focus:border-primary", err ? "border-destructive" : "border-input");
+const inputCls = (err?: string) => cn("h-12 w-full rounded-md border bg-card px-4 text-sm outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_14%,transparent)]", err ? "border-destructive" : "border-input");
 
 function Checkout() {
   const { lines } = useShop();
@@ -90,7 +90,7 @@ function Checkout() {
         }}
       >
         <div className="space-y-10">
-          <section className="space-y-4">
+          <section className="hero-in space-y-4">
             <h2 className="text-2xl">Contact information</h2>
             <Field id="name" label="Full name" error={errors.name}>{inp("name", { autoComplete: "name" })}</Field>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -98,7 +98,7 @@ function Checkout() {
               <Field id="email" label="Email" error={errors.email}>{inp("email", { type: "email", autoComplete: "email" })}</Field>
             </div>
           </section>
-          <section className="space-y-4">
+          <section className="hero-in space-y-4" style={{ animationDelay: "120ms" }}>
             <h2 className="text-2xl">Shipping address</h2>
             <Field id="address" label="Address" error={errors.address}>{inp("address", { autoComplete: "street-address", placeholder: "House no., street, area" })}</Field>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -112,14 +112,14 @@ function Checkout() {
               <Field id="pincode" label="PIN code" error={errors.pincode}>{inp("pincode", { inputMode: "numeric", maxLength: 6, autoComplete: "postal-code" })}</Field>
             </div>
           </section>
-          <section className="space-y-4">
+          <section className="hero-in space-y-4" style={{ animationDelay: "240ms" }}>
             <h2 className="text-2xl">Payment method</h2>
             <div role="radiogroup" className="grid gap-3">
               {[
                 { v: "razorpay" as const, I: CreditCard, t: "Pay online · Razorpay", d: "UPI, cards, netbanking — integration pending" },
                 { v: "cod" as const, I: Wallet, t: "Cash on Delivery", d: "Availability by PIN code — integration pending" },
               ].map(({ v, I, t, d }) => (
-                <button type="button" role="radio" aria-checked={pay === v} key={v} onClick={() => setPay(v)} className={cn("flex items-center gap-4 rounded-lg border p-4 text-left transition", pay === v ? "border-primary ring-1 ring-primary bg-primary/5" : "border-input")}>
+                <button type="button" role="radio" aria-checked={pay === v} key={v} onClick={() => setPay(v)} className={cn("press flex items-center gap-4 rounded-lg border p-4 text-left transition-all duration-200", pay === v ? "border-primary ring-1 ring-primary bg-primary/5" : "border-input")}>
                   <I className="size-5 text-primary" />
                   <span><span className="block text-sm font-semibold">{t}</span><span className="text-xs text-muted-foreground">{d}</span></span>
                 </button>
@@ -128,7 +128,7 @@ function Checkout() {
           </section>
         </div>
 
-        <aside className="h-fit rounded-xl bg-secondary p-6 lg:sticky lg:top-24">
+        <aside className="hero-in h-fit rounded-xl bg-secondary p-6 lg:sticky lg:top-24" style={{ animationDelay: "180ms" }}>
           <h2 className="text-2xl">Order summary</h2>
           <ul className="my-5 space-y-3 text-sm">
             {lines.map((l) => (

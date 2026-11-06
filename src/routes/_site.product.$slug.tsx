@@ -1,5 +1,6 @@
 import { Link, createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
-import { Heart, Truck, RotateCcw } from "lucide-react";
+import { Check, Heart, Truck, RotateCcw } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 import { SampleBadge } from "@/components/shop/DemoNotice";
@@ -13,6 +14,7 @@ import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 import { cn } from "@/lib/utils";
 import { productService } from "@/services/productService";
+import { StaggerContainer, TextReveal } from "@/components/motion/Reveal";
 
 export const Route = createFileRoute("/_site/product/$slug")({
   loader: async ({ params }) => {
@@ -49,6 +51,9 @@ function ProductPage() {
   const [variantId, setVariantId] = useState((p.variants.find((v) => v.stock > 0) ?? p.variants[0]!).id);
   const [qty, setQty] = useState(1);
   const [img, setImg] = useState(0);
+  const [added, setAdded] = useState(false);
+  const [pop, setPop] = useState(0);
+  const addToBag = () => { add(p.id, v.id, qty); setAdded(true); setTimeout(() => setAdded(false), 1600); };
   const v = p.variants.find((x) => x.id === variantId)!;
   const cat = categories.find((c) => c.slug === p.category)!;
   const wished = isWished(p.id);
@@ -61,22 +66,30 @@ function ProductPage() {
       </div>
       <div className="container-lux grid gap-10 pb-32 md:grid-cols-2 md:gap-16 md:pb-20">
         <div className="md:sticky md:top-24 md:self-start">
-          <ProductVisual shape={p.shape} tint={p.tint} label={`${p.name} view ${img + 1}`} variant={img} className="rounded-xl" />
+          <div className="relative overflow-hidden rounded-xl hero-in">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div key={img} initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2}
+                onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 50) setImg((i) => (i + (info.offset.x < 0 ? 1 : 3)) % 4); }}>
+                <ProductVisual shape={p.shape} tint={p.tint} label={`${p.name} view ${img + 1}`} variant={img} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
           <div className="mt-3 grid grid-cols-4 gap-3" role="group" aria-label="Product gallery">
             {[0, 1, 2, 3].map((i) => (
-              <button key={i} onClick={() => setImg(i)} aria-label={`Show image ${i + 1}`} aria-pressed={img === i} className={cn("overflow-hidden rounded-md border-2 transition", img === i ? "border-primary" : "border-transparent opacity-70 hover:opacity-100")}>
+              <button key={i} onClick={() => setImg(i)} aria-label={`Show image ${i + 1}`} aria-pressed={img === i} className={cn("press overflow-hidden rounded-md border-2 transition-all duration-300", img === i ? "border-primary -translate-y-0.5 shadow-soft" : "border-transparent opacity-60 hover:opacity-100")}>
                 <ProductVisual shape={p.shape} tint={p.tint} label="" variant={i} tag={false} />
               </button>
             ))}
           </div>
         </div>
 
-        <div>
+        <div className="hero-in" style={{ animationDelay: "120ms" }}>
           <div className="flex items-center gap-2"><p className="eyebrow">{cat.name}</p><SampleBadge /></div>
           <h1 className="mt-3 text-4xl leading-tight md:text-6xl">{p.name}</h1>
           <p className="mt-3 text-muted-foreground">{p.shortDescription}</p>
           <div className="mt-6 flex items-baseline gap-3">
-            <span className="text-2xl font-semibold">{inr(v.price)}</span>
+            <AnimatePresence mode="popLayout" initial={false}><motion.span key={v.price} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ duration: 0.25 }} className="text-2xl font-semibold tabular-nums">{inr(v.price)}</motion.span></AnimatePresence>
             {v.compareAtPrice && <span className="text-muted-foreground line-through">{inr(v.compareAtPrice)}</span>}
             <span className="text-xs text-muted-foreground">Sample price · incl. taxes</span>
           </div>
@@ -90,11 +103,11 @@ function ProductPage() {
                   onClick={() => { setVariantId(x.id); setQty(1); }}
                   aria-pressed={x.id === variantId}
                   aria-label={`${x.label}${x.stock === 0 ? " (out of stock)" : ""}`}
-                  className={cn("flex h-11 items-center gap-2 rounded-full border px-4 text-sm transition",
+                  className={cn("press flex h-11 items-center gap-2 rounded-full border px-4 text-sm transition-all duration-200",
                     x.id === variantId ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary",
                     x.stock === 0 && "opacity-50 line-through")}
                 >
-                  {x.swatch && <span className="size-5 rounded-full border border-border" style={{ background: x.swatch }} />}
+                  {x.swatch && <span className={cn("size-5 rounded-full border border-border transition-transform duration-300", x.id === variantId && "scale-110")} style={{ background: x.swatch }} />}
                   {x.label}
                 </button>
               ))}
@@ -105,11 +118,17 @@ function ProductPage() {
             <span className="size-2 rounded-full bg-current" />{stockText}
           </p>
 
-          <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-border bg-background/95 p-3 backdrop-blur md:static md:mt-6 md:border-0 md:bg-transparent md:p-0">
+          <div className="animate-in slide-in-from-bottom-full fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lift backdrop-blur duration-500 md:static md:animate-none md:shadow-none md:mt-6 md:border-0 md:bg-transparent md:p-0">
             <QtyStepper value={qty} label={p.name} onChange={(n) => setQty(Math.max(1, Math.min(n, v.stock || 1)))} />
-            <Button variant="lux" size="xl" className="flex-1" disabled={v.stock === 0} onClick={() => add(p.id, v.id, qty)}>Add to bag</Button>
-            <button onClick={() => toggleWish(p.id)} aria-pressed={wished} aria-label="Wishlist" className="grid size-12 shrink-0 place-items-center rounded-full border border-input">
-              <Heart className={cn("size-5", wished && "fill-accent text-accent")} />
+            <Button variant="lux" size="xl" className="relative flex-1 overflow-hidden" disabled={v.stock === 0} onClick={addToBag} aria-live="polite">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span key={added ? "a" : "b"} initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-2">
+                  {added ? <><Check /> Added to bag</> : "Add to bag"}
+                </motion.span>
+              </AnimatePresence>
+            </Button>
+            <button onClick={() => { toggleWish(p.id); setPop((n) => n + 1); }} aria-pressed={wished} aria-label="Wishlist" className="press grid size-12 shrink-0 place-items-center rounded-full border border-input transition-colors hover:border-accent">
+              <Heart key={pop} className={cn("size-5", pop > 0 && "heart-pop", wished && "fill-accent text-accent")} />
             </button>
           </div>
           <Button variant="luxOutline" size="xl" className="mt-3 hidden w-full md:flex" disabled={v.stock === 0} onClick={() => { add(p.id, v.id, qty); navigate({ to: "/checkout" }); }}>Buy now</Button>
@@ -134,8 +153,8 @@ function ProductPage() {
 
       {related.length > 0 && (
         <section className="container-lux pb-24">
-          <h2 className="mb-8 text-4xl">You may also like</h2>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4">{related.map((r, i) => <ProductCard key={r.id} product={r} index={i} />)}</div>
+          <TextReveal text="You may also like" className="mb-8 text-4xl" />
+          <StaggerContainer className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4">{related.map((r, i) => <ProductCard key={r.id} product={r} index={i} />)}</StaggerContainer>
         </section>
       )}
     </>

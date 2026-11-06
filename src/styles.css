@@ -174,3 +174,86 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ───────────── Motion system ─────────────
+ * Durations: micro 200ms · reveal 650ms · hero 1000ms. Easing: --ease-lux.
+ * Content is only hidden when <html class="motion-ok"> (set pre-paint, never
+ * for reduced motion). A failsafe reveals everything after 2.5s if JS dies.
+ */
+:root {
+  --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.33, 0, 0.2, 1);
+  --dur-micro: 200ms;
+  --dur-reveal: 650ms;
+  --dur-hero: 1000ms;
+}
+
+@keyframes reveal-failsafe { to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
+
+.motion-ok [data-reveal] {
+  transition:
+    opacity var(--dur-reveal) var(--ease-lux),
+    transform var(--dur-reveal) var(--ease-lux),
+    clip-path calc(var(--dur-reveal) * 1.5) var(--ease-lux);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+/* Failsafe only while the reveal script has not booted (html lacks .motion-js). */
+.motion-ok:not(.motion-js) [data-reveal]:not(.is-in) { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
+.motion-ok [data-reveal="fade-up"]:not(.is-in) { opacity: 0; transform: translateY(28px); }
+.motion-ok [data-reveal="fade"]:not(.is-in) { opacity: 0; }
+.motion-ok [data-reveal="slide-left"]:not(.is-in) { opacity: 0; transform: translateX(-36px); }
+.motion-ok [data-reveal="slide-right"]:not(.is-in) { opacity: 0; transform: translateX(36px); }
+.motion-ok [data-reveal="scale"]:not(.is-in) { opacity: 0; transform: scale(0.96); }
+
+/* Masked image reveal: wipe up from bottom + gentle scale-down of the inner layer */
+.motion-ok [data-reveal="image"] { clip-path: inset(0 0 0 0); }
+.motion-ok [data-reveal="image"]:not(.is-in) { clip-path: inset(100% 0 0 0); }
+.motion-ok [data-reveal="image"] > .reveal-inner { transition: transform 1.4s var(--ease-lux); transition-delay: var(--reveal-delay, 0ms); }
+.motion-ok [data-reveal="image"]:not(.is-in) > .reveal-inner { transform: scale(1.14); }
+.motion-ok [data-reveal="image-left"] { clip-path: inset(0 0 0 0); }
+.motion-ok [data-reveal="image-left"]:not(.is-in) { clip-path: inset(0 100% 0 0); }
+
+/* Masked text: each line/word slides up inside an overflow-hidden mask */
+.text-mask { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.text-mask > span { display: inline-block; }
+.motion-ok [data-reveal="text"] .text-mask > span {
+  transition: transform 0.9s var(--ease-lux), opacity 0.9s var(--ease-lux);
+  transition-delay: calc(var(--reveal-delay, 0ms) + var(--i, 0) * 70ms);
+}
+.motion-ok [data-reveal="text"]:not(.is-in) .text-mask > span { transform: translateY(105%); opacity: 0; }
+.motion-ok [data-reveal="text"]:not(.is-in) { animation: none; }
+.motion-ok:not(.motion-js) [data-reveal="text"]:not(.is-in) .text-mask > span { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
+
+/* Hover / press language */
+@utility press { transition: transform var(--dur-micro) var(--ease-soft); &:active { transform: scale(0.97); } }
+@utility link-underline {
+  position: relative;
+  &::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+    background: var(--accent); transform: scaleX(0); transform-origin: right;
+    transition: transform 350ms var(--ease-lux);
+  }
+  &:hover::after, &[data-status="active"]::after { transform: scaleX(1); transform-origin: left; }
+}
+@utility arrow-nudge { transition: transform 300ms var(--ease-lux); }
+.group:hover .arrow-nudge, .group:focus-visible .arrow-nudge { transform: translateX(4px); }
+
+@keyframes heart-pop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@utility heart-pop { animation: heart-pop 420ms var(--ease-lux); }
+@keyframes badge-bump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
+@utility badge-bump { animation: badge-bump 450ms var(--ease-lux); }
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@utility skeleton-shimmer {
+  background: linear-gradient(90deg, var(--secondary) 25%, var(--card) 50%, var(--secondary) 75%);
+  background-size: 200% 100%; animation: shimmer 1.6s linear infinite;
+}
+@keyframes hero-in { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: none; } }
+@utility hero-in { animation: hero-in var(--dur-hero) var(--ease-lux) both; }
+
+@layer base {
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 4px; }
+  [data-parallax] { will-change: transform; }
+}
+
+@keyframes word-up { from { transform: translateY(105%); opacity: 0; } to { transform: none; opacity: 1; } }
+.hero-word { display: inline-block; animation: word-up 1s var(--ease-lux) both; }
