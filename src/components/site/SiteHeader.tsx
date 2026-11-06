@@ -14,8 +14,8 @@ const nav = [
   { to: "/haircare", label: "Haircare" },
   { to: "/de-tan-care", label: "De-Tan Care" },
   { to: "/colour-cosmetics", label: "Colour Cosmetics" },
-  { to: "/combos", label: "Combos" },
-  { to: "/about", label: "About Us" },
+  { to: "/combos", label: "Combos", wide: true },
+  { to: "/about", label: "About Us", wide: true },
 ] as const;
 
 export function Wordmark({ className = "" }: { className?: string | undefined}) {
@@ -52,9 +52,9 @@ export function SiteHeader() {
             <button className="press grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary lg:hidden" aria-label="Open menu" onClick={() => setMenu(true)}>
               <Menu className="size-5" />
             </button>
-            <nav aria-label="Main" className="hidden items-center gap-6 lg:flex">
+            <nav aria-label="Main" className="hidden items-center gap-5 lg:flex">
               {nav.slice(1).map((n) => (
-                <Link key={n.to} to={n.to} className="link-underline text-[13px] font-medium text-foreground/80 transition-colors hover:text-primary" activeProps={{ className: "!text-primary" }}>
+                <Link key={n.to} to={n.to} className={`link-underline whitespace-nowrap text-[13px] ${"wide" in n ? "hidden min-[1440px]:inline" : ""}`}  activeProps={{ className: "!text-primary" }}>
                   {n.label}
                 </Link>
               ))}
