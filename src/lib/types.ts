@@ -39,6 +39,9 @@ export interface Product {
   tint: string; // placeholder visual colour (oklch)
   images?: string[] | undefined; // concept photography URLs, main first
   featured: boolean;
+  bestSeller?: boolean | undefined;
+  /** Shop-by-concern mapping set in admin; falls back to src/lib/concerns.ts when undefined. */
+  concerns?: string[] | undefined;
   status: ProductStatus;
   isSample: true | boolean;
   sourceUrl?: string | undefined; // product page on the client's original website

@@ -10,6 +10,18 @@ const icons: Record<ConcernSlug, typeof Sparkles> = {
   "sun-protection": Sun, "hair-fall": Wind, dandruff: Feather, "tan-removal": Leaf,
 };
 
+/** Real catalogue photos per concern — chosen to match each concern without implying results. */
+const concernArt: Record<ConcernSlug, { src: string | undefined; pos: string; tone: string }> = {
+  pigmentation: { src: productImages("face-serum")[1], pos: "50% 45%", tone: "oklch(0.3 0.05 45)" },
+  "acne-prone-skin": { src: productImages("face-wash")[1], pos: "50% 50%", tone: "var(--primary)" },
+  "dull-dry-skin": { src: productImages("aloe-vera-gel")[0], pos: "50% 50%", tone: "oklch(0.32 0.05 140)" },
+  "dark-circles": { src: productImages("toner")[1], pos: "50% 40%", tone: "oklch(0.27 0.03 260)" },
+  "sun-protection": { src: productImages("sunscreen")[0], pos: "50% 50%", tone: "oklch(0.38 0.08 60)" },
+  "hair-fall": { src: productImages("hair-oil")[0], pos: "50% 50%", tone: "oklch(0.28 0.04 100)" },
+  dandruff: { src: productImages("hair-mask")[0], pos: "50% 50%", tone: "oklch(0.3 0.03 180)" },
+  "tan-removal": { src: productImages("volcanic-scrub")[0], pos: "50% 50%", tone: "oklch(0.34 0.07 30)" },
+};
+
 export function ShopByConcern() {
   return (
     <section className="container-lux py-20 md:py-28">
@@ -17,12 +29,14 @@ export function ShopByConcern() {
         <RevealOnScroll as="p" kind="fade" className="eyebrow">Shop by concern</RevealOnScroll>
         <TextReveal text="What does your skin need?" className="mt-3 text-4xl md:text-5xl" delay={80} />
       </div>
-      <StaggerContainer step={60} className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 md:gap-5">
-        {concerns.map(({ slug, name: t }) => { const I = icons[slug]; return (
-          <Link key={slug} to="/concern/$slug" params={{ slug }} className="group flex flex-col items-center gap-4 rounded-2xl border border-border bg-card px-4 py-8 text-center transition-all duration-500 hover:-translate-y-1 hover:border-primary hover:shadow-lg">
-            <span className="grid size-14 place-items-center rounded-full bg-secondary text-primary transition-colors duration-500 group-hover:bg-primary group-hover:text-primary-foreground"><I className="size-6" strokeWidth={1.4} /></span>
-            <span className="font-serif text-xl">{t}</span>
-            <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground group-hover:text-primary">Shop <ArrowRight className="arrow-nudge size-3" /></span>
+      <StaggerContainer step={60} className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
+        {concerns.map(({ slug, name: t }) => { const I = icons[slug]; const a = concernArt[slug]; return (
+          <Link key={slug} to="/concern/$slug" params={{ slug }} className="group relative isolate flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl p-4 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:aspect-[4/5] md:p-6">
+            {a.src && <img src={a.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: a.pos }} className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.07]" />}
+            <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${a.tone} 90%, transparent) 0%, color-mix(in oklab, ${a.tone} 45%, transparent) 42%, transparent 72%)` }} />
+            <span className="absolute left-4 top-4 grid size-9 place-items-center rounded-full bg-background/85 text-primary backdrop-blur md:size-10"><I className="size-4" strokeWidth={1.5} /></span>
+            <span className="font-serif text-xl leading-tight md:text-2xl">{t}</span>
+            <span className="mt-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] opacity-90">Shop <ArrowRight className="arrow-nudge size-3" /></span>
           </Link>
         ); })}
       </StaggerContainer>

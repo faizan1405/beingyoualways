@@ -50,7 +50,7 @@ export const productService = {
   getById: (id: string) => delay(store.find((p) => p.id === id) ?? null),
   related: (p: Product) => delay(store.filter((x) => x.category === p.category && x.id !== p.id && x.status === "active").slice(0, 4)),
   categories: () => delay(categories),
-  byConcern: (c: ConcernSlug) => delay(store.filter((p) => p.status === "active" && (productConcerns[p.slug] ?? []).includes(c))),
+  byConcern: (c: ConcernSlug) => delay(store.filter((p) => p.status === "active" && (p.concerns ?? productConcerns[p.slug] ?? []).includes(c))),
   bySlugs: (slugs: string[]) => delay(store.filter((p) => p.status === "active" && slugs.includes(p.slug))),
   getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
   // Admin (demo — saved in this browser only)

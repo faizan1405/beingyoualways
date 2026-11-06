@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Upload, Video } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { productService } from "@/services/productService";
 import { useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
@@ -29,10 +31,12 @@ const blank = (): Testimonial => ({ id: `t${Date.now()}`, category: "Skin", name
 function Testimonials() {
   const list = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.all);
   const [draft, setDraft] = useState<Testimonial>(blank);
+  const { data: products = [] } = useQuery({ queryKey: ["admin", "products", "for-stories"], queryFn: () => productService.list() });
   const up = (patch: Partial<Testimonial>) => setDraft({ ...draft, ...patch });
 
   const save = () => {
     if (!draft.name.trim() || !draft.quote.trim()) { toast.error("Add the customer's name and their exact words."); return; }
+    if (draft.type === "video" && !draft.videoUrl) { toast.error("Add a video URL or choose a video file."); return; }
     if (draft.published && !(draft.verified && draft.consent)) { toast.error("A review can only be published once it is verified and the customer has given permission."); return; }
     testimonialService.save(draft);
     toast.success(isPublic(draft) ? "Saved — now visible on the homepage (demo, resets on reload)." : "Saved as draft — not shown publicly.");
@@ -54,7 +58,7 @@ function Testimonials() {
                 <li key={t.id} className="flex gap-3 rounded-md bg-secondary/60 p-3">
                   {t.photo && <img src={t.photo} alt="" className="size-14 rounded object-cover" />}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{t.name} <span className="font-normal text-muted-foreground">· {t.category}</span></p>
+                    <p className="text-sm font-semibold">{t.name} <span className="font-normal text-muted-foreground">· {t.category}{t.type === "video" && <> · <Video className="inline size-3" /> video</>}</span></p>
                     <p className="truncate text-sm text-muted-foreground">“{t.quote}”</p>
                     <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider">{isPublic(t) ? <span className="text-primary">Live</span> : <span className="text-muted-foreground">Draft · {[!t.verified && "not verified", !t.consent && "no consent", !t.published && "unpublished"].filter(Boolean).join(", ")}</span>}</p>
                   </div>
@@ -79,16 +83,37 @@ function Testimonials() {
               <div><label className={adminLabel} htmlFor="t-city">City</label><input id="t-city" className={adminInput} value={draft.city} onChange={(e) => up({ city: e.target.value })} /></div>
             </div>
             <div><label className={adminLabel} htmlFor="t-quote">Their exact words</label><textarea id="t-quote" rows={4} className={adminInput} value={draft.quote} onChange={(e) => up({ quote: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={adminLabel} htmlFor="t-type">Review type</label>
+                <select id="t-type" className={adminInput} value={draft.type ?? "text"} onChange={(e) => up({ type: e.target.value as Testimonial["type"] })}>
+                  <option value="text">Text</option><option value="photo">Photo</option><option value="video">Video</option>
+                </select></div>
+              <div><label className={adminLabel} htmlFor="t-prod">Related product</label>
+                <select id="t-prod" className={adminInput} value={draft.productSlug ?? ""} onChange={(e) => up({ productSlug: e.target.value || undefined })}>
+                  <option value="">None</option>{products.map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+                </select></div>
+            </div>
+            {draft.type === "video" && (
+              <div className="space-y-2 rounded-md border border-dashed border-border p-3">
+                <div><label className={adminLabel} htmlFor="t-vurl">Video URL</label><input id="t-vurl" className={adminInput} placeholder="https://… (hosted .mp4)" value={draft.videoUrl?.startsWith("blob:") ? "" : draft.videoUrl ?? ""} onChange={(e) => up({ videoUrl: e.target.value || undefined })} /></div>
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input p-3 text-xs hover:border-primary">
+                  <Upload className="size-4" /> Or choose a video file (preview only)
+                  <input type="file" accept="video/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) { up({ videoUrl: URL.createObjectURL(f) }); toast("Video loaded for preview in this tab only — it is not uploaded to any server."); } }} />
+                </label>
+                {draft.videoUrl && <video src={draft.videoUrl} poster={draft.poster} controls preload="metadata" className="aspect-video w-full rounded bg-primary" />}
+                <p className="text-[11px] text-muted-foreground">Demo: files are not saved. Video storage will be added with the Hostinger backend. Thumbnail = photo chosen below.</p>
+              </div>
+            )}
             <div><label className={adminLabel} htmlFor="t-rating">Rating given by customer (optional)</label>
               <select id="t-rating" className={adminInput} value={draft.rating ?? ""} onChange={(e) => up({ rating: e.target.value ? Number(e.target.value) : undefined })}>
                 <option value="">No rating</option>{[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} / 5</option>)}
               </select></div>
             <div>
-              <p className={adminLabel}>Photo (only with written permission)</p>
+              <p className={adminLabel}>{draft.type === "video" ? "Video thumbnail" : "Photo"} (only with written permission)</p>
               <div className="mt-1 grid grid-cols-6 gap-2">
-                <button type="button" onClick={() => up({ photo: undefined })} className={`aspect-square rounded border text-[10px] ${!draft.photo ? "border-primary ring-2 ring-primary" : "border-border"}`}>None</button>
+                <button type="button" onClick={() => up({ photo: undefined, poster: undefined })} className={`aspect-square rounded border text-[10px] ${!(draft.type === "video" ? draft.poster : draft.photo) ? "border-primary ring-2 ring-primary" : "border-border"}`}>None</button>
                 {uploadedPhotos.map((p) => (
-                  <button key={p.label} type="button" title={p.label} onClick={() => up({ photo: p.src })} className={`overflow-hidden rounded border ${draft.photo === p.src ? "border-primary ring-2 ring-primary" : "border-border"}`}>
+                  <button key={p.label} type="button" title={p.label} onClick={() => up(draft.type === "video" ? { poster: p.src } : { photo: p.src })} className={`overflow-hidden rounded border ${(draft.type === "video" ? draft.poster : draft.photo) === p.src ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                     <img src={p.src} alt={p.label} className="aspect-square w-full object-cover object-top" />
                   </button>
                 ))}

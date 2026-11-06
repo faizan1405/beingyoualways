@@ -12,6 +12,10 @@ export interface Testimonial {
   quote: string;
   rating?: number | undefined;
   photo?: string | undefined;
+  type?: "text" | "photo" | "video" | undefined; // defaults to text/photo by presence of media
+  videoUrl?: string | undefined; // backend-hosted video URL (local blob URLs are demo-only)
+  poster?: string | undefined; // video thumbnail
+  productSlug?: string | undefined; // related product
   verified: boolean; // review confirmed as genuine by the client
   consent: boolean; // customer agreed to public use (incl. photo)
   published: boolean;

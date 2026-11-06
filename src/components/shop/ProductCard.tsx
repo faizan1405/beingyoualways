@@ -58,7 +58,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <span className="font-semibold">{product.variants.length > 1 ? "From " : ""}{inr(minPrice(product))}</span>
           {compare && <span className="text-muted-foreground line-through">{inr(compare)}</span>}
         </div>
-        <div className="mt-1 flex items-center gap-1.5">
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {product.variants.map((v) =>
             v.swatch ? (
               <span key={v.id} title={v.label} className="size-3.5 rounded-full border border-border" style={{ background: v.swatch }} />

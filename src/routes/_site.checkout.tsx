@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CreditCard, Wallet, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { PaymentMethods, type PaymentMethod } from "@/components/shop/PaymentMethods";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -42,7 +43,7 @@ function Checkout() {
   const { lines } = useShop();
   const [f, setF] = useState(empty);
   const [errors, setErrors] = useState<CheckoutErrors>({});
-  const [pay, setPay] = useState<"razorpay" | "cod">("razorpay");
+  const [pay, setPay] = useState<PaymentMethod>("razorpay");
   const [code, setCode] = useState("");
   const [reviewed, setReviewed] = useState(false);
 
@@ -64,7 +65,7 @@ function Checkout() {
       <div className="container-lux max-w-xl py-24 text-center">
         <CheckCircle2 className="mx-auto size-12 text-success" strokeWidth={1.3} />
         <h1 className="mt-6 text-4xl">Checkout details look good</h1>
-        <p className="mt-4 text-muted-foreground">This is a <strong>demo checkout</strong>. No payment was taken and <strong>no order has been placed</strong>. Live ordering will be enabled once Razorpay and the store backend are connected.</p>
+        <p className="mt-4 text-muted-foreground">This is a <strong>demo checkout</strong>. You chose <strong>{pay === "cod" ? "Cash on Delivery" : "Razorpay online payment"}</strong>, but no payment was taken and <strong>no order has been placed</strong>. Live ordering will be enabled once Razorpay and the store backend are connected.</p>
         <Button variant="lux" size="xl" className="mt-8" asChild><Link to="/shop">Continue browsing</Link></Button>
       </div>
     );
@@ -114,17 +115,7 @@ function Checkout() {
           </section>
           <section className="hero-in space-y-4" style={{ animationDelay: "240ms" }}>
             <h2 className="text-2xl">Payment method</h2>
-            <div role="radiogroup" className="grid gap-3">
-              {[
-                { v: "razorpay" as const, I: CreditCard, t: "Pay online · Razorpay", d: "UPI, cards, netbanking — integration pending" },
-                { v: "cod" as const, I: Wallet, t: "Cash on Delivery", d: "Availability by PIN code — integration pending" },
-              ].map(({ v, I, t, d }) => (
-                <button type="button" role="radio" aria-checked={pay === v} key={v} onClick={() => setPay(v)} className={cn("press flex items-center gap-4 rounded-lg border p-4 text-left transition-all duration-200", pay === v ? "border-primary ring-1 ring-primary bg-primary/5" : "border-input")}>
-                  <I className="size-5 text-primary" />
-                  <span><span className="block text-sm font-semibold">{t}</span><span className="text-xs text-muted-foreground">{d}</span></span>
-                </button>
-              ))}
-            </div>
+            <PaymentMethods value={pay} onChange={setPay} />
           </section>
         </div>
 

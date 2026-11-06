@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { useState } from "react";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
@@ -20,6 +20,10 @@ export const Route = createFileRoute("/_site/contact")({
   }),
   component: Contact,
 });
+
+const addressQuery = encodeURIComponent(contactConfig.addressLines.join(", "));
+const embedUrl = `https://maps.google.com/maps?q=${addressQuery}&z=16&output=embed`;
+const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${addressQuery}`;
 
 const fields = [
   ["cname", "Name", "text", true],
@@ -90,6 +94,29 @@ function Contact() {
               <p className="text-xs text-muted-foreground">Demo form — messages are not delivered yet. For a reply, please call or email us.</p>
             )}
           </form>
+        </RevealOnScroll>
+      </section>
+
+      <section className="container-lux pb-20 md:pb-28">
+        <RevealOnScroll className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-[var(--shadow-soft)] md:grid md:grid-cols-[1fr_1.6fr]">
+          <div className="flex flex-col justify-center p-8 md:p-12">
+            <p className="eyebrow">Find us</p>
+            <h2 className="mt-3 text-4xl">Our Ahmedabad office</h2>
+            <address className="mt-5 text-[15px] not-italic leading-relaxed text-muted-foreground">
+              {contactConfig.addressLines.map((l) => <span key={l} className="block">{l}</span>)}
+            </address>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button variant="lux" size="lg" asChild><a href={directionsUrl} target="_blank" rel="noreferrer"><Navigation /> Get directions</a></Button>
+              <Button variant="luxOutline" size="lg" asChild><a href={mapsUrl} target="_blank" rel="noreferrer">Open in Google Maps <ArrowUpRight /></a></Button>
+            </div>
+          </div>
+          <iframe
+            title="Map showing Being You – Always office, Vastral, Ahmedabad"
+            src={embedUrl}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="block h-[320px] w-full border-0 md:h-full md:min-h-[440px]"
+          />
         </RevealOnScroll>
       </section>
     </>

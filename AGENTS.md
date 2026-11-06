@@ -38,3 +38,4 @@ use the editor.
 - Public testimonials come only from `testimonialService` entries that are verified + consented + published (managed at `/admin/testimonials`); never hardcode review copy — avoids fabricated reviews.
 - Concern and curated-collection (De-Tan, Combos) membership lives in `src/lib/concerns.ts`; empty lists render the shared empty state — never add products just to fill a page.
 - Verified business facts (contact, founder, about copy, nav, policy links, shipping-confirmed flag) live in `src/config/business.ts`; components import from it, never hardcode — one place to edit and later swap for the Hostinger API.
+- Sign-in providers go through `src/services/authService.ts` and checkout payment choice through `src/components/shop/PaymentMethods.tsx`; neither may fake a session, payment or order — one place to wire Hostinger OAuth/Razorpay later.
