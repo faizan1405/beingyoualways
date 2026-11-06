@@ -13,8 +13,8 @@ const icons: Record<ConcernSlug, typeof Sparkles> = {
 /** Real catalogue photos per concern — chosen to match each concern without implying results. */
 const concernArt: Record<ConcernSlug, { src: string | undefined; pos: string; tone: string }> = {
   pigmentation: { src: productImages("face-serum")[1], pos: "50% 45%", tone: "oklch(0.3 0.05 45)" },
-  "acne-prone-skin": { src: productImages("face-wash")[0], pos: "50% 50%", tone: "var(--primary)" },
-  "dull-dry-skin": { src: productImages("aloe-vera-gel")[1], pos: "50% 50%", tone: "oklch(0.32 0.05 140)" },
+  "acne-prone-skin": { src: productImages("face-wash")[1], pos: "50% 50%", tone: "var(--primary)" },
+  "dull-dry-skin": { src: productImages("aloe-vera-gel")[0], pos: "50% 50%", tone: "oklch(0.32 0.05 140)" },
   "dark-circles": { src: productImages("toner")[1], pos: "50% 40%", tone: "oklch(0.27 0.03 260)" },
   "sun-protection": { src: productImages("sunscreen")[0], pos: "50% 50%", tone: "oklch(0.38 0.08 60)" },
   "hair-fall": { src: productImages("hair-oil")[0], pos: "50% 50%", tone: "oklch(0.28 0.04 100)" },
