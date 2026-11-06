@@ -50,7 +50,7 @@ export function ConcernStory(p: ConcernStoryProps) {
     let raf = 0;
     const on = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => { const r = el.getBoundingClientRect(); setP(chapterProgress(r.top, r.height, window.innerHeight)); });
+      raf = requestAnimationFrame(() => { const r = el.getBoundingClientRect(); const inner = el.firstElementChild as HTMLElement | null; const off = inner ? parseFloat(getComputedStyle(inner).top) || 0 : 0; setP(chapterProgress(r.top - off, r.height, (inner?.offsetHeight ?? window.innerHeight))); });
     };
     on();
     window.addEventListener("scroll", on, { passive: true });

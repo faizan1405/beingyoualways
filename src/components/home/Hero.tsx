@@ -38,8 +38,8 @@ export function Hero() {
     const on = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        const p = heroProgress(r.top, r.height, window.innerHeight);
+        const r = el.getBoundingClientRect(); const inner = el.firstElementChild as HTMLElement | null; const off = inner ? parseFloat(getComputedStyle(inner).top) || 0 : 0;
+        const p = heroProgress(r.top - off, r.height, (inner?.offsetHeight ?? window.innerHeight));
         setAmount(transformAmount(p));
         setStarted(p > 0.02);
       });
