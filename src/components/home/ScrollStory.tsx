@@ -24,7 +24,7 @@ export function stageAt(p: number, n = stages.length) {
   return { i, blend, active: Math.min(n - 1, Math.round(i + blend)) };
 }
 
-/** "The Beauty of Being You" — vertical, sticky, scroll-linked four-stage story (desktop); stacked stages on mobile. */
+/** "The Beauty of Being You" — one sticky, scroll-linked four-stage story on every screen size (layout adapts for phones). */
 export function ScrollStory() {
   const ref = useRef<HTMLElement>(null);
   const [p, setP] = useState(0);
@@ -51,43 +51,52 @@ export function ScrollStory() {
   const a = stages[i]!, b = stages[Math.min(stages.length - 1, i + 1)]!;
   const bg = mix(a.bg, b.bg, blend), fg = mix(a.fg, b.fg, blend), muted = mix(a.muted, b.muted, blend);
 
+  const progress = (
+    <ol className="grid w-full max-w-md grid-cols-4 gap-2 md:gap-3" aria-label="Story progress">
+      {stages.map((s, n) => {
+        const fill = Math.min(1, Math.max(0, p * (stages.length - 1) - n + 1));
+        return (
+          <li key={s.k} aria-current={n === active ? "step" : undefined} className="text-[10px] uppercase tracking-[0.14em] md:text-[11px] md:tracking-[0.18em]" style={{ color: n === active ? fg : muted, opacity: n === active ? 1 : 0.6 }}>
+            <span className="relative block h-px w-full overflow-hidden" style={{ backgroundColor: mix(muted, "transparent", 0.6) }}>
+              <span className="absolute inset-0 origin-left" style={{ backgroundColor: fg, transform: `scaleX(${n === 0 ? 1 : fill})` }} />
+            </span>
+            <span className="mt-2 block"><span className="md:hidden">0{n + 1}</span><span className="hidden md:inline">0{n + 1} {s.k}</span></span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+
   return (
-    <section ref={ref} aria-label="The beauty of being you" className="story relative md:h-[300vh]">
-      <div className="sticky top-0 hidden h-screen overflow-hidden md:block" style={{ backgroundColor: bg, color: fg }} data-stage={stages[active]!.k}>
+    <section ref={ref} aria-label="The beauty of being you" className="story relative h-[280svh] md:h-[300vh]">
+      <div className="sticky top-0 h-[100svh] overflow-hidden md:h-screen" style={{ backgroundColor: bg, color: fg }} data-stage={stages[active]!.k}>
         <span aria-hidden className="story-orb absolute -left-24 top-1/4 h-72 w-72 rounded-full" style={{ transform: `translate3d(0, ${(-p * 120).toFixed(1)}px, 0)` }} />
         <span aria-hidden className="story-orb absolute -right-16 bottom-10 h-56 w-56 rounded-full" style={{ transform: `translate3d(0, ${(p * 90).toFixed(1)}px, 0)` }} />
-        <div className="container-lux relative grid h-full items-center gap-14 md:grid-cols-[1fr_1.05fr]">
-          <div className="relative">
-            <p className="eyebrow" style={{ color: muted }}>The beauty of being you</p>
-            <div className="relative mt-6 min-h-[19rem]">
+        <div className="container-lux relative flex h-full flex-col justify-center gap-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-16 md:grid md:grid-cols-[1fr_1.05fr] md:items-center md:gap-14 md:py-0">
+          <div className="relative order-2 md:order-1">
+            <p className="eyebrow hidden md:block" style={{ color: muted }}>The beauty of being you</p>
+            <div className="relative min-h-[9.5rem] md:mt-6 md:min-h-[19rem]">
               {stages.map((s, n) => (
                 <div key={s.k} aria-hidden={n !== active} className="story-text absolute inset-0" data-on={n === active || undefined}>
-                  <p className="story-line font-serif text-xl italic" style={{ color: muted }}>0{n + 1} — {s.k}</p>
-                  <h2 className="story-line mt-3 text-5xl leading-[1.05] lg:text-6xl" style={{ color: fg }}>{s.title}</h2>
-                  <p className="story-line mt-5 max-w-md text-[15px] leading-relaxed" style={{ color: muted }}>{s.copy}</p>
+                  <p className="story-line font-serif text-base italic md:text-xl" style={{ color: muted }}>0{n + 1} — {s.k}</p>
+                  <h2 className="story-line mt-1 text-[1.75rem] leading-[1.08] md:mt-3 md:text-5xl lg:text-6xl" style={{ color: fg }}>{s.title}</h2>
+                  <p className="story-line mt-2 max-w-md text-sm leading-relaxed md:mt-5 md:text-[15px]" style={{ color: muted }}>{s.copy}</p>
                   {s.cta && (
-                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className="story-line mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5">
+                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className="story-line mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5 md:mt-8">
                       Explore the Collection <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}
                 </div>
               ))}
             </div>
-            <ol className="mt-8 grid max-w-md grid-cols-4 gap-3" aria-label="Story progress">
-              {stages.map((s, n) => {
-                const fill = Math.min(1, Math.max(0, p * (stages.length - 1) - n + 1));
-                return (
-                  <li key={s.k} aria-current={n === active ? "step" : undefined} className="text-[11px] uppercase tracking-[0.18em]" style={{ color: n === active ? fg : muted, opacity: n === active ? 1 : 0.6 }}>
-                    <span className="relative block h-px w-full overflow-hidden" style={{ backgroundColor: mix(muted, "transparent", 0.6) }}>
-                      <span className="absolute inset-0 origin-left" style={{ backgroundColor: fg, transform: `scaleX(${n === 0 ? 1 : fill})` }} />
-                    </span>
-                    <span className="mt-2 block">0{n + 1} {s.k}</span>
-                  </li>
-                );
-              })}
-            </ol>
+            <div className="mt-8 hidden md:block">{progress}</div>
           </div>
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] shadow-[var(--shadow-soft)]">
+          {/* Mobile top bar: title + progress */}
+          <div className="order-0 md:hidden">
+            <p className="eyebrow mb-3" style={{ color: muted }}>The beauty of being you</p>
+            {progress}
+          </div>
+          <div className="relative order-1 mx-auto aspect-[4/5] h-[min(42svh,26rem)] max-w-full shrink overflow-hidden rounded-[1.5rem] shadow-[var(--shadow-soft)] md:order-2 md:h-auto md:w-full md:max-w-md md:rounded-[2rem]">
             {stages.map((s, n) => {
               const d = p * (stages.length - 1) - n;
               return (
@@ -98,22 +107,6 @@ export function ScrollStory() {
             })}
           </div>
         </div>
-      </div>
-
-      {/* Mobile: stacked stages, each with its own colour */}
-      <div className="md:hidden">
-        <p className="eyebrow container-lux pt-16 text-center">The beauty of being you</p>
-        {stages.map((s, n) => (
-          <article key={s.k} className="py-12" style={{ backgroundColor: s.bg, color: s.fg }}>
-            <div className="container-lux">
-              <p className="font-serif text-sm italic" style={{ color: s.muted }}>0{n + 1} / 04 — {s.k}</p>
-              <img src={s.src} alt={s.alt} loading="lazy" decoding="async" className="mt-4 aspect-[4/5] w-full rounded-3xl object-cover" />
-              <h2 className="mt-5 text-4xl leading-tight">{s.title}</h2>
-              <p className="mt-3 text-[15px]" style={{ color: s.muted }}>{s.copy}</p>
-              {s.cta && <Link to="/shop" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">Explore the Collection <ArrowRight className="h-4 w-4" /></Link>}
-            </div>
-          </article>
-        ))}
       </div>
     </section>
   );
