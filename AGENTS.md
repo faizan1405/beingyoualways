@@ -34,3 +34,4 @@ use the editor.
 - Storefront routes live under the `_site` pathless layout (header/footer); `/admin/*` has its own shell — keeps admin chrome separate.
 - Custom 3D (React Three Fiber) is allowed only in the homepage hero, lazy-loaded behind ClientOnly with a static fallback.
 - Product imagery uses the replaceable `ProductVisual` SVG placeholder until real photos arrive; do not generate AI images.
+- Scroll/text/image reveals use `src/components/motion/Reveal.tsx` (one shared IntersectionObserver + one parallax loop) with CSS in `styles.css`; content is hidden only under `html.motion-ok`, so reduced-motion users and no-JS still see everything. Use `motion/react` only for enter/exit (cart lines, gallery, price swaps).
