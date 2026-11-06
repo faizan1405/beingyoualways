@@ -60,7 +60,7 @@ function Home() {
       <section className="bg-secondary">
         <div className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
           <div className="relative mx-auto w-full max-w-lg pb-16 pr-10 md:pb-20 md:pr-16">
-            <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("face-wash")[0]} alt="Being You face wash among fresh botanicals" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
+            <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("toner")[0]} alt="Being You toner among fresh fennel flowers" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
             <Parallax speed={0.08} className="absolute bottom-0 right-0 w-[48%]"><ImageReveal from="left" delay={200} className="overflow-hidden rounded-2xl border-[6px] border-secondary shadow-lift"><img src={productImages("aloe-vera-gel")[0]} alt="Being You aloe vera gel with fresh aloe leaves" loading="lazy" decoding="async" className="aspect-square w-full object-cover" /></ImageReveal></Parallax>
             <span aria-hidden className="absolute -left-3 top-8 hidden rounded-full bg-background/90 px-4 py-2 font-serif text-sm italic text-foreground shadow-[var(--shadow-soft)] backdrop-blur md:block">Naturally you</span>
           </div>
