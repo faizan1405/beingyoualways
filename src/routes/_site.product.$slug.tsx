@@ -136,8 +136,8 @@ function ProductPage() {
           <Button variant="link" className="mt-1 w-full md:hidden" disabled={v.stock === 0} onClick={() => { add(p.id, v.id, qty); navigate({ to: "/checkout" }); }}>Buy now →</Button>
 
           <div className="mt-8 grid grid-cols-2 gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2 rounded-md bg-secondary p-3"><Truck className="size-4 text-primary" />Free shipping above ₹999</div>
-            <div className="flex items-center gap-2 rounded-md bg-secondary p-3"><RotateCcw className="size-4 text-primary" />Returns per draft policy</div>
+            <div className="flex items-center gap-2 rounded-md bg-secondary p-3"><Truck className="size-4 text-primary" />Shipping details confirmed at checkout</div>
+            <div className="flex items-center gap-2 rounded-md bg-secondary p-3"><RotateCcw className="size-4 text-primary" />Returns policy pending approval</div>
           </div>
 
           <Accordion type="multiple" defaultValue={["desc"]} className="mt-8">

@@ -20,6 +20,7 @@ import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-c
 import { Route as SiteCombosRouteImport } from './routes/_site.combos'
 import { Route as SiteContactRouteImport } from './routes/_site.contact'
 import { Route as SiteDeTanCareRouteImport } from './routes/_site.de-tan-care'
+import { Route as SiteDisclaimerRouteImport } from './routes/_site.disclaimer'
 import { Route as SiteFaqRouteImport } from './routes/_site.faq'
 import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
 import { Route as SiteLoginRouteImport } from './routes/_site.login'
@@ -104,6 +105,11 @@ const SiteContactRoute = SiteContactRouteImport.update({
 const SiteDeTanCareRoute = SiteDeTanCareRouteImport.update({
   id: '/de-tan-care',
   path: '/de-tan-care',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteDisclaimerRoute = SiteDisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteFaqRoute = SiteFaqRouteImport.update({
@@ -273,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/combos': typeof SiteCombosRoute
   '/contact': typeof SiteContactRoute
   '/de-tan-care': typeof SiteDeTanCareRoute
+  '/disclaimer': typeof SiteDisclaimerRoute
   '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/combos': typeof SiteCombosRoute
   '/contact': typeof SiteContactRoute
   '/de-tan-care': typeof SiteDeTanCareRoute
+  '/disclaimer': typeof SiteDisclaimerRoute
   '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
@@ -358,6 +366,7 @@ export interface FileRoutesById {
   '/_site/combos': typeof SiteCombosRoute
   '/_site/contact': typeof SiteContactRoute
   '/_site/de-tan-care': typeof SiteDeTanCareRoute
+  '/_site/disclaimer': typeof SiteDisclaimerRoute
   '/_site/faq': typeof SiteFaqRoute
   '/_site/haircare': typeof SiteHaircareRoute
   '/_site/login': typeof SiteLoginRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/combos'
     | '/contact'
     | '/de-tan-care'
+    | '/disclaimer'
     | '/faq'
     | '/haircare'
     | '/login'
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/combos'
     | '/contact'
     | '/de-tan-care'
+    | '/disclaimer'
     | '/faq'
     | '/haircare'
     | '/login'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/_site/combos'
     | '/_site/contact'
     | '/_site/de-tan-care'
+    | '/_site/disclaimer'
     | '/_site/faq'
     | '/_site/haircare'
     | '/_site/login'
@@ -604,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/de-tan-care'
       fullPath: '/de-tan-care'
       preLoaderRoute: typeof SiteDeTanCareRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/disclaimer': {
+      id: '/_site/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof SiteDisclaimerRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/faq': {
@@ -855,6 +874,7 @@ interface SiteRouteChildren {
   SiteCombosRoute: typeof SiteCombosRoute
   SiteContactRoute: typeof SiteContactRoute
   SiteDeTanCareRoute: typeof SiteDeTanCareRoute
+  SiteDisclaimerRoute: typeof SiteDisclaimerRoute
   SiteFaqRoute: typeof SiteFaqRoute
   SiteHaircareRoute: typeof SiteHaircareRoute
   SiteLoginRoute: typeof SiteLoginRoute
@@ -881,6 +901,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteCombosRoute: SiteCombosRoute,
   SiteContactRoute: SiteContactRoute,
   SiteDeTanCareRoute: SiteDeTanCareRoute,
+  SiteDisclaimerRoute: SiteDisclaimerRoute,
   SiteFaqRoute: SiteFaqRoute,
   SiteHaircareRoute: SiteHaircareRoute,
   SiteLoginRoute: SiteLoginRoute,

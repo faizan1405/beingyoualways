@@ -248,6 +248,6 @@ export const abandonedCarts: AbandonedCart[] = [
 export const chatbotMenu: ChatbotMenuItem[] = [
   { id: "b1", keyword: "1", label: "Shop products", response: "Browse our collection: {store_url}/shop" },
   { id: "b2", keyword: "2", label: "Track my order", response: "Please share your order ID (e.g. BYA-1042) and we'll share its status." },
-  { id: "b3", keyword: "3", label: "Shipping & returns", response: "Orders usually ship in 2–4 working days. See {store_url}/shipping-policy" },
+  { id: "b3", keyword: "3", label: "Shipping & returns", response: "Please see {store_url}/shipping-policy for shipping details." },
   { id: "b4", keyword: "4", label: "Talk to our team", response: "Connecting you to a team member during support hours." },
 ];
