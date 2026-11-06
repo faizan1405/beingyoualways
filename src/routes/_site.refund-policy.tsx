@@ -6,12 +6,12 @@ export const Route = createFileRoute("/_site/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund & Returns Policy | Being You – Always" },
-      { name: "description", content: "Refund and returns information for Being You – Always. Final policy pending client approval." },
+      { name: "description", content: "Refund and returns information for Being You – Always. Migrated from the original Being You – Always website." },
       { property: "og:title", content: "Refund & Returns Policy | Being You – Always" },
-      { property: "og:description", content: "Refund and returns information for Being You – Always. Final policy pending client approval." },
+      { property: "og:description", content: "Refund and returns information for Being You – Always. Migrated from the original Being You – Always website." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <PolicyPage title="Refund & Returns Policy" originalPath="/refund_returns/" />,
+  component: () => <PolicyPage title="Refund & Returns Policy" policy="refund" />,
 });

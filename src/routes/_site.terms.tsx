@@ -13,5 +13,5 @@ export const Route = createFileRoute("/_site/terms")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <PolicyPage title="Terms & Conditions" originalPath="/terms-of-service/" />,
+  component: () => <PolicyPage title="Terms & Conditions" policy="terms" />,
 });
