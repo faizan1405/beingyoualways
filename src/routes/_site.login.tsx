@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -89,6 +89,7 @@ function Login() {
           </div>
           <Button variant="lux" size="xl" className="w-full" type="submit"><MessageCircle /> Send OTP on WhatsApp</Button>
         </form>
+        <p className="mt-5 text-center text-[11px] text-muted-foreground">By continuing you agree to our <Link to="/terms" className="underline">Terms & Conditions</Link> and <Link to="/privacy-policy" className="underline">Privacy Policy</Link>.</p>
         <DemoNotice className="mt-6">Demo only — no OTP is sent. Live WhatsApp OTP verification will be enabled after backend integration.</DemoNotice>
       </div>
     </div>

@@ -134,6 +134,7 @@ function Checkout() {
           <OrderTotals />
           <Button type="submit" variant="lux" size="xl" className="mt-6 w-full">Review order (demo)</Button>
           <p className="mt-3 text-center text-xs text-muted-foreground">No payment will be taken.</p>
+          <p className="mt-4 text-center text-[11px] text-muted-foreground">Please read our <Link to="/shipping-policy" className="underline">Shipping</Link>, <Link to="/refund-policy" className="underline">Refund & Returns</Link> and <Link to="/terms" className="underline">Terms & Conditions</Link>.</p>
         </aside>
       </form>
     </div>
