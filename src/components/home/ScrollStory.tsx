@@ -21,7 +21,7 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v));
 export function stageAt(p: number, n = stages.length) {
   const x = Math.min(n - 1, Math.max(0, p * (n - 1)));
   const i = Math.floor(x);
-  const blend = ease(clamp((x - i - 0.25) / 0.5));
+  const blend = ease(clamp((x - i - 0.3) / 0.4));
   return { i, blend, active: Math.min(n - 1, Math.round(i + blend)) };
 }
 
