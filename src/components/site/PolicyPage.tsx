@@ -58,12 +58,11 @@ export function PolicyPage({ title, policy }: { title: string; policy: PolicyKey
           </RevealOnScroll>
         )}
 
-        <RevealOnScroll kind="fade-up" delay={120}>
           <div
-            className="policy-body mx-auto mt-10 max-w-[72ch] space-y-5 text-base leading-[1.85] text-foreground/85 [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_a]:break-words [&_h2]:!mt-12 [&_h2]:scroll-mt-28 [&_h2]:border-t [&_h2]:border-border [&_h2]:pt-8 [&_h2]:font-serif [&_h2]:text-3xl [&_h2]:leading-tight [&_h2]:text-foreground [&_h2:first-child]:!mt-0 [&_h2:first-child]:border-0 [&_h2:first-child]:pt-0 [&_strong]:font-semibold [&_strong]:text-foreground"
+            className="policy-body hero-in mx-auto mt-10 max-w-[72ch] space-y-5 text-base leading-[1.85] text-foreground/85 [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_a]:break-words [&_h2]:!mt-12 [&_h2]:scroll-mt-28 [&_h2]:border-t [&_h2]:border-border [&_h2]:pt-8 [&_h2]:font-serif [&_h2]:text-3xl [&_h2]:leading-tight [&_h2]:text-foreground [&_h2:first-child]:!mt-0 [&_h2:first-child]:border-0 [&_h2:first-child]:pt-0 [&_strong]:font-semibold [&_strong]:text-foreground"
+            style={{ animationDelay: "250ms" }}
             dangerouslySetInnerHTML={{ __html: html }}
           />
-        </RevealOnScroll>
 
         <details className="mt-14 rounded-2xl border border-border p-5 text-sm">
           <summary className="cursor-pointer font-semibold">Internal review checklist</summary>
