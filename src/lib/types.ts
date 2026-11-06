@@ -41,6 +41,7 @@ export interface Product {
   featured: boolean;
   status: ProductStatus;
   isSample: true | boolean;
+  sourceUrl?: string | undefined; // product page on the client's original website
 }
 
 export interface CartItem {

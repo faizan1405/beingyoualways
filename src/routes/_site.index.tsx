@@ -60,8 +60,8 @@ function Home() {
       <section className="bg-secondary">
         <div className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
           <div className="grid grid-cols-2 gap-4">
-            <Parallax speed={-0.06}><ImageReveal className="mt-12 rounded-xl"><ProductVisual src={productImages("saffron-night-cream")[1]} shape="jar" tint="oklch(0.82 0.08 70)" label="Saffron Night Cream" variant={2} /></ImageReveal></Parallax>
-            <Parallax speed={0.06}><ImageReveal from="left" delay={150} className="rounded-xl"><ProductVisual shape="bottle" tint="oklch(0.78 0.05 120)" label="Reetha Shikakai Shampoo" variant={0} className="!bg-card" src={productImages("reetha-shikakai-shampoo")[1]} /></ImageReveal></Parallax>
+            <Parallax speed={-0.06}><ImageReveal className="mt-12 rounded-xl"><ProductVisual src={productImages("face-serum")[1]} shape="dropper" tint="oklch(0.82 0.08 70)" label="Being You Face Serum" variant={2} /></ImageReveal></Parallax>
+            <Parallax speed={0.06}><ImageReveal from="left" delay={150} className="rounded-xl"><ProductVisual shape="bottle" tint="oklch(0.78 0.05 120)" label="Being You Hair Oil" variant={0} className="!bg-card" src={productImages("hair-oil")[1]} /></ImageReveal></Parallax>
           </div>
           <div>
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Our story</RevealOnScroll>

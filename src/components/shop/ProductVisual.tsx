@@ -12,7 +12,6 @@ export function ProductVisual({
     return (
       <div className={cn("relative aspect-[4/5] overflow-hidden bg-secondary", className)}>
         <img src={src} alt={label || ""} width={1024} height={1280} loading={eager ? "eager" : "lazy"} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-        {tag && <span className="eyebrow absolute bottom-3 left-3 rounded-full bg-background/75 px-2 py-0.5 !text-[9px] backdrop-blur">Concept photo</span>}
       </div>
     );
   }

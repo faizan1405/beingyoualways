@@ -87,12 +87,12 @@ function ProductPage() {
 
         <div className="hero-in" style={{ animationDelay: "120ms" }}>
           <div className="flex items-center gap-2"><p className="eyebrow">{cat.name}</p><SampleBadge /></div>
-          <h1 className="mt-3 text-4xl leading-tight md:text-6xl">{p.name}</h1>
+          <h1 className="mt-3 text-3xl leading-tight md:text-5xl">{p.name}</h1>
           <p className="mt-3 text-muted-foreground">{p.shortDescription}</p>
           <div className="mt-6 flex items-baseline gap-3">
             <AnimatePresence mode="popLayout" initial={false}><motion.span key={v.price} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ duration: 0.25 }} className="text-2xl font-semibold tabular-nums">{inr(v.price)}</motion.span></AnimatePresence>
             {v.compareAtPrice && <span className="text-muted-foreground line-through">{inr(v.compareAtPrice)}</span>}
-            <span className="text-xs text-muted-foreground">Sample price · incl. taxes</span>
+            <span className="text-xs text-muted-foreground">Price as listed · taxes to be confirmed</span>
           </div>
 
           <fieldset className="mt-8">
@@ -142,7 +142,7 @@ function ProductPage() {
 
           <Accordion type="multiple" defaultValue={["desc"]} className="mt-8">
             <AccordionItem value="desc"><AccordionTrigger className="font-serif text-xl font-normal">Description</AccordionTrigger><AccordionContent className="text-sm leading-relaxed text-muted-foreground">{p.description}</AccordionContent></AccordionItem>
-            <AccordionItem value="ing"><AccordionTrigger className="font-serif text-xl font-normal">Ingredients</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground">{p.ingredients.join(", ")}. <em>(Sample list — replace with the approved INCI list.)</em></AccordionContent></AccordionItem>
+            <AccordionItem value="ing"><AccordionTrigger className="font-serif text-xl font-normal">Ingredients</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground">{p.ingredients.length ? p.ingredients.join(", ") : <em>Full ingredient list to be confirmed by the client.</em>}</AccordionContent></AccordionItem>
             <AccordionItem value="dir"><AccordionTrigger className="font-serif text-xl font-normal">Directions for use</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground">{p.directions}</AccordionContent></AccordionItem>
             <AccordionItem value="info"><AccordionTrigger className="font-serif text-xl font-normal">Product information</AccordionTrigger><AccordionContent>
               <dl className="grid grid-cols-2 gap-2 text-sm">{p.details.map((d) => <div key={d.label} className="contents"><dt className="text-muted-foreground">{d.label}</dt><dd>{d.value}</dd></div>)}</dl>
