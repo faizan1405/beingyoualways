@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentPage } from "@/components/site/ContentPage";
+import { PolicyPage } from "@/components/site/PolicyPage";
 
 export const Route = createFileRoute("/_site/refund-policy")({
   head: () => ({
     meta: [
-      { title: "Refund Policy | Being You – Always" },
-      { name: "description", content: "Returns, exchanges and refunds at Being You – Always (draft)." },
-      { property: "og:title", content: "Refund Policy | Being You – Always" },
-      { property: "og:description", content: "Returns, exchanges and refunds at Being You – Always (draft)." },
+      { title: "Refund & Returns Policy | Being You – Always" },
+      { name: "description", content: "Refund and returns information for Being You – Always. Final policy pending client approval." },
+      { property: "og:title", content: "Refund & Returns Policy | Being You – Always" },
+      { property: "og:description", content: "Refund and returns information for Being You – Always. Final policy pending client approval." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => (
-    <ContentPage eyebrow="Help" title="Refund Policy" draft>
-      <h2>Eligibility</h2><p>Placeholder: which products can be returned and within how many days.</p><h2>Process</h2><p>Placeholder: how to request a return and how refunds are issued.</p>
-    </ContentPage>
-  ),
+  component: () => <PolicyPage title="Refund & Returns Policy" originalPath="/refund_returns/" />,
 });
