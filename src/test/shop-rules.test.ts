@@ -16,6 +16,6 @@ describe("shop rules", () => {
   it("filters by category", () => expect(filterProducts(products, { category: "haircare" }).every((p) => p.category === "haircare")).toBe(true));
   it("sorts by price ascending", () => {
     const l = filterProducts(products, { sort: "price-asc" });
-    expect(l[0].variants[0].price).toBeLessThanOrEqual(l[l.length - 1].variants[0].price);
+    expect(l[0]!.variants[0]!.price).toBeLessThanOrEqual(l[l.length - 1]!.variants[0]!.price);
   });
 });

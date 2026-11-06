@@ -46,8 +46,8 @@ function EditProduct() {
         className="grid gap-4 xl:grid-cols-[1fr_340px]"
         onSubmit={(e) => {
           e.preventDefault();
-          if (p.name.trim().length < 2) return toast.error("Product name is required");
-          if (p.variants.some((v) => !v.label || v.price <= 0)) return toast.error("Each variant needs a label and a price");
+          if (p.name.trim().length < 2) { toast.error("Product name is required"); return; }
+          if (p.variants.some((v) => !v.label || v.price <= 0)) { toast.error("Each variant needs a label and a price"); return; }
           save.mutate({ ...p, slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") });
         }}
       >

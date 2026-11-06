@@ -46,7 +46,7 @@ function ProductPage() {
   const { product: p, related } = Route.useLoaderData();
   const { add, toggleWish, isWished } = useShop();
   const navigate = useNavigate();
-  const [variantId, setVariantId] = useState((p.variants.find((v) => v.stock > 0) ?? p.variants[0]).id);
+  const [variantId, setVariantId] = useState((p.variants.find((v) => v.stock > 0) ?? p.variants[0]!).id);
   const [qty, setQty] = useState(1);
   const [img, setImg] = useState(0);
   const v = p.variants.find((x) => x.id === variantId)!;

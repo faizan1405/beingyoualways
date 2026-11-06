@@ -28,7 +28,7 @@ const catVisual = {
   "colour-cosmetics": { shape: "lipstick", tint: "oklch(0.58 0.12 40)" },
 } as const;
 
-function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string; link?: { to: "/shop" | undefined; label: string } }) {
+function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string; link?: { to: "/shop"; label: string } | undefined }) {
   return (
     <div className="mb-10 flex items-end justify-between gap-6">
       <div>

@@ -17,7 +17,7 @@ function WhatsApp() {
   const qc = useQueryClient();
   const { data: campaigns = [] } = useQuery({ queryKey: ["admin", "campaigns"], queryFn: whatsappService.campaigns });
   const { data: messages = [] } = useQuery({ queryKey: ["admin", "messages"], queryFn: whatsappService.messages });
-  const [form, setForm] = useState({ name: "", template: whatsappService.templates[0], segment: "all" as WhatsAppCampaign["segment"], scheduledFor: "" });
+  const [form, setForm] = useState({ name: "", template: whatsappService.templates[0]!, segment: "all" as WhatsAppCampaign["segment"], scheduledFor: "" });
   const save = useMutation({
     mutationFn: whatsappService.saveCampaign,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin", "campaigns"] }); toast("Campaign saved as draft — nothing will be sent (API not connected)"); setForm({ ...form, name: "", scheduledFor: "" }); },
@@ -32,8 +32,8 @@ function WhatsApp() {
         <Panel title="Create campaign">
           <form className="space-y-3" onSubmit={(e) => {
             e.preventDefault();
-            if (!form.name.trim()) return toast.error("Campaign name is required");
-            save.mutate({ id: `w${Date.now()}`, name: form.name, template: form.template, segment: form.segment, scheduledFor: form.scheduledFor || undefined, status: form.scheduledFor ? "scheduled" : "draft", recipients: segCounts[form.segment] });
+            if (!form.name.trim()) { toast.error("Campaign name is required"); return; }
+            save.mutate({ id: `w${Date.now()}`, name: form.name, template: form.template, segment: form.segment, scheduledFor: form.scheduledFor || undefined, status: form.scheduledFor ? "scheduled" : "draft", recipients: segCounts[form.segment] ?? 0 });
           }}>
             <div><label htmlFor="cn" className={adminLabel}>Campaign name</label><input id="cn" className={adminInput} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div><label htmlFor="ct" className={adminLabel}>Template</label><select id="ct" className={adminInput} value={form.template} onChange={(e) => setForm({ ...form, template: e.target.value })}>{whatsappService.templates.map((t) => <option key={t}>{t}</option>)}</select></div>

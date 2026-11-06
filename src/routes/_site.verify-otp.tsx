@@ -7,7 +7,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { authService } from "@/services/authService";
 
 export const Route = createFileRoute("/_site/verify-otp")({
-  validateSearch: (s: Record<string, unknown>): { phone?: string | undefined} => ({ phone: typeof s.phone === "string" ? s.phone : undefined }),
+  validateSearch: (s: Record<string, unknown>): { phone?: string | undefined} => ({ phone: typeof s["phone"] === "string" ? s["phone"] : undefined }),
   head: () => ({
     meta: [
       { title: "Verify OTP | Being You – Always" },

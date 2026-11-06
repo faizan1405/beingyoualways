@@ -4,7 +4,7 @@ import { ShopView } from "@/components/shop/ShopView";
 import { productService } from "@/services/productService";
 
 export const Route = createFileRoute("/_site/shop")({
-  validateSearch: (s: Record<string, unknown>): { q?: string | undefined} => ({ q: typeof s.q === "string" ? s.q : undefined }),
+  validateSearch: (s: Record<string, unknown>): { q?: string | undefined} => ({ q: typeof s["q"] === "string" ? s["q"] : undefined }),
   head: () => ({
     meta: [
       { title: "Shop All | Being You – Always" },
