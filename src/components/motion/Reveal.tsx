@@ -17,6 +17,7 @@ function observe(el: Element) {
     el.classList.add("is-in");
     return () => {};
   }
+  document.documentElement.classList.add("motion-js");
   io ??= new IntersectionObserver(
     (entries) => {
       for (const e of entries) {

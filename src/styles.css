@@ -197,7 +197,8 @@
     clip-path calc(var(--dur-reveal) * 1.5) var(--ease-lux);
   transition-delay: var(--reveal-delay, 0ms);
 }
-.motion-ok [data-reveal]:not(.is-in) { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
+/* Failsafe only while the reveal script has not booted (html lacks .motion-js). */
+.motion-ok:not(.motion-js) [data-reveal]:not(.is-in) { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
 .motion-ok [data-reveal="fade-up"]:not(.is-in) { opacity: 0; transform: translateY(28px); }
 .motion-ok [data-reveal="fade"]:not(.is-in) { opacity: 0; }
 .motion-ok [data-reveal="slide-left"]:not(.is-in) { opacity: 0; transform: translateX(-36px); }
@@ -221,7 +222,7 @@
 }
 .motion-ok [data-reveal="text"]:not(.is-in) .text-mask > span { transform: translateY(105%); opacity: 0; }
 .motion-ok [data-reveal="text"]:not(.is-in) { animation: none; }
-.motion-ok [data-reveal="text"]:not(.is-in) .text-mask > span { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
+.motion-ok:not(.motion-js) [data-reveal="text"]:not(.is-in) .text-mask > span { animation: reveal-failsafe 0.01s linear 2.5s forwards; }
 
 /* Hover / press language */
 @utility press { transition: transform var(--dur-micro) var(--ease-soft); &:active { transform: scale(0.97); } }
