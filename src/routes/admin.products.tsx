@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,9 +28,14 @@ function Products() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin", "products"] }); toast("Product deleted (demo state)"); },
   });
 
+  const reset = useMutation({
+    mutationFn: () => productService.resetDemo(),
+    onSuccess: () => { qc.invalidateQueries(); toast("Demo data reset to the imported catalogue"); },
+  });
+
   return (
-    <AdminPage title="Products" subtitle="Changes are kept in memory for this demo and reset on reload."
-      actions={<Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button>}>
+    <AdminPage title="Products" subtitle="Real catalogue from beingyoualways.com. Demo edits are saved in this browser only; stock numbers are demo values."
+      actions={<div className="flex gap-2"><Button variant="luxOutline" size="xl" onClick={() => reset.mutate()}><RotateCcw /> Reset demo data</Button><Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
       <Panel>
         <input aria-label="Search products" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className={`${adminInput} mb-4 max-w-sm`} />
         {isLoading ? <div className="h-40 animate-pulse rounded bg-secondary" /> : (
