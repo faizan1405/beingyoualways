@@ -13,7 +13,7 @@ describe("real catalogue", () => {
     expect([v.price, v.compareAtPrice]).toEqual([380, 390]);
   });
   it("offers six lipstick shades", () => expect(bySlug("liquid-matte-lipstick").variants).toHaveLength(6));
-  it("maps sunscreen to Sun Protection", () => expect(productConcerns.sunscreen).toContain("sun-protection"));
+  it("maps sunscreen to Sun Protection", () => expect(productConcerns["sunscreen"]).toContain("sun-protection"));
   it("every concern/collection slug exists in the catalogue", () => {
     const slugs = [...Object.keys(productConcerns), ...deTanSlugs, ...comboSlugs];
     expect(slugs.every((s) => products.some((p) => p.slug === s))).toBe(true);
