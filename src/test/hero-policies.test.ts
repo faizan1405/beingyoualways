@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { transformAmount } from "@/components/home/Hero";
+import { heroProgress, transformAmount } from "@/components/home/Hero";
 import { policies, policyReview } from "@/content/policies";
 
 describe("hero skin transformation", () => {
-  it("starts fully on the Before photo at the top", () => expect(transformAmount(0, 800)).toBe(0));
-  it("is complete after 55% of one viewport of scrolling", () => expect(transformAmount(440, 800)).toBe(1));
-  it("reverses when scrolling back up", () => expect(transformAmount(100, 800)).toBeLessThan(transformAmount(300, 800)));
+  it("starts fully on the Before photo at the top", () => expect(transformAmount(heroProgress(0, 1360, 800))).toBe(0));
+  it("shows the fully clear face at 80% while still pinned", () => expect(transformAmount(0.8)).toBe(1));
+  it("holds the clear face until the hero releases", () => expect(transformAmount(heroProgress(-560, 1360, 800))).toBe(1));
+  it("reverses when scrolling back up", () => expect(transformAmount(0.3)).toBeLessThan(transformAmount(0.6)));
 });
 
 describe("policies", () => {
