@@ -90,7 +90,7 @@ function Rig({ still }: { still: boolean }) {
 
 export default function HeroScene({ still }: { still: boolean }) {
   return (
-    <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0.4, 5.2], fov: 38 }} gl={{ antialias: true, alpha: true }} shadows>
+    <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0.5, 7.4], fov: 36 }} gl={{ antialias: true, alpha: true }} shadows>
       <ambientLight intensity={0.55} />
       <directionalLight position={[3, 5, 4]} intensity={2.2} castShadow />
       <directionalLight position={[-4, 2, -2]} intensity={0.8} color={TERRA} />

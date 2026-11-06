@@ -42,7 +42,7 @@ function Scene() {
 export function Hero() {
   return (
     <section className="bg-hero relative overflow-hidden">
-      <div className="container-lux grid min-h-[calc(100svh-6.5rem)] items-center gap-4 py-10 md:grid-cols-2 md:py-0">
+      <div className="container-lux grid min-h-[calc(100svh-6.5rem)] md:max-h-[860px] items-center gap-4 py-10 md:grid-cols-2 md:py-0">
         <div className="order-2 text-center md:order-1 md:text-left">
           <p className="eyebrow">Plant-based beauty · Made in India</p>
           <h1 className="mt-5 text-[2.9rem] leading-[0.98] sm:text-6xl lg:text-[5.4rem]">
@@ -56,7 +56,7 @@ export function Hero() {
             <Button variant="link" asChild className="uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story →</Link></Button>
           </div>
         </div>
-        <div className="order-1 h-[52vh] min-h-[320px] md:order-2 md:h-[78vh]" aria-label="Rotating 3D view of a Being You serum bottle" role="img">
+        <div className="order-1 h-[52vh] min-h-[320px] md:order-2 md:h-[min(78vh,720px)]" aria-label="Rotating 3D view of a Being You serum bottle" role="img">
           <ClientOnly fallback={<StaticFallback />}>
             <Scene />
           </ClientOnly>

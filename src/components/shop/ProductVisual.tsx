@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
  * Swap for real <img> assets once the client supplies product photos.
  */
 export function ProductVisual({
-  shape, tint, label, className, variant = 0,
-}: { shape: ProductShape; tint: string; label: string; className?: string | undefined; variant?: number | undefined}) {
+  shape, tint, label, className, variant = 0, tag = true,
+}: { shape: ProductShape; tint: string; label: string; className?: string | undefined; variant?: number | undefined; tag?: boolean | undefined }) {
   const bgs = ["var(--secondary)", "oklch(0.93 0.02 60)", "oklch(0.92 0.02 140)", "oklch(0.95 0.01 20)"];
   return (
     <div
@@ -27,7 +27,7 @@ export function ProductVisual({
         </g>
         <Shape shape={shape} tint={tint} />
       </svg>
-      <span className="eyebrow absolute bottom-3 left-3 !text-[9px] opacity-70">Sample image</span>
+      {tag && <span className="eyebrow absolute bottom-3 left-3 !text-[9px] opacity-70">Sample image</span>}
     </div>
   );
 }

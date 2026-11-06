@@ -65,7 +65,7 @@ function ProductPage() {
           <div className="mt-3 grid grid-cols-4 gap-3" role="group" aria-label="Product gallery">
             {[0, 1, 2, 3].map((i) => (
               <button key={i} onClick={() => setImg(i)} aria-label={`Show image ${i + 1}`} aria-pressed={img === i} className={cn("overflow-hidden rounded-md border-2 transition", img === i ? "border-primary" : "border-transparent opacity-70 hover:opacity-100")}>
-                <ProductVisual shape={p.shape} tint={p.tint} label="" variant={i} />
+                <ProductVisual shape={p.shape} tint={p.tint} label="" variant={i} tag={false} />
               </button>
             ))}
           </div>
