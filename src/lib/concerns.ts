@@ -13,7 +13,10 @@ export const concerns: { slug: ConcernSlug; name: string; blurb: string }[] = [
   { slug: "sun-protection", name: "Sun Protection", blurb: "Everyday defence for skin under the Indian sun." },
   { slug: "hair-fall", name: "Hair Fall", blurb: "Nourishing care for thinning, breaking hair." },
   { slug: "dandruff", name: "Dandruff", blurb: "Cleansing, calming care for a flaky scalp." },
-  { slug: "tan-removal", name: "Tan Removal", blurb: "De-tan care to refr/**
+  { slug: "tan-removal", name: "Tan Removal", blurb: "De-tan care to refresh sun-dulled skin." },
+];
+
+/**
  * product slug → concerns, based on each product's own name/description on the original site.
  * The original site tags most products with "Dark Circles" without support in the copy — not mirrored here.
  */
