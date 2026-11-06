@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as SiteAccountRouteImport } from './routes/_site.account'
@@ -28,16 +29,24 @@ import { Route as SiteSkincareRouteImport } from './routes/_site.skincare'
 import { Route as SiteTermsRouteImport } from './routes/_site.terms'
 import { Route as SiteVerifyOtpRouteImport } from './routes/_site.verify-otp'
 import { Route as SiteWishlistRouteImport } from './routes/_site.wishlist'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
 import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account.addresses'
 import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.orders'
 import { Route as SiteAccountProfileRouteImport } from './routes/_site.account.profile'
 import { Route as SiteAccountWishlistRouteImport } from './routes/_site.account.wishlist'
 import { Route as SiteProductSlugRouteImport } from './routes/_site.product.$slug'
+import { Route as AdminProductsIdRouteImport } from './routes/admin.products_.$id'
 import { Route as SiteAccountOrdersIdRouteImport } from './routes/_site.account_.orders_.$id'
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
@@ -130,6 +139,16 @@ const SiteWishlistRoute = SiteWishlistRouteImport.update({
   path: '/wishlist',
   getParentRoute: () => SiteRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SiteAccountIndexRoute = SiteAccountIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -160,6 +179,11 @@ const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => SiteRoute,
 } as any)
+const AdminProductsIdRoute = AdminProductsIdRouteImport.update({
+  id: '/products_/$id',
+  path: '/products/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
   id: '/account_/orders_/$id',
   path: '/account/orders/$id',
@@ -168,6 +192,7 @@ const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/about': typeof SiteAboutRoute
   '/account': typeof SiteAccountRouteWithChildren
   '/cart': typeof SiteCartRoute
@@ -185,11 +210,14 @@ export interface FileRoutesByFullPath {
   '/terms': typeof SiteTermsRoute
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
   '/account/orders': typeof SiteAccountOrdersRoute
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
   '/product/$slug': typeof SiteProductSlugRoute
+  '/admin/products/$id': typeof AdminProductsIdRoute
   '/account/': typeof SiteAccountIndexRoute
   '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
@@ -210,18 +238,22 @@ export interface FileRoutesByTo {
   '/terms': typeof SiteTermsRoute
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
+  '/admin/products': typeof AdminProductsRoute
   '/': typeof SiteIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
   '/account/orders': typeof SiteAccountOrdersRoute
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
   '/product/$slug': typeof SiteProductSlugRoute
+  '/admin/products/$id': typeof AdminProductsIdRoute
   '/account': typeof SiteAccountIndexRoute
   '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/_site/about': typeof SiteAboutRoute
   '/_site/account': typeof SiteAccountRouteWithChildren
   '/_site/cart': typeof SiteCartRoute
@@ -239,12 +271,15 @@ export interface FileRoutesById {
   '/_site/terms': typeof SiteTermsRoute
   '/_site/verify-otp': typeof SiteVerifyOtpRoute
   '/_site/wishlist': typeof SiteWishlistRoute
+  '/admin/products': typeof AdminProductsRoute
   '/_site/': typeof SiteIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_site/account/addresses': typeof SiteAccountAddressesRoute
   '/_site/account/orders': typeof SiteAccountOrdersRoute
   '/_site/account/profile': typeof SiteAccountProfileRoute
   '/_site/account/wishlist': typeof SiteAccountWishlistRoute
   '/_site/product/$slug': typeof SiteProductSlugRoute
+  '/admin/products_/$id': typeof AdminProductsIdRoute
   '/_site/account/': typeof SiteAccountIndexRoute
   '/_site/account_/orders_/$id': typeof SiteAccountOrdersIdRoute
 }
@@ -252,6 +287,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/about'
     | '/account'
     | '/cart'
@@ -269,11 +305,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-otp'
     | '/wishlist'
+    | '/admin/products'
+    | '/admin/'
     | '/account/addresses'
     | '/account/orders'
     | '/account/profile'
     | '/account/wishlist'
     | '/product/$slug'
+    | '/admin/products/$id'
     | '/account/'
     | '/account/orders/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -294,17 +333,21 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-otp'
     | '/wishlist'
+    | '/admin/products'
     | '/'
+    | '/admin'
     | '/account/addresses'
     | '/account/orders'
     | '/account/profile'
     | '/account/wishlist'
     | '/product/$slug'
+    | '/admin/products/$id'
     | '/account'
     | '/account/orders/$id'
   id:
     | '__root__'
     | '/_site'
+    | '/admin'
     | '/_site/about'
     | '/_site/account'
     | '/_site/cart'
@@ -322,18 +365,22 @@ export interface FileRouteTypes {
     | '/_site/terms'
     | '/_site/verify-otp'
     | '/_site/wishlist'
+    | '/admin/products'
     | '/_site/'
+    | '/admin/'
     | '/_site/account/addresses'
     | '/_site/account/orders'
     | '/_site/account/profile'
     | '/_site/account/wishlist'
     | '/_site/product/$slug'
+    | '/admin/products_/$id'
     | '/_site/account/'
     | '/_site/account_/orders_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -343,6 +390,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_site/': {
@@ -471,6 +525,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteWishlistRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_site/account/': {
       id: '/_site/account/'
       path: '/'
@@ -512,6 +580,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/product/$slug'
       preLoaderRoute: typeof SiteProductSlugRouteImport
       parentRoute: typeof SiteRoute
+    }
+    '/admin/products_/$id': {
+      id: '/admin/products_/$id'
+      path: '/products/$id'
+      fullPath: '/admin/products/$id'
+      preLoaderRoute: typeof AdminProductsIdRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_site/account_/orders_/$id': {
       id: '/_site/account_/orders_/$id'
@@ -591,8 +666,23 @@ const SiteRouteChildren: SiteRouteChildren = {
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
+interface AdminRouteChildren {
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminProductsIdRoute: typeof AdminProductsIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminProductsRoute: AdminProductsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminProductsIdRoute: AdminProductsIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
