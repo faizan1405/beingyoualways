@@ -93,7 +93,7 @@ export function ConcernStory(p: ConcernStoryProps) {
 
         <div>
           <p className="eyebrow">0{p.index} — {p.name}</p>
-          <ol className="mt-4 flex gap-3 text-[10px] md:mt-5 md:gap-4 md:text-[11px] uppercase tracking-[0.18em]" aria-label="Story moments">
+          <ol className="mt-4 flex flex-wrap gap-x-3 gap-y-2 text-[10px] md:mt-5 md:gap-4 md:text-[11px] uppercase tracking-[0.18em]" aria-label="Story moments">
             {p.moments.map((x, n) => (
               <li key={x.label} aria-current={n === m ? "step" : undefined} className="transition-opacity duration-500" style={{ opacity: n === m ? 1 : 0.45 }}>
                 <span className="mb-2 block h-px w-10 bg-current" />{x.label}

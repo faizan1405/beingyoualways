@@ -25,7 +25,7 @@ function Overview() {
           <Panel key={k}><p className="eyebrow">{k}</p><p className="mt-2 font-serif text-3xl">{v}</p><p className="mt-1 text-[10px] uppercase text-muted-foreground">Demo data</p></Panel>
         ))}
       </div>
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <Panel title="Monthly sales (sample)">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
