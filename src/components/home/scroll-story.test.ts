@@ -14,22 +14,16 @@ describe("scroll story stages", () => {
   });
 });
 
-import { sectionProgress } from "./ScrollStory";
-import { concernProgress, momentAt } from "../concerns/ConcernStory";
+import { chapterProgress, momentAt, transformAt } from "../concerns/ConcernStory";
 
-describe("horizontal story progress", () => {
-  it("is 0 before the section is reached and 1 after it has passed", () => {
-    expect(sectionProgress(800, 900, 800)).toBe(0);
-    expect(sectionProgress(-900, 900, 800)).toBe(1);
+describe("concern chapter (sticky)", () => {
+  it("holds Before for the first 25%", () => expect(transformAt(0.25)).toBe(0));
+  it("is fully After by 85% and held to the end", () => {
+    expect(transformAt(0.85)).toBe(1);
+    expect(transformAt(chapterProgress(-1700, 2080, 800))).toBe(1);
   });
-});
-
-describe("concern transformation", () => {
-  it("starts at Before and ends at After", () => {
-    expect(concernProgress(800, 1000, 800)).toBe(0);
-    expect(concernProgress(-500, 1000, 800)).toBe(1);
-    expect(momentAt(0)).toBe(0);
-    expect(momentAt(0.5)).toBe(1);
-    expect(momentAt(1)).toBe(2);
+  it("moves through four moments and reverses", () => {
+    expect([0.1, 0.3, 0.6, 0.9].map(momentAt)).toEqual([0, 1, 2, 3]);
+    expect(momentAt(chapterProgress(0, 2080, 800))).toBe(0);
   });
 });

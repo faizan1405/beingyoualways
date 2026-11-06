@@ -53,9 +53,10 @@ function ExploreConcerns() {
         beforeAlt="Illustrative portrait: woman with dark spots and uneven skin tone" afterAlt="The same woman with more even-looking skin tone"
         fromBg="var(--secondary)" toBg="color-mix(in oklab, var(--sage) 45%, var(--background))"
         moments={[
-          { label: "Before", title: "Dark spots and uneven tone.", copy: "Sun, time and everyday life can leave skin looking patchy. You're not alone in noticing it." },
-          { label: "The Journey", title: "A steady, gentle routine.", copy: "Cleanse, care and protect daily. Consistency matters more than intensity." },
-          { label: "After", title: "A more even-looking glow.", copy: "An illustration of what caring for your skin can feel like — every skin's journey is different." },
+          { label: "The concern", title: "Dark spots and uneven tone.", copy: "Sun, time and everyday life can leave skin looking patchy. You're not alone in noticing it." },
+          { label: "Understanding", title: "Why tone looks uneven.", copy: "Sun exposure and skin's natural response to it can show up as darker patches over time." },
+          { label: "Everyday care", title: "A steady, gentle routine.", copy: "Cleanse, care and protect daily. Consistency matters more than intensity." },
+          { label: "The reveal", title: "A more even-looking glow.", copy: "An illustration of what caring for your skin can feel like — every skin's journey is different." },
         ]}
         products={pig} ctaLabel="Explore relevant skincare" ctaTo="/skincare" />
 
@@ -63,9 +64,10 @@ function ExploreConcerns() {
         beforeAlt="Illustrative portrait: woman with visible red pimples on cheeks, chin and forehead" afterAlt="The same woman with clearer-looking skin"
         fromBg="color-mix(in oklab, var(--accent) 18%, var(--background))" toBg="color-mix(in oklab, var(--sage) 35%, var(--background))"
         moments={[
-          { label: "Before", title: "Breakouts that won't settle.", copy: "Redness and blemishes can make skin feel unpredictable." },
-          { label: "The Journey", title: "Keep it clean and calm.", copy: "A gentle cleanse, light hydration and hands off — small habits, repeated." },
-          { label: "After", title: "Clearer-looking, calmer skin.", copy: "Illustrative only. Persistent acne is best discussed with a dermatologist." },
+          { label: "The concern", title: "Breakouts that won't settle.", copy: "Redness and blemishes can make skin feel unpredictable." },
+          { label: "Understanding", title: "Skin that needs a calmer routine.", copy: "Excess oil, clogged pores and touching your face can all play a part." },
+          { label: "Everyday care", title: "Keep it clean and calm.", copy: "A gentle cleanse, light hydration and hands off — small habits, repeated." },
+          { label: "The reveal", title: "Clearer-looking, calmer skin.", copy: "Illustrative only. Persistent acne is best discussed with a dermatologist." },
         ]}
         products={acne} ctaLabel="Shop skincare products" ctaTo="/skincare" />
 
@@ -73,9 +75,10 @@ function ExploreConcerns() {
         beforeAlt="Illustrative portrait: woman with dry, frizzy, dull-looking long hair" afterAlt="The same woman with smoother, shinier-looking hair"
         fromBg="color-mix(in oklab, var(--accent) 22%, var(--secondary))" toBg="color-mix(in oklab, var(--sage) 40%, var(--background))"
         moments={[
-          { label: "Before", title: "Dry, frizzy, dull.", copy: "Heat, hard water and weather can leave hair rough and hard to manage." },
-          { label: "The Journey", title: "Oil, wash, nourish.", copy: "A weekly oiling ritual, a gentle wash and a mask when hair needs extra care." },
-          { label: "After", title: "Smoother, more manageable hair.", copy: "An illustration of everyday haircare — not a promise of regrowth or treatment." },
+          { label: "The concern", title: "Dry, frizzy, dull.", copy: "Heat, hard water and weather can leave hair rough and hard to manage." },
+          { label: "Understanding", title: "Hair that's asking for moisture.", copy: "When strands lose moisture, the surface roughens — and shine and smoothness fade." },
+          { label: "Everyday care", title: "Oil, wash, nourish.", copy: "A weekly oiling ritual, a gentle wash and a mask when hair needs extra care." },
+          { label: "The reveal", title: "Smoother, more manageable hair.", copy: "An illustration of everyday haircare — not a promise of regrowth or treatment." },
         ]}
         products={hair} ctaLabel="Explore haircare collection" ctaTo="/haircare" />
     </>

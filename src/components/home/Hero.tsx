@@ -6,31 +6,43 @@ import before from "@/assets/hero-acne-before.jpg";
 import after from "@/assets/hero-pig-after.jpg";
 import { Button } from "@/components/ui/button";
 
-/** Fraction of the viewport height scrolled at which the After photo is fully shown. */
-export const COMPLETE_AT = 0.55;
+const clamp = (v: number) => Math.min(1, Math.max(0, v));
 
-/** Map page scroll (px) to the transformation 0–1: complete after ~55% of one viewport, eased. */
-export function transformAmount(scrollY: number, viewportHeight: number) {
-  const t = Math.min(1, Math.max(0, scrollY / (viewportHeight * COMPLETE_AT)));
+/** Progress 0–1 through the hero's bounded sticky range. */
+export function heroProgress(top: number, height: number, vh: number) {
+  return clamp(-top / Math.max(1, height - vh));
+}
+
+/** Face transformation from hero progress: hold Before to 10%, fade until 80%, then hold the clear face. */
+export function transformAmount(p: number) {
+  const t = clamp((p - 0.1) / 0.7);
   return t * t * (3 - 2 * t);
 }
 
 /**
- * Hero with a scroll-linked skin transformation. The hero stays in normal document flow (no
- * pinning, no extra height); ordinary page scroll drives the crossfade between two aligned
- * photos of the same woman. No autoplay, no slider, no scroll locking. Reduced motion → static.
+ * Campaign hero with a short bounded sticky scene (~1.7 viewports total on desktop, shorter on mobile).
+ * Page scroll drives the crossfade; the clear face is fully shown and held before the hero releases.
+ * No wheel interception, no comparison bar, no autoplay. Reduced motion → static clear portrait.
  */
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const [amount, setAmount] = useState(0);
+  const [started, setStarted] = useState(false);
   const [still, setStill] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setStill(true); return; }
+    const el = ref.current;
+    if (!el) return;
     let raf = 0;
     const on = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setAmount(transformAmount(window.scrollY, window.innerHeight)));
+      raf = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect(); const inner = el.firstElementChild as HTMLElement | null; const off = inner ? parseFloat(getComputedStyle(inner).top) || 0 : 0;
+        const p = heroProgress(r.top - off, r.height, (inner?.offsetHeight ?? window.innerHeight));
+        setAmount(transformAmount(p));
+        setStarted(p > 0.02);
+      });
     };
     on();
     window.addEventListener("scroll", on, { passive: true });
@@ -38,15 +50,13 @@ export function Hero() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", on); window.removeEventListener("resize", on); };
   }, []);
 
-  const pct = Math.round(amount * 100);
-
   return (
-    <section ref={ref} className="bg-hero relative" aria-label="Introduction">
-      <div className="flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden md:min-h-[calc(100vh-4rem)]">
-        <div className="container-lux grid w-full items-center gap-6 py-6 md:grid-cols-2 md:gap-10 md:py-8">
+    <section ref={ref} className={`bg-hero relative ${still ? "" : "h-[150svh] md:h-[170vh]"}`} aria-label="Introduction">
+      <div className={`${still ? "" : "sticky top-14 md:top-16"} flex h-[calc(100svh-3.5rem)] items-center md:h-[calc(100vh-4rem)]`}>
+        <div className="container-lux grid w-full items-center gap-5 md:grid-cols-[1fr_1.05fr] md:gap-12">
           <div className="order-2 text-center md:order-1 md:text-left">
             <p className="eyebrow hero-in" style={{ animationDelay: "100ms" }}>Plant-based beauty · Made in India</p>
-            <h1 className="mt-4 text-[2.4rem] leading-[0.98] sm:text-6xl md:mt-5 lg:text-[5.2rem]" aria-label="Beauty that feels like you, always.">
+            <h1 className="mt-3 text-[2.2rem] leading-[0.98] sm:text-6xl md:mt-5 lg:text-[5.4rem]" aria-label="Beauty that feels like you, always.">
               {["Beauty", "that", "feels", "|", "like you,", "always."].map((w, i) =>
                 w === "|" ? <br key={i} /> : (
                   <span key={i} aria-hidden className="text-mask mr-[0.22em]">
@@ -55,34 +65,33 @@ export function Hero() {
                 ),
               )}
             </h1>
-            <p className="hero-in mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mx-0 md:mt-6" style={{ animationDelay: "800ms" }}>
+            <p className="hero-in mx-auto mt-3 hidden max-w-md text-[15px] leading-relaxed text-muted-foreground sm:block md:mx-0 md:mt-6" style={{ animationDelay: "800ms" }}>
               Plant-powered care for pigmentation, dullness and uneven tone — for a healthier-looking glow, naturally.
             </p>
-            <div className="hero-in mt-6 flex flex-col items-center gap-2 sm:flex-row md:mt-9 md:justify-start md:gap-3" style={{ animationDelay: "950ms" }}>
+            <div className="hero-in mt-5 flex flex-col items-center gap-1 sm:flex-row md:mt-9 md:justify-start md:gap-3" style={{ animationDelay: "950ms" }}>
               <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
               <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
             </div>
           </div>
 
-          <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,300px)] sm:max-w-[380px] md:order-2 md:max-w-[520px]" style={{ animationDelay: "300ms" }}>
-            <div className="relative aspect-[4/5] max-h-[46svh] w-full overflow-hidden rounded-[1.75rem] bg-secondary shadow-[var(--shadow-soft)] md:max-h-[min(76vh,680px)]" style={{ marginInline: "auto" }}>
-              <img src={before} alt="Illustrative portrait: woman with visible acne and red spots on her cheeks, forehead and chin" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
-              <img src={after} alt={still ? "" : "The same woman with clearer-looking skin and fewer visible pimples"} aria-hidden={still || amount < 0.5} width={1024} height={1280}
-                className="absolute inset-0 h-full w-full object-cover object-[50%_30%] will-change-[opacity]"
-                style={{ opacity: still ? 0 : amount }} />
-              {!still && (
-                <div className="absolute inset-x-4 top-4 flex items-center gap-3 rounded-full bg-background/80 px-4 py-2 backdrop-blur" aria-hidden>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Before</span>
-                  <span className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-border"><span className="absolute inset-y-0 left-0 bg-primary" style={{ width: `${pct}%` }} /></span>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">After</span>
-                </div>
+          <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,340px)] sm:max-w-[400px] md:order-2 md:max-w-none" style={{ animationDelay: "300ms" }}>
+            <div className="relative mx-auto aspect-[4/5] max-h-[52svh] overflow-hidden rounded-t-[999px] rounded-b-[2rem] bg-secondary shadow-[var(--shadow-soft)] md:max-h-[min(78vh,720px)]">
+              {still ? (
+                <img src={after} alt="Illustrative portrait: woman with clear-looking skin" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+              ) : (
+                <>
+                  <img src={before} alt="Illustrative portrait: woman with visible acne on her cheeks, forehead and chin" width={1024} height={1280} fetchPriority="high"
+                    className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" style={{ transform: `scale(${(1.06 - amount * 0.04).toFixed(3)})` }} />
+                  <img src={after} alt={amount > 0.5 ? "The same woman with clearer-looking skin" : ""} aria-hidden={amount <= 0.5} width={1024} height={1280}
+                    className="absolute inset-0 h-full w-full object-cover object-[50%_30%] will-change-[opacity]"
+                    style={{ opacity: amount, transform: `scale(${(1.06 - amount * 0.04).toFixed(3)})` }} />
+                  <p aria-hidden className="absolute inset-x-0 bottom-6 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-background transition-opacity duration-500" style={{ opacity: started ? 0 : 0.95 }}>
+                    Scroll to reveal ↓
+                  </p>
+                </>
               )}
-              {!still && amount < 0.05 && <p className="absolute inset-x-0 bottom-10 text-center text-[11px] font-medium tracking-[0.12em] text-background/95 transition-opacity">Scroll to see the change ↓</p>}
             </div>
-            {still && (
-              <img src={after} alt="The same woman with clearer-looking skin and fewer visible pimples" width={1024} height={1280} loading="lazy" className="mt-3 aspect-[4/5] max-h-[46svh] w-full rounded-[1.75rem] object-cover object-[50%_30%]" />
-            )}
-            <figcaption className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Illustrative imagery — not actual product results</figcaption>
+            <figcaption className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI-generated illustrative imagery — not actual product results</figcaption>
           </figure>
         </div>
       </div>

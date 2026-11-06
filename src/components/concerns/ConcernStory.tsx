@@ -16,7 +16,7 @@ export interface ConcernStoryProps {
   beforeAlt: string;
   afterAlt: string;
   pos?: string;
-  moments: [Moment, Moment, Moment];
+  moments: [Moment, Moment, Moment, Moment];
   fromBg: string;
   toBg: string;
   products: Product[];
@@ -27,19 +27,20 @@ export interface ConcernStoryProps {
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const ease = (t: number) => t * t * (3 - 2 * t);
 
-/** Transformation 0–1 while the visual passes through the viewport (normal flow). Exported for tests. */
-export function concernProgress(top: number, height: number, vh: number) {
-  const raw = (vh * 0.7 - top) / Math.max(1, height * 0.75);
-  return ease(clamp(raw));
+/** Chapter progress 0–1 through its own bounded sticky range. Exported for tests. */
+export function chapterProgress(top: number, height: number, vh: number) {
+  return clamp(-top / Math.max(1, height - vh));
 }
-/** Before (0) → The Journey (1) → After (2). */
-export const momentAt = (t: number) => (t < 0.33 ? 0 : t < 0.72 ? 1 : 2);
+/** Face/hair change: Before held to 25%, fades until 85%, After held to the end. */
+export const transformAt = (p: number) => ease(clamp((p - 0.25) / 0.6));
+/** Four editorial moments at 0–25 / 25–50 / 50–75 / 75–100%. */
+export const momentAt = (p: number) => Math.min(3, Math.floor(p * 4));
 
 export const DISCLOSURE = "AI-generated illustrative imagery — not actual customer or product results.";
 
 export function ConcernStory(p: ConcernStoryProps) {
-  const ref = useRef<HTMLElement>(null);
-  const [t, setT] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const [p0, setP] = useState(0);
   const [still, setStill] = useState(false);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export function ConcernStory(p: ConcernStoryProps) {
     let raf = 0;
     const on = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => { const r = el.getBoundingClientRect(); setT(concernProgress(r.top, r.height, window.innerHeight)); });
+      raf = requestAnimationFrame(() => { const r = el.getBoundingClientRect(); const inner = el.firstElementChild as HTMLElement | null; const off = inner ? parseFloat(getComputedStyle(inner).top) || 0 : 0; setP(chapterProgress(r.top - off, r.height, (inner?.offsetHeight ?? window.innerHeight))); });
     };
     on();
     window.addEventListener("scroll", on, { passive: true });
@@ -57,13 +58,16 @@ export function ConcernStory(p: ConcernStoryProps) {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", on); window.removeEventListener("resize", on); };
   }, []);
 
-  const m = still ? 2 : momentAt(t);
+  const t = still ? 1 : transformAt(p0);
+  const m = still ? 3 : momentAt(p0);
   const bg = `color-mix(in oklab, ${p.fromBg} ${((1 - t) * 100).toFixed(1)}%, ${p.toBg})`;
 
   return (
-    <section ref={ref} id={p.id} aria-labelledby={`${p.id}-h`} className="relative scroll-mt-20" style={{ backgroundColor: still ? p.toBg : bg }} data-moment={m}>
-      <div className="container-lux grid items-center gap-10 py-20 md:grid-cols-[1.05fr_1fr] md:gap-16 md:py-28">
-        <figure className="relative mx-auto w-full max-w-[520px]">
+    <section id={p.id} aria-labelledby={`${p.id}-h`} className="relative scroll-mt-16" style={{ backgroundColor: still ? p.toBg : bg }} data-moment={m}>
+      <div ref={ref} className={still ? "" : "h-[230svh] md:h-[260vh]"}>
+      <div className={`${still ? "py-16" : "sticky top-14 h-[calc(100svh-3.5rem)] md:top-16 md:h-[calc(100vh-4rem)]"} flex items-center`}>
+      <div className="container-lux grid w-full items-center gap-5 md:grid-cols-[1.05fr_1fr] md:gap-16">
+        <figure className="relative mx-auto w-full max-w-[min(100%,36svh)] md:max-w-[min(480px,62vh)]">
           {still ? (
             <div className="grid grid-cols-2 gap-3">
               {[{ s: p.before, a: p.beforeAlt, l: "Before" }, { s: p.after, a: p.afterAlt, l: "After" }].map((x) => (
@@ -84,34 +88,37 @@ export function ConcernStory(p: ConcernStoryProps) {
               </div>
             </div>
           )}
-          <figcaption className="mt-3 text-center text-[11px] leading-snug text-muted-foreground">{DISCLOSURE}</figcaption>
+          <figcaption className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">{DISCLOSURE}</figcaption>
         </figure>
 
         <div>
           <p className="eyebrow">0{p.index} — {p.name}</p>
-          <ol className="mt-5 flex gap-4 text-[11px] uppercase tracking-[0.18em]" aria-label="Story moments">
+          <ol className="mt-4 flex gap-3 text-[10px] md:mt-5 md:gap-4 md:text-[11px] uppercase tracking-[0.18em]" aria-label="Story moments">
             {p.moments.map((x, n) => (
               <li key={x.label} aria-current={n === m ? "step" : undefined} className="transition-opacity duration-500" style={{ opacity: n === m ? 1 : 0.45 }}>
                 <span className="mb-2 block h-px w-10 bg-current" />{x.label}
               </li>
             ))}
           </ol>
-          <div className="relative mt-6 grid">
+          <div className="relative mt-4 grid md:mt-6">
             {p.moments.map((x, n) => (
               <div key={x.label} aria-hidden={n !== m} className="story-text col-start-1 row-start-1" data-on={n === m || undefined}>
-                <h2 id={n === 0 ? `${p.id}-h` : undefined} className="story-line text-4xl leading-[1.08] md:text-5xl">{x.title}</h2>
-                <p className="story-line mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">{x.copy}</p>
+                <h2 id={n === 0 ? `${p.id}-h` : undefined} className="story-line text-3xl leading-[1.08] md:text-5xl">{x.title}</h2>
+                <p className="story-line mt-3 max-w-md text-sm md:mt-4 md:text-[15px] leading-relaxed text-muted-foreground">{x.copy}</p>
               </div>
             ))}
           </div>
-          <Link to={p.ctaTo} className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-[transform,opacity] duration-500 hover:-translate-y-0.5" style={{ opacity: m === 2 ? 1 : 0.85 }}>
+          <Link to={p.ctaTo} tabIndex={m === 3 ? 0 : -1} aria-hidden={m !== 3} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-[transform,opacity] duration-500 hover:-translate-y-0.5 md:mt-8"
+            style={{ opacity: m === 3 ? 1 : 0, transform: m === 3 ? "none" : "translateY(10px)", pointerEvents: m === 3 ? "auto" : "none" }}>
             {p.ctaLabel} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
+      </div>
+      </div>
 
       {p.products.length > 0 && (
-        <div className="container-lux pb-20 md:pb-28">
+        <div className="container-lux pb-20 pt-4 md:pb-28">
           <p className="eyebrow">Products to explore</p>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">Chosen from our catalogue because their own descriptions mention this area of care. Individual results vary.</p>
           <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
