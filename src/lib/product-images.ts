@@ -1,6 +1,5 @@
 // Central product photo registry. Files live in src/assets/products/<slug>-<n>.webp
-// (1 = studio, 2 = lifestyle, 3 = texture). AI-generated concept photography —
-// replace with the client's real packaging shots when supplied.
+// Real product photos from beingyoualways.com, resized to WebP (max 900px) for mobile.
 const files = import.meta.glob<string>("../assets/products/*.webp", { eager: true, import: "default" });
 
 const bySlug: Record<string, string[]> = {};

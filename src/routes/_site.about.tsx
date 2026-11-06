@@ -43,7 +43,7 @@ function About() {
       </section>
 
       <section className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
-        <Parallax speed={-0.05}><ImageReveal className="rounded-xl"><ProductVisual src={productImages("saffron-night-cream")[1]} shape="jar" tint="oklch(0.82 0.08 70)" label="Being You ritual" variant={2} /></ImageReveal></Parallax>
+        <Parallax speed={-0.05}><ImageReveal className="rounded-xl"><ProductVisual src={productImages("aloe-vera-gel")[1]} shape="jar" tint="oklch(0.82 0.08 70)" label="Being You ritual" variant={2} /></ImageReveal></Parallax>
         <RevealOnScroll kind="slide-right" delay={150} className="space-y-5 text-[16px] leading-relaxed text-muted-foreground">
           <p className="eyebrow">Naturally you</p>
           <h2 className="text-4xl leading-tight text-foreground md:text-5xl">More than a routine.</h2>

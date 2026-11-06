@@ -1,5 +1,5 @@
-// Concern & collection mapping for the sample catalogue.
-// Only map a product when its (sample) description supports it — never invent products to fill a concern.
+// Concern & collection mapping for the real catalogue (beingyoualways.com, Nov 2026).
+// Only map a product when its own name/description supports it — never invent products to fill a concern.
 
 export type ConcernSlug =
   | "pigmentation" | "acne-prone-skin" | "dull-dry-skin" | "dark-circles"
@@ -13,22 +13,27 @@ export const concerns: { slug: ConcernSlug; name: string; blurb: string }[] = [
   { slug: "sun-protection", name: "Sun Protection", blurb: "Everyday defence for skin under the Indian sun." },
   { slug: "hair-fall", name: "Hair Fall", blurb: "Nourishing care for thinning, breaking hair." },
   { slug: "dandruff", name: "Dandruff", blurb: "Cleansing, calming care for a flaky scalp." },
-  { slug: "tan-removal", name: "Tan Removal", blurb: "De-tan care to refresh sun-dulled skin." },
-];
-
-/** product slug → concerns. Sample mapping — confirm per real product before launch. */
+  { slug: "tan-removal", name: "Tan Removal", blurb: "De-tan care to refr/**
+ * product slug → concerns, based on each product's own name/description on the original site.
+ * The original site tags most products with "Dark Circles" without support in the copy — not mirrored here.
+ */
 export const productConcerns: Record<string, ConcernSlug[]> = {
-  "kumkumadi-face-oil": ["pigmentation", "dull-dry-skin"],
-  "green-tea-gel-cleanser": ["acne-prone-skin"],
-  "saffron-night-cream": ["dull-dry-skin"],
-  "rose-dew-face-serum": ["dull-dry-skin"],
-  "bhringraj-hair-oil": ["hair-fall"],
-  "reetha-shikakai-shampoo": ["dandruff"],
+  "face-serum": ["pigmentation", "dull-dry-skin"],
+  "face-wash": ["acne-prone-skin", "dull-dry-skin"],
+  "aloe-vera-gel": ["dull-dry-skin"],
+  sunscreen: ["sun-protection"],
+  "hair-oil": ["hair-fall"],
+  shampoo: ["hair-fall", "dandruff"],
+  "tomato-face-wash": ["tan-removal"],
+  "face-mask": ["tan-removal"],
+  "volcanic-scrub": ["tan-removal"],
 };
 
-/** De-Tan Care products (none in the sample catalogue yet). */
-export const deTanSlugs: string[] = [];
-/** Combo / bundle products (none in the sample catalogue yet). */
-export const comboSlugs: string[] = [];
+/** De-Tan Care — products the original site lists under "De-Tan Care". */
+export const deTanSlugs: string[] = ["tomato-face-wash", "volcanic-scrub", "face-mask"];
+/** Combos / bundles listed on the original site. */
+export const comboSlugs: string[] = ["wax-powder-aloe-vera-gel-combo"];
+
+ comboSlugs: string[] = [];
 
 export const getConcern = (slug: string) => concerns.find((c) => c.slug === slug) ?? null;
