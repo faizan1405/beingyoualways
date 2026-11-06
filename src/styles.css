@@ -253,3 +253,6 @@
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 4px; }
   [data-parallax] { will-change: transform; }
 }
+
+@keyframes word-up { from { transform: translateY(105%); opacity: 0; } to { transform: none; opacity: 1; } }
+.hero-word { display: inline-block; animation: word-up 1s var(--ease-lux) both; }

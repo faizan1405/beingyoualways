@@ -1,6 +1,7 @@
 // Browser-only 3D scene. Loaded lazily after hydration by Hero.tsx.
+import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 // WebGL materials need literal colours; these mirror the brand tokens.
@@ -26,7 +27,7 @@ function Bottle() {
     <group position={[0, -1.2, 0]}>
       <mesh castShadow>
         <latheGeometry args={[profile, 96]} />
-        <meshPhysicalMaterial color={TERRA} roughness={0.12} transmission={0.55} thickness={0.8} clearcoat={1} clearcoatRoughness={0.08} ior={1.45} />
+        <meshPhysicalMaterial color={TERRA} roughness={0.1} transmission={0.5} thickness={0.9} clearcoat={1} clearcoatRoughness={0.06} ior={1.45} envMapIntensity={1.1} />
       </mesh>
       {/* inner serum */}
       <mesh position={[0, 0.7, 0]}>
@@ -67,16 +68,43 @@ function Leaf({ position, rotation, scale = 1 }: { position: [number, number, nu
   );
 }
 
+// Motion feel — tune here.
+const IDLE_SPIN = 0.22; // rad/s
+const MAX_TILT_X = 0.18; // rad, cursor-driven
+const MAX_TILT_Y = 0.35;
+const FOLLOW = 3.2; // damping rate
+const FLOAT_AMP = 0.07;
+const ENTRANCE_S = 1.1;
+
 function Rig({ still }: { still: boolean }) {
   const g = useRef<THREE.Group>(null);
-  useFrame((state, dt) => {
-    if (!g.current || still) return;
-    g.current.rotation.y += dt * 0.25;
-    const tx = state.pointer.x * 0.25;
-    const ty = state.pointer.y * 0.12;
-    g.current.rotation.x += (ty - g.current.rotation.x) * 0.05;
-    g.current.position.x += (tx - g.current.position.x) * 0.05;
-    g.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.06;
+  const spin = useRef(0);
+  const t0 = useRef<number | null>(null);
+  useFrame((state, rawDt) => {
+    const dt = Math.min(rawDt, 0.05);
+    const grp = g.current;
+    if (!grp) return;
+    if (t0.current === null) t0.current = state.clock.elapsedTime;
+    // eased entrance (0→1)
+    const k = still ? 1 : Math.min(1, (state.clock.elapsedTime - t0.current) / ENTRANCE_S);
+    const e = 1 - Math.pow(1 - k, 3);
+    grp.scale.setScalar(0.82 + 0.18 * e);
+    if (still) return;
+    spin.current += dt * IDLE_SPIN;
+    const damp = 1 - Math.exp(-FOLLOW * dt);
+    const tx = THREE.MathUtils.clamp(-state.pointer.y, -1, 1) * MAX_TILT_X;
+    const ty = THREE.MathUtils.clamp(state.pointer.x, -1, 1) * MAX_TILT_Y;
+    grp.rotation.x += (tx - grp.rotation.x) * damp;
+    grp.rotation.y = spin.current + ty * e;
+    grp.position.x += (state.pointer.x * 0.18 - grp.position.x) * damp;
+    grp.position.y = (1 - e) * -0.7 + Math.sin(state.clock.elapsedTime * 0.8) * FLOAT_AMP;
+    grp.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.03;
+    // camera: slow dolly-in on entrance, then subtle parallax
+    const cam = state.camera;
+    cam.position.z += (7.4 + (1 - e) * 1.8 - cam.position.z) * damp;
+    cam.position.x += (state.pointer.x * 0.35 - cam.position.x) * damp * 0.5;
+    cam.position.y += (0.5 + state.pointer.y * 0.2 - cam.position.y) * damp * 0.5;
+    cam.lookAt(0, 0.1, 0);
   });
   return (
     <group ref={g}>
@@ -89,17 +117,39 @@ function Rig({ still }: { still: boolean }) {
 }
 
 export default function HeroScene({ still }: { still: boolean }) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+  const [ready, setReady] = useState(false);
+  const lowPower = typeof navigator !== "undefined" && (navigator.hardwareConcurrency ?? 8) <= 4;
+  // Pause rendering when the hero scrolls out of view.
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const o = new IntersectionObserver(([e]) => setVisible(!!e?.isIntersecting), { threshold: 0.01 });
+    o.observe(el);
+    return () => o.disconnect();
+  }, []);
   return (
-    <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0.5, 7.4], fov: 36 }} gl={{ antialias: true, alpha: true }} shadows>
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[3, 5, 4]} intensity={2.2} castShadow />
-      <directionalLight position={[-4, 2, -2]} intensity={0.8} color={TERRA} />
-      <pointLight position={[0, 2, 3]} intensity={6} color="#FFF4E6" />
-      <Rig still={still} />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.22, 0]} receiveShadow>
-        <circleGeometry args={[2.4, 64]} />
-        <shadowMaterial opacity={0.12} />
-      </mesh>
-    </Canvas>
+    <div ref={wrap} className="h-full w-full transition-opacity duration-700" style={{ opacity: ready ? 1 : 0 }} data-scene-ready={ready || undefined}>
+      <Canvas
+        dpr={lowPower ? [1, 1.25] : [1, 1.75]}
+        frameloop={visible && !still ? "always" : "demand"}
+        camera={{ position: [0, 0.5, 9.2], fov: 36 }}
+        gl={{ antialias: !lowPower, alpha: true, powerPreference: "high-performance" }}
+        onCreated={() => requestAnimationFrame(() => setReady(true))}
+      >
+        <ambientLight intensity={0.35} />
+        <directionalLight position={[3, 5, 4]} intensity={1.8} />
+        <directionalLight position={[-4, 2, -2]} intensity={0.7} color={TERRA} />
+        <pointLight position={[0, 2, 3]} intensity={4} color="#FFF4E6" />
+        <Environment resolution={128}>
+          <Lightformer intensity={2.2} position={[0, 5, 2]} scale={[8, 3, 1]} />
+          <Lightformer intensity={1.4} color="#FFE9D6" position={[-5, 1, 1]} rotation-y={Math.PI / 2} scale={[10, 2, 1]} />
+          <Lightformer intensity={0.9} color={SAGE} position={[5, 0, -1]} rotation-y={-Math.PI / 2} scale={[10, 2, 1]} />
+        </Environment>
+        <Rig still={still} />
+        <ContactShadows position={[0, -1.22, 0]} opacity={0.28} scale={6} blur={2.6} far={2} frames={1} />
+      </Canvas>
+    </div>
   );
 }
