@@ -80,12 +80,12 @@ function Home() {
         <StaggerContainer step={70} className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {collections.map((c, i) => (
             <Link key={c.name} to={c.to} className={`group relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl p-6 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift md:min-h-[340px] ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
-              <div className={`absolute inset-0 -z-10 grid ${c.images.length > 1 ? "grid-rows-2" : ""}`}>
+              <div className={`absolute inset-0 -z-10 grid overflow-hidden ${c.images.length > 1 ? "grid-rows-2" : ""}`}>
                 {c.images.map((src, j) => (
-                  <img key={j} src={src} alt="" loading="lazy" decoding="async" style={{ objectPosition: c.pos }} className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]" />
+                  <img key={j} src={src} alt="" loading="lazy" decoding="async" style={{ objectPosition: c.pos }} className={`${"zoom" in c ? "h-[135%]" : "h-full"} w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]`} />
                 ))}
               </div>
-              <div aria-hidden className="absolute inset-0 -z-10 transition-opacity duration-500 group-hover:opacity-90" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${c.tone} 92%, transparent) 0%, color-mix(in oklab, ${c.tone} 55%, transparent) 38%, transparent 72%)` }} />
+              <div aria-hidden className="absolute inset-0 -z-10 transition-opacity duration-500 group-hover:opacity-90" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${c.tone} 92%, transparent) 0%, color-mix(in oklab, ${c.tone} 55%, transparent) 38%, transparent 68%, color-mix(in oklab, ${c.tone} 45%, transparent) 100%)` }} />
               <span className="absolute right-5 top-4 font-serif text-5xl italic opacity-80 [text-shadow:0_2px_12px_oklch(0_0_0/0.35)]">0{i + 1}</span>
               <h3 className="text-3xl leading-tight">{c.name}</h3>
               <p className="mt-1 text-xs opacity-85">{c.copy}</p>

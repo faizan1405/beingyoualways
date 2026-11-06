@@ -80,6 +80,6 @@ export const collections = [
   { name: "Skin Care", copy: "Serums, creams & cleansers", to: "/skincare", images: [productImages("face-serum")[0]], pos: "50% 40%", tone: "var(--primary)" },
   { name: "Hair Care", copy: "Oils, shampoos & masks", to: "/haircare", images: [productImages("shampoo")[0]], pos: "60% 50%", tone: "oklch(0.32 0.04 140)" },
   { name: "De-Tan Care", copy: "Brighten & even out", to: "/de-tan-care", images: [productImages("tomato-face-wash")[0]], pos: "30% 50%", tone: "oklch(0.36 0.07 35)" },
-  { name: "Colour Cosmetics", copy: "Lips, cheeks & base", to: "/colour-cosmetics", images: [productImages("liquid-matte-lipstick")[3]], pos: "50% 22%", tone: "oklch(0.25 0.03 20)" },
-  { name: "Combos", copy: "Complete rituals, better value", to: "/combos", images: [productImages("aloe-vera-gel")[0], productImages("herbal-wax-powder")[0]], pos: "50% 50%", tone: "var(--primary)" },
+  { name: "Colour Cosmetics", copy: "Lips, cheeks & base", to: "/colour-cosmetics", images: [productImages("liquid-matte-lipstick")[3]], pos: "50% 0%", zoom: true, tone: "oklch(0.25 0.03 20)" },
+  { name: "Combos", copy: "Complete rituals, better value", to: "/combos", images: [productImages("aloe-vera-gel")[0], productImages("herbal-wax-powder")[1]], pos: "50% 50%", tone: "var(--primary)" },
 ] as const;
