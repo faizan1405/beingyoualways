@@ -99,6 +99,16 @@ function EditProduct() {
         <div className="space-y-4">
           <Panel title="Images">
             {preview ? <img src={preview} alt="Uploaded preview" className="aspect-[4/5] w-full rounded-md object-cover" /> : <ProductVisual src={p.images?.[0]} shape={p.shape} tint={p.tint} label={p.name || "New product"} className="rounded-md" />}
+            {(p.images?.length ?? 0) > 1 && (
+              <div className="mt-3 grid grid-cols-4 gap-2" aria-label="Choose main image">
+                {p.images!.map((src, i) => (
+                  <button key={src} type="button" title={i === 0 ? "Main image" : "Make main image"} onClick={() => { setPreview(null); up({ images: [src, ...p.images!.filter((x) => x !== src)] }); }}
+                    className={`overflow-hidden rounded border ${i === 0 ? "border-primary ring-2 ring-primary" : "border-border"}`}>
+                    <img src={src} alt="" className="aspect-square w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
             <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground hover:border-primary">
               <Upload className="size-4" /> Upload image (preview only)
               <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPreview(URL.createObjectURL(f)); }} />
