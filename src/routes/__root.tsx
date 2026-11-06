@@ -104,8 +104,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Enables scroll reveals before first paint; skipped for reduced-motion users so content is never hidden. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion-ok')}catch(e){}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
