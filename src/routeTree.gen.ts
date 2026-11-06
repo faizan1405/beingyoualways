@@ -9,50 +9,848 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SiteRouteImport } from './routes/_site'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as SiteAccountRouteImport } from './routes/_site.account'
+import { Route as SiteCartRouteImport } from './routes/_site.cart'
+import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
+import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
+import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteFaqRouteImport } from './routes/_site.faq'
+import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
+import { Route as SiteLoginRouteImport } from './routes/_site.login'
+import { Route as SitePrivacyPolicyRouteImport } from './routes/_site.privacy-policy'
+import { Route as SiteRefundPolicyRouteImport } from './routes/_site.refund-policy'
+import { Route as SiteShippingPolicyRouteImport } from './routes/_site.shipping-policy'
+import { Route as SiteShopRouteImport } from './routes/_site.shop'
+import { Route as SiteSkincareRouteImport } from './routes/_site.skincare'
+import { Route as SiteTermsRouteImport } from './routes/_site.terms'
+import { Route as SiteVerifyOtpRouteImport } from './routes/_site.verify-otp'
+import { Route as SiteWishlistRouteImport } from './routes/_site.wishlist'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAbandonedCartRouteImport } from './routes/admin.abandoned-cart'
+import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
+import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
+import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account.addresses'
+import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.orders'
+import { Route as SiteAccountProfileRouteImport } from './routes/_site.account.profile'
+import { Route as SiteAccountWishlistRouteImport } from './routes/_site.account.wishlist'
+import { Route as SiteProductSlugRouteImport } from './routes/_site.product.$slug'
+import { Route as AdminCustomersIdRouteImport } from './routes/admin.customers_.$id'
+import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders_.$id'
+import { Route as AdminProductsIdRouteImport } from './routes/admin.products_.$id'
+import { Route as SiteAccountOrdersIdRouteImport } from './routes/_site.account_.orders_.$id'
 
-const IndexRoute = IndexRouteImport.update({
+const SiteRoute = SiteRouteImport.update({
+  id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAccountRoute = SiteAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCartRoute = SiteCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCheckoutRoute = SiteCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteColourCosmeticsRoute = SiteColourCosmeticsRouteImport.update({
+  id: '/colour-cosmetics',
+  path: '/colour-cosmetics',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteFaqRoute = SiteFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteHaircareRoute = SiteHaircareRouteImport.update({
+  id: '/haircare',
+  path: '/haircare',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteLoginRoute = SiteLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SitePrivacyPolicyRoute = SitePrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteRefundPolicyRoute = SiteRefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShippingPolicyRoute = SiteShippingPolicyRouteImport.update({
+  id: '/shipping-policy',
+  path: '/shipping-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShopRoute = SiteShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteSkincareRoute = SiteSkincareRouteImport.update({
+  id: '/skincare',
+  path: '/skincare',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteTermsRoute = SiteTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteVerifyOtpRoute = SiteVerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteWishlistRoute = SiteWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => SiteRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAbandonedCartRoute = AdminAbandonedCartRouteImport.update({
+  id: '/abandoned-cart',
+  path: '/abandoned-cart',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChatbotRoute = AdminChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWhatsappRoute = AdminWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AdminRoute,
+} as any)
+const SiteAccountIndexRoute = SiteAccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountAddressesRoute = SiteAccountAddressesRouteImport.update({
+  id: '/addresses',
+  path: '/addresses',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountOrdersRoute = SiteAccountOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountProfileRoute = SiteAccountProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountWishlistRoute = SiteAccountWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
+  id: '/product/$slug',
+  path: '/product/$slug',
+  getParentRoute: () => SiteRoute,
+} as any)
+const AdminCustomersIdRoute = AdminCustomersIdRouteImport.update({
+  id: '/customers_/$id',
+  path: '/customers/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
+  id: '/orders_/$id',
+  path: '/orders/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsIdRoute = AdminProductsIdRouteImport.update({
+  id: '/products_/$id',
+  path: '/products/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
+  id: '/account_/orders_/$id',
+  path: '/account/orders/$id',
+  getParentRoute: () => SiteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof SiteIndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/about': typeof SiteAboutRoute
+  '/account': typeof SiteAccountRouteWithChildren
+  '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
+  '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/contact': typeof SiteContactRoute
+  '/faq': typeof SiteFaqRoute
+  '/haircare': typeof SiteHaircareRoute
+  '/login': typeof SiteLoginRoute
+  '/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/refund-policy': typeof SiteRefundPolicyRoute
+  '/shipping-policy': typeof SiteShippingPolicyRoute
+  '/shop': typeof SiteShopRoute
+  '/skincare': typeof SiteSkincareRoute
+  '/terms': typeof SiteTermsRoute
+  '/verify-otp': typeof SiteVerifyOtpRoute
+  '/wishlist': typeof SiteWishlistRoute
+  '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/': typeof AdminIndexRoute
+  '/account/addresses': typeof SiteAccountAddressesRoute
+  '/account/orders': typeof SiteAccountOrdersRoute
+  '/account/profile': typeof SiteAccountProfileRoute
+  '/account/wishlist': typeof SiteAccountWishlistRoute
+  '/product/$slug': typeof SiteProductSlugRoute
+  '/admin/customers/$id': typeof AdminCustomersIdRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/admin/products/$id': typeof AdminProductsIdRoute
+  '/account/': typeof SiteAccountIndexRoute
+  '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/about': typeof SiteAboutRoute
+  '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
+  '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/contact': typeof SiteContactRoute
+  '/faq': typeof SiteFaqRoute
+  '/haircare': typeof SiteHaircareRoute
+  '/login': typeof SiteLoginRoute
+  '/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/refund-policy': typeof SiteRefundPolicyRoute
+  '/shipping-policy': typeof SiteShippingPolicyRoute
+  '/shop': typeof SiteShopRoute
+  '/skincare': typeof SiteSkincareRoute
+  '/terms': typeof SiteTermsRoute
+  '/verify-otp': typeof SiteVerifyOtpRoute
+  '/wishlist': typeof SiteWishlistRoute
+  '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/': typeof SiteIndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/account/addresses': typeof SiteAccountAddressesRoute
+  '/account/orders': typeof SiteAccountOrdersRoute
+  '/account/profile': typeof SiteAccountProfileRoute
+  '/account/wishlist': typeof SiteAccountWishlistRoute
+  '/product/$slug': typeof SiteProductSlugRoute
+  '/admin/customers/$id': typeof AdminCustomersIdRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/admin/products/$id': typeof AdminProductsIdRoute
+  '/account': typeof SiteAccountIndexRoute
+  '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_site': typeof SiteRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
+  '/_site/about': typeof SiteAboutRoute
+  '/_site/account': typeof SiteAccountRouteWithChildren
+  '/_site/cart': typeof SiteCartRoute
+  '/_site/checkout': typeof SiteCheckoutRoute
+  '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/_site/contact': typeof SiteContactRoute
+  '/_site/faq': typeof SiteFaqRoute
+  '/_site/haircare': typeof SiteHaircareRoute
+  '/_site/login': typeof SiteLoginRoute
+  '/_site/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/_site/refund-policy': typeof SiteRefundPolicyRoute
+  '/_site/shipping-policy': typeof SiteShippingPolicyRoute
+  '/_site/shop': typeof SiteShopRoute
+  '/_site/skincare': typeof SiteSkincareRoute
+  '/_site/terms': typeof SiteTermsRoute
+  '/_site/verify-otp': typeof SiteVerifyOtpRoute
+  '/_site/wishlist': typeof SiteWishlistRoute
+  '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/_site/': typeof SiteIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/_site/account/addresses': typeof SiteAccountAddressesRoute
+  '/_site/account/orders': typeof SiteAccountOrdersRoute
+  '/_site/account/profile': typeof SiteAccountProfileRoute
+  '/_site/account/wishlist': typeof SiteAccountWishlistRoute
+  '/_site/product/$slug': typeof SiteProductSlugRoute
+  '/admin/customers_/$id': typeof AdminCustomersIdRoute
+  '/admin/orders_/$id': typeof AdminOrdersIdRoute
+  '/admin/products_/$id': typeof AdminProductsIdRoute
+  '/_site/account/': typeof SiteAccountIndexRoute
+  '/_site/account_/orders_/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/about'
+    | '/account'
+    | '/cart'
+    | '/checkout'
+    | '/colour-cosmetics'
+    | '/contact'
+    | '/faq'
+    | '/haircare'
+    | '/login'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-policy'
+    | '/shop'
+    | '/skincare'
+    | '/terms'
+    | '/verify-otp'
+    | '/wishlist'
+    | '/admin/abandoned-cart'
+    | '/admin/chatbot'
+    | '/admin/customers'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/settings'
+    | '/admin/whatsapp'
+    | '/admin/'
+    | '/account/addresses'
+    | '/account/orders'
+    | '/account/profile'
+    | '/account/wishlist'
+    | '/product/$slug'
+    | '/admin/customers/$id'
+    | '/admin/orders/$id'
+    | '/admin/products/$id'
+    | '/account/'
+    | '/account/orders/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/about'
+    | '/cart'
+    | '/checkout'
+    | '/colour-cosmetics'
+    | '/contact'
+    | '/faq'
+    | '/haircare'
+    | '/login'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-policy'
+    | '/shop'
+    | '/skincare'
+    | '/terms'
+    | '/verify-otp'
+    | '/wishlist'
+    | '/admin/abandoned-cart'
+    | '/admin/chatbot'
+    | '/admin/customers'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/settings'
+    | '/admin/whatsapp'
+    | '/'
+    | '/admin'
+    | '/account/addresses'
+    | '/account/orders'
+    | '/account/profile'
+    | '/account/wishlist'
+    | '/product/$slug'
+    | '/admin/customers/$id'
+    | '/admin/orders/$id'
+    | '/admin/products/$id'
+    | '/account'
+    | '/account/orders/$id'
+  id:
+    | '__root__'
+    | '/_site'
+    | '/admin'
+    | '/_site/about'
+    | '/_site/account'
+    | '/_site/cart'
+    | '/_site/checkout'
+    | '/_site/colour-cosmetics'
+    | '/_site/contact'
+    | '/_site/faq'
+    | '/_site/haircare'
+    | '/_site/login'
+    | '/_site/privacy-policy'
+    | '/_site/refund-policy'
+    | '/_site/shipping-policy'
+    | '/_site/shop'
+    | '/_site/skincare'
+    | '/_site/terms'
+    | '/_site/verify-otp'
+    | '/_site/wishlist'
+    | '/admin/abandoned-cart'
+    | '/admin/chatbot'
+    | '/admin/customers'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/settings'
+    | '/admin/whatsapp'
+    | '/_site/'
+    | '/admin/'
+    | '/_site/account/addresses'
+    | '/_site/account/orders'
+    | '/_site/account/profile'
+    | '/_site/account/wishlist'
+    | '/_site/product/$slug'
+    | '/admin/customers_/$id'
+    | '/admin/orders_/$id'
+    | '/admin/products_/$id'
+    | '/_site/account/'
+    | '/_site/account_/orders_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  SiteRoute: typeof SiteRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_site': {
+      id: '/_site'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_site/': {
+      id: '/_site/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/account': {
+      id: '/_site/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof SiteAccountRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/cart': {
+      id: '/_site/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof SiteCartRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/checkout': {
+      id: '/_site/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof SiteCheckoutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/colour-cosmetics': {
+      id: '/_site/colour-cosmetics'
+      path: '/colour-cosmetics'
+      fullPath: '/colour-cosmetics'
+      preLoaderRoute: typeof SiteColourCosmeticsRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/faq': {
+      id: '/_site/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof SiteFaqRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/haircare': {
+      id: '/_site/haircare'
+      path: '/haircare'
+      fullPath: '/haircare'
+      preLoaderRoute: typeof SiteHaircareRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/login': {
+      id: '/_site/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof SiteLoginRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/privacy-policy': {
+      id: '/_site/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof SitePrivacyPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/refund-policy': {
+      id: '/_site/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof SiteRefundPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shipping-policy': {
+      id: '/_site/shipping-policy'
+      path: '/shipping-policy'
+      fullPath: '/shipping-policy'
+      preLoaderRoute: typeof SiteShippingPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shop': {
+      id: '/_site/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof SiteShopRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/skincare': {
+      id: '/_site/skincare'
+      path: '/skincare'
+      fullPath: '/skincare'
+      preLoaderRoute: typeof SiteSkincareRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/terms': {
+      id: '/_site/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof SiteTermsRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/verify-otp': {
+      id: '/_site/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof SiteVerifyOtpRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/wishlist': {
+      id: '/_site/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof SiteWishlistRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/abandoned-cart': {
+      id: '/admin/abandoned-cart'
+      path: '/abandoned-cart'
+      fullPath: '/admin/abandoned-cart'
+      preLoaderRoute: typeof AdminAbandonedCartRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chatbot': {
+      id: '/admin/chatbot'
+      path: '/chatbot'
+      fullPath: '/admin/chatbot'
+      preLoaderRoute: typeof AdminChatbotRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/whatsapp': {
+      id: '/admin/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/admin/whatsapp'
+      preLoaderRoute: typeof AdminWhatsappRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_site/account/': {
+      id: '/_site/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof SiteAccountIndexRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/addresses': {
+      id: '/_site/account/addresses'
+      path: '/addresses'
+      fullPath: '/account/addresses'
+      preLoaderRoute: typeof SiteAccountAddressesRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/orders': {
+      id: '/_site/account/orders'
+      path: '/orders'
+      fullPath: '/account/orders'
+      preLoaderRoute: typeof SiteAccountOrdersRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/profile': {
+      id: '/_site/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof SiteAccountProfileRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/wishlist': {
+      id: '/_site/account/wishlist'
+      path: '/wishlist'
+      fullPath: '/account/wishlist'
+      preLoaderRoute: typeof SiteAccountWishlistRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/product/$slug': {
+      id: '/_site/product/$slug'
+      path: '/product/$slug'
+      fullPath: '/product/$slug'
+      preLoaderRoute: typeof SiteProductSlugRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/admin/customers_/$id': {
+      id: '/admin/customers_/$id'
+      path: '/customers/$id'
+      fullPath: '/admin/customers/$id'
+      preLoaderRoute: typeof AdminCustomersIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders_/$id': {
+      id: '/admin/orders_/$id'
+      path: '/orders/$id'
+      fullPath: '/admin/orders/$id'
+      preLoaderRoute: typeof AdminOrdersIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products_/$id': {
+      id: '/admin/products_/$id'
+      path: '/products/$id'
+      fullPath: '/admin/products/$id'
+      preLoaderRoute: typeof AdminProductsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_site/account_/orders_/$id': {
+      id: '/_site/account_/orders_/$id'
+      path: '/account/orders/$id'
+      fullPath: '/account/orders/$id'
+      preLoaderRoute: typeof SiteAccountOrdersIdRouteImport
+      parentRoute: typeof SiteRoute
     }
   }
 }
 
+interface SiteAccountRouteChildren {
+  SiteAccountAddressesRoute: typeof SiteAccountAddressesRoute
+  SiteAccountOrdersRoute: typeof SiteAccountOrdersRoute
+  SiteAccountProfileRoute: typeof SiteAccountProfileRoute
+  SiteAccountWishlistRoute: typeof SiteAccountWishlistRoute
+  SiteAccountIndexRoute: typeof SiteAccountIndexRoute
+}
+
+const SiteAccountRouteChildren: SiteAccountRouteChildren = {
+  SiteAccountAddressesRoute: SiteAccountAddressesRoute,
+  SiteAccountOrdersRoute: SiteAccountOrdersRoute,
+  SiteAccountProfileRoute: SiteAccountProfileRoute,
+  SiteAccountWishlistRoute: SiteAccountWishlistRoute,
+  SiteAccountIndexRoute: SiteAccountIndexRoute,
+}
+
+const SiteAccountRouteWithChildren = SiteAccountRoute._addFileChildren(
+  SiteAccountRouteChildren,
+)
+
+interface SiteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
+  SiteAccountRoute: typeof SiteAccountRouteWithChildren
+  SiteCartRoute: typeof SiteCartRoute
+  SiteCheckoutRoute: typeof SiteCheckoutRoute
+  SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
+  SiteContactRoute: typeof SiteContactRoute
+  SiteFaqRoute: typeof SiteFaqRoute
+  SiteHaircareRoute: typeof SiteHaircareRoute
+  SiteLoginRoute: typeof SiteLoginRoute
+  SitePrivacyPolicyRoute: typeof SitePrivacyPolicyRoute
+  SiteRefundPolicyRoute: typeof SiteRefundPolicyRoute
+  SiteShippingPolicyRoute: typeof SiteShippingPolicyRoute
+  SiteShopRoute: typeof SiteShopRoute
+  SiteSkincareRoute: typeof SiteSkincareRoute
+  SiteTermsRoute: typeof SiteTermsRoute
+  SiteVerifyOtpRoute: typeof SiteVerifyOtpRoute
+  SiteWishlistRoute: typeof SiteWishlistRoute
+  SiteIndexRoute: typeof SiteIndexRoute
+  SiteProductSlugRoute: typeof SiteProductSlugRoute
+  SiteAccountOrdersIdRoute: typeof SiteAccountOrdersIdRoute
+}
+
+const SiteRouteChildren: SiteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
+  SiteAccountRoute: SiteAccountRouteWithChildren,
+  SiteCartRoute: SiteCartRoute,
+  SiteCheckoutRoute: SiteCheckoutRoute,
+  SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
+  SiteContactRoute: SiteContactRoute,
+  SiteFaqRoute: SiteFaqRoute,
+  SiteHaircareRoute: SiteHaircareRoute,
+  SiteLoginRoute: SiteLoginRoute,
+  SitePrivacyPolicyRoute: SitePrivacyPolicyRoute,
+  SiteRefundPolicyRoute: SiteRefundPolicyRoute,
+  SiteShippingPolicyRoute: SiteShippingPolicyRoute,
+  SiteShopRoute: SiteShopRoute,
+  SiteSkincareRoute: SiteSkincareRoute,
+  SiteTermsRoute: SiteTermsRoute,
+  SiteVerifyOtpRoute: SiteVerifyOtpRoute,
+  SiteWishlistRoute: SiteWishlistRoute,
+  SiteIndexRoute: SiteIndexRoute,
+  SiteProductSlugRoute: SiteProductSlugRoute,
+  SiteAccountOrdersIdRoute: SiteAccountOrdersIdRoute,
+}
+
+const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
+
+interface AdminRouteChildren {
+  AdminAbandonedCartRoute: typeof AdminAbandonedCartRoute
+  AdminChatbotRoute: typeof AdminChatbotRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminWhatsappRoute: typeof AdminWhatsappRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminCustomersIdRoute: typeof AdminCustomersIdRoute
+  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
+  AdminProductsIdRoute: typeof AdminProductsIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAbandonedCartRoute: AdminAbandonedCartRoute,
+  AdminChatbotRoute: AdminChatbotRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminWhatsappRoute: AdminWhatsappRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminCustomersIdRoute: AdminCustomersIdRoute,
+  AdminOrdersIdRoute: AdminOrdersIdRoute,
+  AdminProductsIdRoute: AdminProductsIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  SiteRoute: SiteRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
