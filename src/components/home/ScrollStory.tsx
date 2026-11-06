@@ -27,8 +27,9 @@ export function stageAt(p: number, n = stages.length) {
 
 /** Section progress while it passes through the viewport (normal flow, no pinning). Exported for tests. */
 export function sectionProgress(top: number, height: number, vh: number) {
-  // starts when the section top reaches 25% down the screen, ends when its bottom reaches 75%
-  return clamp((vh * 0.25 - top) / Math.max(1, height - vh * 0.5));
+  // raw = 0 as the section enters from below, 1 as it leaves at the top; the journey uses the middle 20–80%
+  const raw = (vh - top) / Math.max(1, height + vh);
+  return clamp((raw - 0.2) / 0.6);
 }
 
 /** "The Beauty of Being You" — four stages slide right→left as the page scrolls vertically. No scroll locking or wheel interception. */
@@ -60,7 +61,8 @@ export function ScrollStory() {
     const target = Math.min(stages.length - 1, Math.max(0, n)) / (stages.length - 1);
     const vh = window.innerHeight;
     const top = el.getBoundingClientRect().top + window.scrollY;
-    const y = top - vh * 0.25 + target * (el.offsetHeight - vh * 0.5);
+    const raw = 0.2 + target * 0.6;
+    const y = top - vh + raw * (el.offsetHeight + vh);
     window.scrollTo({ top: y, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   };
 
