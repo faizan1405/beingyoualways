@@ -64,6 +64,7 @@ export const navigationConfig = {
     { to: "/combos", label: "Combos" },
   ],
   information: [
+    { to: "/explore-concerns", label: "Explore by Concern" },
     { to: "/about", label: "About Us" },
     { to: "/contact", label: "Contact Us" },
     { to: "/faq", label: "FAQs" },

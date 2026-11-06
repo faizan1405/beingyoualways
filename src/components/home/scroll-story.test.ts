@@ -13,3 +13,23 @@ describe("scroll story stages", () => {
     expect(stageAt(0.05).active).toBe(0);
   });
 });
+
+import { sectionProgress } from "./ScrollStory";
+import { concernProgress, momentAt } from "../concerns/ConcernStory";
+
+describe("horizontal story progress", () => {
+  it("is 0 before the section is reached and 1 after it has passed", () => {
+    expect(sectionProgress(800, 900, 800)).toBe(0);
+    expect(sectionProgress(-900, 900, 800)).toBe(1);
+  });
+});
+
+describe("concern transformation", () => {
+  it("starts at Before and ends at After", () => {
+    expect(concernProgress(800, 1000, 800)).toBe(0);
+    expect(concernProgress(-500, 1000, 800)).toBe(1);
+    expect(momentAt(0)).toBe(0);
+    expect(momentAt(0.5)).toBe(1);
+    expect(momentAt(1)).toBe(2);
+  });
+});
