@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
+import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
+import { Route as SiteShopRouteImport } from './routes/_site.shop'
+import { Route as SiteSkincareRouteImport } from './routes/_site.skincare'
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
@@ -21,24 +25,63 @@ const SiteIndexRoute = SiteIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteColourCosmeticsRoute = SiteColourCosmeticsRouteImport.update({
+  id: '/colour-cosmetics',
+  path: '/colour-cosmetics',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteHaircareRoute = SiteHaircareRouteImport.update({
+  id: '/haircare',
+  path: '/haircare',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShopRoute = SiteShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteSkincareRoute = SiteSkincareRouteImport.update({
+  id: '/skincare',
+  path: '/skincare',
+  getParentRoute: () => SiteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/haircare': typeof SiteHaircareRoute
+  '/shop': typeof SiteShopRoute
+  '/skincare': typeof SiteSkincareRoute
 }
 export interface FileRoutesByTo {
+  '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/haircare': typeof SiteHaircareRoute
+  '/shop': typeof SiteShopRoute
+  '/skincare': typeof SiteSkincareRoute
   '/': typeof SiteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/_site/haircare': typeof SiteHaircareRoute
+  '/_site/shop': typeof SiteShopRoute
+  '/_site/skincare': typeof SiteSkincareRoute
   '/_site/': typeof SiteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/colour-cosmetics' | '/haircare' | '/shop' | '/skincare'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/_site' | '/_site/'
+  to: '/colour-cosmetics' | '/haircare' | '/shop' | '/skincare' | '/'
+  id:
+    | '__root__'
+    | '/_site'
+    | '/_site/colour-cosmetics'
+    | '/_site/haircare'
+    | '/_site/shop'
+    | '/_site/skincare'
+    | '/_site/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -61,14 +104,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteIndexRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/colour-cosmetics': {
+      id: '/_site/colour-cosmetics'
+      path: '/colour-cosmetics'
+      fullPath: '/colour-cosmetics'
+      preLoaderRoute: typeof SiteColourCosmeticsRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/haircare': {
+      id: '/_site/haircare'
+      path: '/haircare'
+      fullPath: '/haircare'
+      preLoaderRoute: typeof SiteHaircareRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shop': {
+      id: '/_site/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof SiteShopRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/skincare': {
+      id: '/_site/skincare'
+      path: '/skincare'
+      fullPath: '/skincare'
+      preLoaderRoute: typeof SiteSkincareRouteImport
+      parentRoute: typeof SiteRoute
+    }
   }
 }
 
 interface SiteRouteChildren {
+  SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
+  SiteHaircareRoute: typeof SiteHaircareRoute
+  SiteShopRoute: typeof SiteShopRoute
+  SiteSkincareRoute: typeof SiteSkincareRoute
   SiteIndexRoute: typeof SiteIndexRoute
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
+  SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
+  SiteHaircareRoute: SiteHaircareRoute,
+  SiteShopRoute: SiteShopRoute,
+  SiteSkincareRoute: SiteSkincareRoute,
   SiteIndexRoute: SiteIndexRoute,
 }
 
