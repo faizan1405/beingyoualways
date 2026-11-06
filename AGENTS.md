@@ -33,5 +33,5 @@ use the editor.
 - Storefront is frontend-only; pages read data via `src/services/*Service.ts`, never mock arrays directly — so services can be swapped for Hostinger REST calls.
 - Storefront routes live under the `_site` pathless layout (header/footer); `/admin/*` has its own shell — keeps admin chrome separate.
 - Homepage hero uses the BeforeAfter image slider (AI images allowed there only, by user approval); no 3D in the hero.
-- Product imagery uses the replaceable `ProductVisual` SVG placeholder until real photos arrive; do not generate AI images.
+- Product photos are registered by slug in `src/lib/product-images.ts` (files `src/assets/products/<slug>-<n>.webp`) and passed via `ProductVisual src`; the SVG drawing is only the fallback — one source so every page shows the same photo.
 - Scroll/text/image reveals use `src/components/motion/Reveal.tsx` (one shared IntersectionObserver + one parallax loop) with CSS in `styles.css`; content is hidden only under `html.motion-ok`, so reduced-motion users and no-JS still see everything. Use `motion/react` only for enter/exit (cart lines, gallery, price swaps).
