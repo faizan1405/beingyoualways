@@ -32,8 +32,8 @@ function AdminLayout() {
     <nav aria-label="Admin" className="flex flex-col gap-1 p-4">
       {nav.map(({ to, label, I, ...rest }) => (
         <Link key={to} to={to} onClick={() => setOpen(false)} activeOptions={{ exact: "exact" in rest }}
-          className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-sidebar-foreground/75 transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          activeProps={{ className: "!bg-sidebar-accent !text-sidebar-accent-foreground font-semibold" }}>
+          className="flex items-center gap-3 rounded-md border-l-2 border-transparent px-3 py-2.5 text-sm text-sidebar-foreground/75 transition-all duration-200 hover:translate-x-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          activeProps={{ className: "!bg-sidebar-accent !text-sidebar-accent-foreground !border-sidebar-primary font-semibold" }}>
           <I className="size-4" />{label}
         </Link>
       ))}
@@ -50,8 +50,8 @@ function AdminLayout() {
       </aside>
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-foreground/40" onClick={() => setOpen(false)} />
-          <aside className="relative h-full w-72 bg-sidebar">
+          <div className="animate-in fade-in absolute inset-0 bg-foreground/40 duration-300" onClick={() => setOpen(false)} />
+          <aside className="animate-in slide-in-from-left relative h-full w-72 bg-sidebar duration-300">
             <button aria-label="Close menu" className="absolute right-3 top-4 text-sidebar-foreground" onClick={() => setOpen(false)}><X /></button>
             <p className="px-6 py-6 font-serif text-2xl text-sidebar-foreground">Being You</p>
             {side}

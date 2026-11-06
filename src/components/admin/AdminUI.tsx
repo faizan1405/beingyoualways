@@ -18,7 +18,7 @@ export function AdminPage({ title, subtitle, actions, children }: { title: strin
 
 export function Panel({ title, children, className, action }: { title?: string | undefined; children: ReactNode; className?: string | undefined; action?: ReactNode | undefined}) {
   return (
-    <section className={cn("rounded-xl border border-border bg-card p-5 shadow-soft", className)}>
+    <section className={cn("animate-in fade-in slide-in-from-bottom-2 rounded-xl border border-border bg-card p-5 shadow-soft duration-500 transition-shadow hover:shadow-lift", className)}>
       {title && <div className="mb-4 flex items-center justify-between"><h2 className="font-sans text-sm font-semibold uppercase tracking-wider">{title}</h2>{action}</div>}
       {children}
     </section>
@@ -41,7 +41,7 @@ export function Table({ head, children }: { head: string[]; children: ReactNode 
     <div className="overflow-x-auto">
       <table className="w-full min-w-[560px] text-sm">
         <thead><tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">{head.map((h) => <th key={h} className="px-3 py-3 font-semibold">{h}</th>)}</tr></thead>
-        <tbody className="divide-y divide-border">{children}</tbody>
+        <tbody className="divide-y divide-border [&>tr]:transition-colors [&>tr]:duration-150 [&>tr:hover]:bg-secondary/50">{children}</tbody>
       </table>
     </div>
   );
