@@ -11,14 +11,21 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as SiteAccountRouteImport } from './routes/_site.account'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
+import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteFaqRouteImport } from './routes/_site.faq'
 import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
 import { Route as SiteLoginRouteImport } from './routes/_site.login'
+import { Route as SitePrivacyPolicyRouteImport } from './routes/_site.privacy-policy'
+import { Route as SiteRefundPolicyRouteImport } from './routes/_site.refund-policy'
+import { Route as SiteShippingPolicyRouteImport } from './routes/_site.shipping-policy'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as SiteSkincareRouteImport } from './routes/_site.skincare'
+import { Route as SiteTermsRouteImport } from './routes/_site.terms'
 import { Route as SiteVerifyOtpRouteImport } from './routes/_site.verify-otp'
 import { Route as SiteWishlistRouteImport } from './routes/_site.wishlist'
 import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
@@ -36,6 +43,11 @@ const SiteRoute = SiteRouteImport.update({
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteAccountRoute = SiteAccountRouteImport.update({
@@ -58,6 +70,16 @@ const SiteColourCosmeticsRoute = SiteColourCosmeticsRouteImport.update({
   path: '/colour-cosmetics',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteFaqRoute = SiteFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteHaircareRoute = SiteHaircareRouteImport.update({
   id: '/haircare',
   path: '/haircare',
@@ -68,6 +90,21 @@ const SiteLoginRoute = SiteLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => SiteRoute,
 } as any)
+const SitePrivacyPolicyRoute = SitePrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteRefundPolicyRoute = SiteRefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShippingPolicyRoute = SiteShippingPolicyRouteImport.update({
+  id: '/shipping-policy',
+  path: '/shipping-policy',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteShopRoute = SiteShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -76,6 +113,11 @@ const SiteShopRoute = SiteShopRouteImport.update({
 const SiteSkincareRoute = SiteSkincareRouteImport.update({
   id: '/skincare',
   path: '/skincare',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteTermsRoute = SiteTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteVerifyOtpRoute = SiteVerifyOtpRouteImport.update({
@@ -126,14 +168,21 @@ const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/about': typeof SiteAboutRoute
   '/account': typeof SiteAccountRouteWithChildren
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/contact': typeof SiteContactRoute
+  '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
+  '/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/refund-policy': typeof SiteRefundPolicyRoute
+  '/shipping-policy': typeof SiteShippingPolicyRoute
   '/shop': typeof SiteShopRoute
   '/skincare': typeof SiteSkincareRoute
+  '/terms': typeof SiteTermsRoute
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
@@ -145,13 +194,20 @@ export interface FileRoutesByFullPath {
   '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesByTo {
+  '/about': typeof SiteAboutRoute
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/contact': typeof SiteContactRoute
+  '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
+  '/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/refund-policy': typeof SiteRefundPolicyRoute
+  '/shipping-policy': typeof SiteShippingPolicyRoute
   '/shop': typeof SiteShopRoute
   '/skincare': typeof SiteSkincareRoute
+  '/terms': typeof SiteTermsRoute
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
   '/': typeof SiteIndexRoute
@@ -166,14 +222,21 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/_site/about': typeof SiteAboutRoute
   '/_site/account': typeof SiteAccountRouteWithChildren
   '/_site/cart': typeof SiteCartRoute
   '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/_site/contact': typeof SiteContactRoute
+  '/_site/faq': typeof SiteFaqRoute
   '/_site/haircare': typeof SiteHaircareRoute
   '/_site/login': typeof SiteLoginRoute
+  '/_site/privacy-policy': typeof SitePrivacyPolicyRoute
+  '/_site/refund-policy': typeof SiteRefundPolicyRoute
+  '/_site/shipping-policy': typeof SiteShippingPolicyRoute
   '/_site/shop': typeof SiteShopRoute
   '/_site/skincare': typeof SiteSkincareRoute
+  '/_site/terms': typeof SiteTermsRoute
   '/_site/verify-otp': typeof SiteVerifyOtpRoute
   '/_site/wishlist': typeof SiteWishlistRoute
   '/_site/': typeof SiteIndexRoute
@@ -189,14 +252,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/account'
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
+    | '/contact'
+    | '/faq'
     | '/haircare'
     | '/login'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-policy'
     | '/shop'
     | '/skincare'
+    | '/terms'
     | '/verify-otp'
     | '/wishlist'
     | '/account/addresses'
@@ -208,13 +278,20 @@ export interface FileRouteTypes {
     | '/account/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/about'
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
+    | '/contact'
+    | '/faq'
     | '/haircare'
     | '/login'
+    | '/privacy-policy'
+    | '/refund-policy'
+    | '/shipping-policy'
     | '/shop'
     | '/skincare'
+    | '/terms'
     | '/verify-otp'
     | '/wishlist'
     | '/'
@@ -228,14 +305,21 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_site'
+    | '/_site/about'
     | '/_site/account'
     | '/_site/cart'
     | '/_site/checkout'
     | '/_site/colour-cosmetics'
+    | '/_site/contact'
+    | '/_site/faq'
     | '/_site/haircare'
     | '/_site/login'
+    | '/_site/privacy-policy'
+    | '/_site/refund-policy'
+    | '/_site/shipping-policy'
     | '/_site/shop'
     | '/_site/skincare'
+    | '/_site/terms'
     | '/_site/verify-otp'
     | '/_site/wishlist'
     | '/_site/'
@@ -268,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteIndexRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/account': {
       id: '/_site/account'
       path: '/account'
@@ -296,6 +387,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteColourCosmeticsRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/faq': {
+      id: '/_site/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof SiteFaqRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/haircare': {
       id: '/_site/haircare'
       path: '/haircare'
@@ -310,6 +415,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteLoginRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/privacy-policy': {
+      id: '/_site/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof SitePrivacyPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/refund-policy': {
+      id: '/_site/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof SiteRefundPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shipping-policy': {
+      id: '/_site/shipping-policy'
+      path: '/shipping-policy'
+      fullPath: '/shipping-policy'
+      preLoaderRoute: typeof SiteShippingPolicyRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/shop': {
       id: '/_site/shop'
       path: '/shop'
@@ -322,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/skincare'
       fullPath: '/skincare'
       preLoaderRoute: typeof SiteSkincareRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/terms': {
+      id: '/_site/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof SiteTermsRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/verify-otp': {
@@ -411,14 +544,21 @@ const SiteAccountRouteWithChildren = SiteAccountRoute._addFileChildren(
 )
 
 interface SiteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
   SiteAccountRoute: typeof SiteAccountRouteWithChildren
   SiteCartRoute: typeof SiteCartRoute
   SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
+  SiteContactRoute: typeof SiteContactRoute
+  SiteFaqRoute: typeof SiteFaqRoute
   SiteHaircareRoute: typeof SiteHaircareRoute
   SiteLoginRoute: typeof SiteLoginRoute
+  SitePrivacyPolicyRoute: typeof SitePrivacyPolicyRoute
+  SiteRefundPolicyRoute: typeof SiteRefundPolicyRoute
+  SiteShippingPolicyRoute: typeof SiteShippingPolicyRoute
   SiteShopRoute: typeof SiteShopRoute
   SiteSkincareRoute: typeof SiteSkincareRoute
+  SiteTermsRoute: typeof SiteTermsRoute
   SiteVerifyOtpRoute: typeof SiteVerifyOtpRoute
   SiteWishlistRoute: typeof SiteWishlistRoute
   SiteIndexRoute: typeof SiteIndexRoute
@@ -427,14 +567,21 @@ interface SiteRouteChildren {
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
   SiteAccountRoute: SiteAccountRouteWithChildren,
   SiteCartRoute: SiteCartRoute,
   SiteCheckoutRoute: SiteCheckoutRoute,
   SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
+  SiteContactRoute: SiteContactRoute,
+  SiteFaqRoute: SiteFaqRoute,
   SiteHaircareRoute: SiteHaircareRoute,
   SiteLoginRoute: SiteLoginRoute,
+  SitePrivacyPolicyRoute: SitePrivacyPolicyRoute,
+  SiteRefundPolicyRoute: SiteRefundPolicyRoute,
+  SiteShippingPolicyRoute: SiteShippingPolicyRoute,
   SiteShopRoute: SiteShopRoute,
   SiteSkincareRoute: SiteSkincareRoute,
+  SiteTermsRoute: SiteTermsRoute,
   SiteVerifyOtpRoute: SiteVerifyOtpRoute,
   SiteWishlistRoute: SiteWishlistRoute,
   SiteIndexRoute: SiteIndexRoute,
