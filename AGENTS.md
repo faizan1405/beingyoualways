@@ -32,10 +32,11 @@ use the editor.
 ## Project rules
 - Storefront is frontend-only; pages read data via `src/services/*Service.ts`, never mock arrays directly — so services can be swapped for Hostinger REST calls.
 - Storefront routes live under the `_site` pathless layout (header/footer); `/admin/*` has its own shell — keeps admin chrome separate.
-- Homepage hero uses the BeforeAfter image slider (AI images allowed there only, by user approval); no 3D in the hero.
+- Homepage hero is a scroll-controlled crossfade of two aligned Before/After photos in `Hero.tsx` (sticky panel, page scroll drives it; no slider, no autoplay; AI images allowed there only, by user approval); no 3D in the hero.
 - Catalogue data lives in `src/lib/catalogue.json` (imported from beingyoualways.com) mapped in `mock-data.ts`; product photos are registered by slug in `src/lib/product-images.ts` (`src/assets/products/<slug>-<n>.webp`) and passed via `ProductVisual src` — one source so every page matches.
 - Scroll/text/image reveals use `src/components/motion/Reveal.tsx` (one shared IntersectionObserver + one parallax loop) with CSS in `styles.css`; content is hidden only under `html.motion-ok`, so reduced-motion users and no-JS still see everything. Use `motion/react` only for enter/exit (cart lines, gallery, price swaps).
 - Public testimonials come only from `testimonialService` entries that are verified + consented + published (managed at `/admin/testimonials`); never hardcode review copy — avoids fabricated reviews.
 - Concern and curated-collection (De-Tan, Combos) membership lives in `src/lib/concerns.ts`; empty lists render the shared empty state — never add products just to fill a page.
 - Verified business facts (contact, founder, about copy, nav, policy links, shipping-confirmed flag) live in `src/config/business.ts`; components import from it, never hardcode — one place to edit and later swap for the Hostinger API.
 - Sign-in providers go through `src/services/authService.ts` and checkout payment choice through `src/components/shop/PaymentMethods.tsx`; neither may fake a session, payment or order — one place to wire Hostinger OAuth/Razorpay later.
+- Policy pages render text migrated verbatim from beingyoualways.com in `src/content/policies.json`; review flags and legal-approval status live in `src/content/policies.ts` — never rewrite legal wording or mark approved without the client.
