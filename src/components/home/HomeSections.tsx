@@ -40,6 +40,15 @@ export function ShopByConcern() {
           </Link>
         ); })}
       </StaggerContainer>
+      <RevealOnScroll as="div" kind="fade" className="mt-10 flex flex-col items-center justify-between gap-5 rounded-3xl bg-secondary p-6 text-center md:flex-row md:p-8 md:text-left">
+        <div>
+          <p className="eyebrow">New · Explore by concern</p>
+          <p className="mt-2 font-serif text-2xl md:text-3xl">See pigmentation, acne and haircare stories unfold as you scroll.</p>
+        </div>
+        <Link to="/explore-concerns" className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
+          Explore by Concern <ArrowRight className="arrow-nudge size-4" />
+        </Link>
+      </RevealOnScroll>
     </section>
   );
 }
