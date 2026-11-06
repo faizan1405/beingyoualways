@@ -42,7 +42,7 @@ export function Hero() {
 
   return (
     <section ref={ref} className="bg-hero relative" aria-label="Introduction">
-      <div className="flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden md:min-h-[calc(100vh-4rem)]`}>
+      <div className="flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden md:min-h-[calc(100vh-4rem)]">
         <div className="container-lux grid w-full items-center gap-6 py-6 md:grid-cols-2 md:gap-10 md:py-8">
           <div className="order-2 text-center md:order-1 md:text-left">
             <p className="eyebrow hero-in" style={{ animationDelay: "100ms" }}>Plant-based beauty · Made in India</p>
