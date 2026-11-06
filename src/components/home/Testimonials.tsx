@@ -1,6 +1,8 @@
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { MessageSquareQuote, Quote, Star } from "lucide-react";
+import { MessageSquareQuote, Play, Quote, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { productService } from "@/services/productService";
 
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 import { testimonialCategories, testimonialService, type TestimonialCategory } from "@/services/testimonialService";
@@ -14,6 +16,7 @@ export function Testimonials() {
   const [picked, setTab] = useState<TestimonialCategory>("Skin");
   const tab = tabs.includes(picked) ? picked : (tabs[0] ?? picked);
   const items = list.filter((t) => t.category === tab);
+  const [playing, setPlaying] = useState<(typeof list)[number] | null>(null);
 
   return (
     <section className="bg-secondary">
@@ -44,13 +47,19 @@ export function Testimonials() {
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {items.map((s) => (
                   <figure key={s.id} className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-                    {s.photo && <img src={s.photo} alt={`${s.name}, customer`} loading="lazy" className="mb-5 aspect-[4/3] w-full rounded-xl object-cover object-top" />}
+                    {s.type === "video" && s.videoUrl ? (
+                      <button type="button" onClick={() => setPlaying(s)} aria-label={`Play video story from ${s.name}`} className="group relative mb-5 aspect-[4/3] w-full overflow-hidden rounded-xl bg-primary">
+                        {s.poster && <img src={s.poster} alt="" loading="lazy" className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
+                        <span className="absolute inset-0 grid place-items-center"><span className="grid size-16 place-items-center rounded-full bg-background/90 text-primary shadow-lift transition-transform duration-300 group-hover:scale-110"><Play className="ml-1 size-6 fill-current" /></span></span>
+                        <span className="absolute left-3 top-3 rounded-full bg-background/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground">Video · {s.category}</span>
+                      </button>
+                    ) : s.photo && <img src={s.photo} alt={`${s.name}, customer`} loading="lazy" className="mb-5 aspect-[4/3] w-full rounded-xl object-cover object-top" />}
                     <div className="flex items-center justify-between">
                       {s.rating ? <div className="flex gap-0.5 text-accent" aria-label={`${s.rating} out of 5`}>{Array.from({ length: s.rating }).map((_, i) => <Star key={i} className="size-3.5 fill-current" />)}</div> : <span />}
                       <Quote className="size-5 text-accent/50" />
                     </div>
                     <blockquote className="mt-4 flex-1 font-serif text-xl leading-snug">“{s.quote}”</blockquote>
-                    <figcaption className="mt-5 border-t border-border pt-4 text-sm"><strong className="font-semibold">{s.name}</strong> <span className="text-muted-foreground">· {s.city} · Verified customer</span></figcaption>
+                    <figcaption className="mt-5 border-t border-border pt-4 text-sm"><strong className="font-semibold">{s.name}</strong> <span className="text-muted-foreground">· {s.city} · Verified customer</span>{s.productSlug && <ProductRef slug={s.productSlug} />}</figcaption>
                   </figure>
                 ))}
               </div>
@@ -59,6 +68,19 @@ export function Testimonials() {
         </AnimatePresence>
         </>)}
       </div>
+      <Dialog open={!!playing} onOpenChange={(o) => !o && setPlaying(null)}>
+        <DialogContent className="max-w-3xl overflow-hidden p-0">
+          <DialogTitle className="sr-only">{playing ? `Video story from ${playing.name}` : "Video story"}</DialogTitle>
+          {playing?.videoUrl && <video src={playing.videoUrl} poster={playing.poster} controls playsInline preload="metadata" className="aspect-video w-full bg-primary" />}
+          {playing && <p className="px-6 pb-5 font-serif text-lg">“{playing.quote}” <span className="font-sans text-sm text-muted-foreground">— {playing.name}</span></p>}
+        </DialogContent>
+      </Dialog>
     </section>
   );
+}
+
+function ProductRef({ slug }: { slug: string }) {
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => { productService.getBySlug(slug).then((p) => setName(p?.name ?? null)).catch(() => {}); }, [slug]);
+  return name ? <span className="mt-1 block text-xs text-muted-foreground">Used: {name}</span> : null;
 }
