@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { productImages } from "@/lib/product-images";
 
-type Stage = { k: string; title: string; copy: string; src?: string; alt: string; bg: string; fg: string; muted: string; cta?: boolean };
+type Stage = { k: string; title: string; copy: string; src: string | undefined; alt: string; bg: string; fg: string; muted: string; cta?: boolean };
 
 export const stages: Stage[] = [
   { k: "Discover", title: "Discover the beauty of nature.", copy: "Thoughtful beauty begins with inspiration from the natural world.", src: productImages("toner")[0], alt: "Being You toner among fresh fennel flowers", bg: "var(--background)", fg: "var(--foreground)", muted: "var(--muted-foreground)" },
