@@ -81,7 +81,7 @@ function About() {
         </div>
         <StaggerContainer step={80} className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {values.map(({ I, t, d }) => (
-            <div key={t} className="lift rounded-2xl border border-border bg-card p-8">
+            <div key={t} className="rounded-2xl border border-border bg-card p-8">
               <I className="size-7 text-accent" strokeWidth={1.4} />
               <h3 className="mt-5 text-3xl">{t}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{d}</p>
