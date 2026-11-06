@@ -57,6 +57,7 @@ function ProductPage() {
   const v = p.variants.find((x) => x.id === variantId)!;
   const cat = categories.find((c) => c.slug === p.category)!;
   const wished = isWished(p.id);
+  const n = p.images?.length || 4;
   const stockText = v.stock === 0 ? "Out of stock" : v.stock <= 5 ? `Only ${v.stock} left` : "In stock";
 
   return (
@@ -70,15 +71,15 @@ function ProductPage() {
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div key={img} initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2}
-                onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 50) setImg((i) => (i + (info.offset.x < 0 ? 1 : 3)) % 4); }}>
-                <ProductVisual shape={p.shape} tint={p.tint} label={`${p.name} view ${img + 1}`} variant={img} />
+                onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 50) setImg((i) => (i + (info.offset.x < 0 ? 1 : n - 1)) % n); }}>
+                <ProductVisual src={p.images?.[img]} eager shape={p.shape} tint={p.tint} label={`${p.name} – ${["product", "lifestyle", "texture", "detail"][img]} photo`} variant={img} />
               </motion.div>
             </AnimatePresence>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-3" role="group" aria-label="Product gallery">
-            {[0, 1, 2, 3].map((i) => (
+          <div className="mt-3 grid grid-cols-4 gap-3 sm:max-w-[75%]" role="group" aria-label="Product gallery">
+            {Array.from({ length: n }, (_, i) => (
               <button key={i} onClick={() => setImg(i)} aria-label={`Show image ${i + 1}`} aria-pressed={img === i} className={cn("press overflow-hidden rounded-md border-2 transition-all duration-300", img === i ? "border-primary -translate-y-0.5 shadow-soft" : "border-transparent opacity-60 hover:opacity-100")}>
-                <ProductVisual shape={p.shape} tint={p.tint} label="" variant={i} tag={false} />
+                <ProductVisual src={p.images?.[i]} shape={p.shape} tint={p.tint} label="" variant={i} tag={false} />
               </button>
             ))}
           </div>

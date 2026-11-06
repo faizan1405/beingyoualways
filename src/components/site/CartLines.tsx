@@ -37,7 +37,7 @@ export function CartLines({ compact = false }: { compact?: boolean | undefined})
           className="flex gap-4 overflow-hidden py-5"
         >
           <Link to="/product/$slug" params={{ slug: l.product.slug }} onClick={() => setDrawerOpen(false)} className={compact ? "w-20 shrink-0" : "w-24 shrink-0 md:w-28"}>
-            <ProductVisual shape={l.product.shape} tint={l.product.tint} label={l.product.name} className="rounded-md" tag={false} />
+            <ProductVisual src={l.product.images?.[0]} shape={l.product.shape} tint={l.product.tint} label={l.product.name} className="rounded-md" tag={false} />
           </Link>
           <div className="flex flex-1 flex-col">
             <div className="flex justify-between gap-2">

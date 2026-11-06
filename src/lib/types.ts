@@ -37,6 +37,7 @@ export interface Product {
   variants: ProductVariant[];
   shape: ProductShape;
   tint: string; // placeholder visual colour (oklch)
+  images?: string[] | undefined; // concept photography URLs, main first
   featured: boolean;
   status: ProductStatus;
   isSample: true | boolean;

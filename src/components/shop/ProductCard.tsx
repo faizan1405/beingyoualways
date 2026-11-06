@@ -25,7 +25,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       <div className="relative overflow-hidden rounded-lg ring-1 ring-transparent transition-[box-shadow,transform] duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-1 group-hover:shadow-lift group-hover:ring-border">
         <Link to="/product/$slug" params={{ slug: product.slug }} aria-label={product.name}>
           <ProductVisual
-            shape={product.shape} tint={product.tint} label={product.name} variant={index}
+            src={product.images?.[0]} shape={product.shape} tint={product.tint} label={product.name} variant={index}
             className="transition-transform duration-[1100ms] ease-[var(--ease-lux)] group-hover:scale-[1.06]"
           />
         </Link>

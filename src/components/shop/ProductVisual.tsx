@@ -6,8 +6,16 @@ import { cn } from "@/lib/utils";
  * Swap for real <img> assets once the client supplies product photos.
  */
 export function ProductVisual({
-  shape, tint, label, className, variant = 0, tag = true,
-}: { shape: ProductShape; tint: string; label: string; className?: string | undefined; variant?: number | undefined; tag?: boolean | undefined }) {
+  shape, tint, label, className, variant = 0, tag = true, src, eager = false,
+}: { src?: string | undefined; eager?: boolean | undefined; shape: ProductShape; tint: string; label: string; className?: string | undefined; variant?: number | undefined; tag?: boolean | undefined }) {
+  if (src) {
+    return (
+      <div className={cn("relative aspect-[4/5] overflow-hidden bg-secondary", className)}>
+        <img src={src} alt={label || ""} width={1024} height={1280} loading={eager ? "eager" : "lazy"} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        {tag && <span className="eyebrow absolute bottom-3 left-3 rounded-full bg-background/75 px-2 py-0.5 !text-[9px] backdrop-blur">Concept photo</span>}
+      </div>
+    );
+  }
   const bgs = ["var(--secondary)", "oklch(0.93 0.02 60)", "oklch(0.92 0.02 140)", "oklch(0.95 0.01 20)"];
   return (
     <div

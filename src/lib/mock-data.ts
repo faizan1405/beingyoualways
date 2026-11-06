@@ -1,3 +1,4 @@
+import { productImages } from "./product-images";
 // SAMPLE DATA — temporary placeholder content until the client supplies real
 // products, prices and orders. Only the mock services may import this file.
 import type {
@@ -42,6 +43,7 @@ const p = (x: Omit<Product, "details" | "status" | "isSample"> & Partial<Product
   details: baseDetails,
   status: "active",
   isSample: true,
+  images: productImages(x.slug),
   ...x,
 });
 
