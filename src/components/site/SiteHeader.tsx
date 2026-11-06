@@ -54,7 +54,7 @@ export function SiteHeader() {
             </button>
             <nav aria-label="Main" className="hidden items-center gap-5 lg:flex">
               {nav.slice(1).map((n) => (
-                <Link key={n.to} to={n.to} className={`link-underline whitespace-nowrap text-[13px] ${"wide" in n ? "hidden min-[1440px]:inline" : ""}`}  activeProps={{ className: "!text-primary" }}>
+                <Link key={n.to} to={n.to} className={`link-underline whitespace-nowrap text-[13px] font-medium text-foreground/80 transition-colors hover:text-primary ${"wide" in n ? "hidden min-[1440px]:inline" : ""}`}  activeProps={{ className: "!text-primary" }}>
                   {n.label}
                 </Link>
               ))}
