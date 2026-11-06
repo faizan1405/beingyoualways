@@ -81,7 +81,7 @@ function EditProduct() {
         </div>
         <div className="space-y-4">
           <Panel title="Images">
-            {preview ? <img src={preview} alt="Uploaded preview" className="aspect-[4/5] w-full rounded-md object-cover" /> : <ProductVisual shape={p.shape} tint={p.tint} label={p.name || "New product"} className="rounded-md" />}
+            {preview ? <img src={preview} alt="Uploaded preview" className="aspect-[4/5] w-full rounded-md object-cover" /> : <ProductVisual src={p.images?.[0]} shape={p.shape} tint={p.tint} label={p.name || "New product"} className="rounded-md" />}
             <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground hover:border-primary">
               <Upload className="size-4" /> Upload image (preview only)
               <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPreview(URL.createObjectURL(f)); }} />

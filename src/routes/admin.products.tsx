@@ -39,7 +39,7 @@ function Products() {
               const stock = totalStock(p);
               return (
                 <tr key={p.id}>
-                  <Td><div className="flex items-center gap-3"><ProductVisual shape={p.shape} tint={p.tint} label="" className="w-10 rounded" tag={false} /><span className="font-semibold">{p.name}</span></div></Td>
+                  <Td><div className="flex items-center gap-3"><ProductVisual src={p.images?.[0]} shape={p.shape} tint={p.tint} label="" className="w-10 rounded" tag={false} /><span className="font-semibold">{p.name}</span></div></Td>
                   <Td>{categories.find((c) => c.slug === p.category)?.name}</Td>
                   <Td>{inr(minPrice(p))}</Td>
                   <Td><span className={stock === 0 ? "text-destructive" : stock < 10 ? "text-warning" : ""}>{stock}</span></Td>
