@@ -17,7 +17,9 @@ import { Route as SiteAccountRouteImport } from './routes/_site.account'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
+import { Route as SiteCombosRouteImport } from './routes/_site.combos'
 import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteDeTanCareRouteImport } from './routes/_site.de-tan-care'
 import { Route as SiteFaqRouteImport } from './routes/_site.faq'
 import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
 import { Route as SiteLoginRouteImport } from './routes/_site.login'
@@ -42,6 +44,7 @@ import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account
 import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.orders'
 import { Route as SiteAccountProfileRouteImport } from './routes/_site.account.profile'
 import { Route as SiteAccountWishlistRouteImport } from './routes/_site.account.wishlist'
+import { Route as SiteConcernSlugRouteImport } from './routes/_site.concern.$slug'
 import { Route as SiteProductSlugRouteImport } from './routes/_site.product.$slug'
 import { Route as AdminCustomersIdRouteImport } from './routes/admin.customers_.$id'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders_.$id'
@@ -87,9 +90,19 @@ const SiteColourCosmeticsRoute = SiteColourCosmeticsRouteImport.update({
   path: '/colour-cosmetics',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteCombosRoute = SiteCombosRouteImport.update({
+  id: '/combos',
+  path: '/combos',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteContactRoute = SiteContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteDeTanCareRoute = SiteDeTanCareRouteImport.update({
+  id: '/de-tan-care',
+  path: '/de-tan-care',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteFaqRoute = SiteFaqRouteImport.update({
@@ -212,6 +225,11 @@ const SiteAccountWishlistRoute = SiteAccountWishlistRouteImport.update({
   path: '/wishlist',
   getParentRoute: () => SiteAccountRoute,
 } as any)
+const SiteConcernSlugRoute = SiteConcernSlugRouteImport.update({
+  id: '/concern/$slug',
+  path: '/concern/$slug',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -246,7 +264,9 @@ export interface FileRoutesByFullPath {
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/combos': typeof SiteCombosRoute
   '/contact': typeof SiteContactRoute
+  '/de-tan-care': typeof SiteDeTanCareRoute
   '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
@@ -270,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/account/orders': typeof SiteAccountOrdersRoute
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
+  '/concern/$slug': typeof SiteConcernSlugRoute
   '/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -282,7 +303,9 @@ export interface FileRoutesByTo {
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/combos': typeof SiteCombosRoute
   '/contact': typeof SiteContactRoute
+  '/de-tan-care': typeof SiteDeTanCareRoute
   '/faq': typeof SiteFaqRoute
   '/haircare': typeof SiteHaircareRoute
   '/login': typeof SiteLoginRoute
@@ -307,6 +330,7 @@ export interface FileRoutesByTo {
   '/account/orders': typeof SiteAccountOrdersRoute
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
+  '/concern/$slug': typeof SiteConcernSlugRoute
   '/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -323,7 +347,9 @@ export interface FileRoutesById {
   '/_site/cart': typeof SiteCartRoute
   '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
+  '/_site/combos': typeof SiteCombosRoute
   '/_site/contact': typeof SiteContactRoute
+  '/_site/de-tan-care': typeof SiteDeTanCareRoute
   '/_site/faq': typeof SiteFaqRoute
   '/_site/haircare': typeof SiteHaircareRoute
   '/_site/login': typeof SiteLoginRoute
@@ -348,6 +374,7 @@ export interface FileRoutesById {
   '/_site/account/orders': typeof SiteAccountOrdersRoute
   '/_site/account/profile': typeof SiteAccountProfileRoute
   '/_site/account/wishlist': typeof SiteAccountWishlistRoute
+  '/_site/concern/$slug': typeof SiteConcernSlugRoute
   '/_site/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers_/$id': typeof AdminCustomersIdRoute
   '/admin/orders_/$id': typeof AdminOrdersIdRoute
@@ -365,7 +392,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
+    | '/combos'
     | '/contact'
+    | '/de-tan-care'
     | '/faq'
     | '/haircare'
     | '/login'
@@ -389,6 +418,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/profile'
     | '/account/wishlist'
+    | '/concern/$slug'
     | '/product/$slug'
     | '/admin/customers/$id'
     | '/admin/orders/$id'
@@ -401,7 +431,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
+    | '/combos'
     | '/contact'
+    | '/de-tan-care'
     | '/faq'
     | '/haircare'
     | '/login'
@@ -426,6 +458,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/profile'
     | '/account/wishlist'
+    | '/concern/$slug'
     | '/product/$slug'
     | '/admin/customers/$id'
     | '/admin/orders/$id'
@@ -441,7 +474,9 @@ export interface FileRouteTypes {
     | '/_site/cart'
     | '/_site/checkout'
     | '/_site/colour-cosmetics'
+    | '/_site/combos'
     | '/_site/contact'
+    | '/_site/de-tan-care'
     | '/_site/faq'
     | '/_site/haircare'
     | '/_site/login'
@@ -466,6 +501,7 @@ export interface FileRouteTypes {
     | '/_site/account/orders'
     | '/_site/account/profile'
     | '/_site/account/wishlist'
+    | '/_site/concern/$slug'
     | '/_site/product/$slug'
     | '/admin/customers_/$id'
     | '/admin/orders_/$id'
@@ -537,11 +573,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteColourCosmeticsRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/combos': {
+      id: '/_site/combos'
+      path: '/combos'
+      fullPath: '/combos'
+      preLoaderRoute: typeof SiteCombosRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/contact': {
       id: '/_site/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/de-tan-care': {
+      id: '/_site/de-tan-care'
+      path: '/de-tan-care'
+      fullPath: '/de-tan-care'
+      preLoaderRoute: typeof SiteDeTanCareRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/faq': {
@@ -712,6 +762,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteAccountWishlistRouteImport
       parentRoute: typeof SiteAccountRoute
     }
+    '/_site/concern/$slug': {
+      id: '/_site/concern/$slug'
+      path: '/concern/$slug'
+      fullPath: '/concern/$slug'
+      preLoaderRoute: typeof SiteConcernSlugRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/product/$slug': {
       id: '/_site/product/$slug'
       path: '/product/$slug'
@@ -776,7 +833,9 @@ interface SiteRouteChildren {
   SiteCartRoute: typeof SiteCartRoute
   SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
+  SiteCombosRoute: typeof SiteCombosRoute
   SiteContactRoute: typeof SiteContactRoute
+  SiteDeTanCareRoute: typeof SiteDeTanCareRoute
   SiteFaqRoute: typeof SiteFaqRoute
   SiteHaircareRoute: typeof SiteHaircareRoute
   SiteLoginRoute: typeof SiteLoginRoute
@@ -789,6 +848,7 @@ interface SiteRouteChildren {
   SiteVerifyOtpRoute: typeof SiteVerifyOtpRoute
   SiteWishlistRoute: typeof SiteWishlistRoute
   SiteIndexRoute: typeof SiteIndexRoute
+  SiteConcernSlugRoute: typeof SiteConcernSlugRoute
   SiteProductSlugRoute: typeof SiteProductSlugRoute
   SiteAccountOrdersIdRoute: typeof SiteAccountOrdersIdRoute
 }
@@ -799,7 +859,9 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteCartRoute: SiteCartRoute,
   SiteCheckoutRoute: SiteCheckoutRoute,
   SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
+  SiteCombosRoute: SiteCombosRoute,
   SiteContactRoute: SiteContactRoute,
+  SiteDeTanCareRoute: SiteDeTanCareRoute,
   SiteFaqRoute: SiteFaqRoute,
   SiteHaircareRoute: SiteHaircareRoute,
   SiteLoginRoute: SiteLoginRoute,
@@ -812,6 +874,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteVerifyOtpRoute: SiteVerifyOtpRoute,
   SiteWishlistRoute: SiteWishlistRoute,
   SiteIndexRoute: SiteIndexRoute,
+  SiteConcernSlugRoute: SiteConcernSlugRoute,
   SiteProductSlugRoute: SiteProductSlugRoute,
   SiteAccountOrdersIdRoute: SiteAccountOrdersIdRoute,
 }
