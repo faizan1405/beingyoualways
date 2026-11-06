@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { FounderQuote, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
 import { Testimonials } from "@/components/home/Testimonials";
+import { ScrollStory } from "@/components/home/ScrollStory";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
@@ -74,6 +75,8 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <ScrollStory />
 
       <section className="container-lux py-20 md:py-28">
         <SectionHead eyebrow="Featured collections" title="Explore the range" link={{ to: "/shop", label: "Shop all" }} />

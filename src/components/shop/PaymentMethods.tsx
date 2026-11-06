@@ -24,7 +24,7 @@ export function PaymentMethods({ value, onChange }: { value: PaymentMethod; onCh
             <span className="flex-1">
               <span className="flex items-center gap-2 text-sm font-semibold"><I className="size-4 text-primary" /> {t}</span>
               <span className="mt-1 block text-xs text-muted-foreground">{d}</span>
-              <span className="mt-2 flex items-start gap-1.5 text-[11px] font-medium text-accent-foreground/80"><Info className="mt-px size-3 shrink-0 text-accent" /> {note}</span>
+              <span className="mt-2 flex items-start gap-1.5 text-[11px] font-medium text-muted-foreground"><Info className="mt-px size-3 shrink-0 text-accent" /> {note}</span>
             </span>
           </button>
         );
