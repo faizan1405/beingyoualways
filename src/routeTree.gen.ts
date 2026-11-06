@@ -11,14 +11,23 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteAccountRouteImport } from './routes/_site.account'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteColourCosmeticsRouteImport } from './routes/_site.colour-cosmetics'
 import { Route as SiteHaircareRouteImport } from './routes/_site.haircare'
+import { Route as SiteLoginRouteImport } from './routes/_site.login'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as SiteSkincareRouteImport } from './routes/_site.skincare'
+import { Route as SiteVerifyOtpRouteImport } from './routes/_site.verify-otp'
 import { Route as SiteWishlistRouteImport } from './routes/_site.wishlist'
+import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
+import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account.addresses'
+import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.orders'
+import { Route as SiteAccountProfileRouteImport } from './routes/_site.account.profile'
+import { Route as SiteAccountWishlistRouteImport } from './routes/_site.account.wishlist'
 import { Route as SiteProductSlugRouteImport } from './routes/_site.product.$slug'
+import { Route as SiteAccountOrdersIdRouteImport } from './routes/_site.account_.orders_.$id'
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
@@ -27,6 +36,11 @@ const SiteRoute = SiteRouteImport.update({
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAccountRoute = SiteAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteCartRoute = SiteCartRouteImport.update({
@@ -49,6 +63,11 @@ const SiteHaircareRoute = SiteHaircareRouteImport.update({
   path: '/haircare',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteLoginRoute = SiteLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteShopRoute = SiteShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -59,87 +78,174 @@ const SiteSkincareRoute = SiteSkincareRouteImport.update({
   path: '/skincare',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteVerifyOtpRoute = SiteVerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteWishlistRoute = SiteWishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
   getParentRoute: () => SiteRoute,
+} as any)
+const SiteAccountIndexRoute = SiteAccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountAddressesRoute = SiteAccountAddressesRouteImport.update({
+  id: '/addresses',
+  path: '/addresses',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountOrdersRoute = SiteAccountOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountProfileRoute = SiteAccountProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SiteAccountRoute,
+} as any)
+const SiteAccountWishlistRoute = SiteAccountWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => SiteAccountRoute,
 } as any)
 const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
+  id: '/account_/orders_/$id',
+  path: '/account/orders/$id',
+  getParentRoute: () => SiteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/account': typeof SiteAccountRouteWithChildren
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/haircare': typeof SiteHaircareRoute
+  '/login': typeof SiteLoginRoute
   '/shop': typeof SiteShopRoute
   '/skincare': typeof SiteSkincareRoute
+  '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
+  '/account/addresses': typeof SiteAccountAddressesRoute
+  '/account/orders': typeof SiteAccountOrdersRoute
+  '/account/profile': typeof SiteAccountProfileRoute
+  '/account/wishlist': typeof SiteAccountWishlistRoute
   '/product/$slug': typeof SiteProductSlugRoute
+  '/account/': typeof SiteAccountIndexRoute
+  '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesByTo {
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/haircare': typeof SiteHaircareRoute
+  '/login': typeof SiteLoginRoute
   '/shop': typeof SiteShopRoute
   '/skincare': typeof SiteSkincareRoute
+  '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
   '/': typeof SiteIndexRoute
+  '/account/addresses': typeof SiteAccountAddressesRoute
+  '/account/orders': typeof SiteAccountOrdersRoute
+  '/account/profile': typeof SiteAccountProfileRoute
+  '/account/wishlist': typeof SiteAccountWishlistRoute
   '/product/$slug': typeof SiteProductSlugRoute
+  '/account': typeof SiteAccountIndexRoute
+  '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/_site/account': typeof SiteAccountRouteWithChildren
   '/_site/cart': typeof SiteCartRoute
   '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/colour-cosmetics': typeof SiteColourCosmeticsRoute
   '/_site/haircare': typeof SiteHaircareRoute
+  '/_site/login': typeof SiteLoginRoute
   '/_site/shop': typeof SiteShopRoute
   '/_site/skincare': typeof SiteSkincareRoute
+  '/_site/verify-otp': typeof SiteVerifyOtpRoute
   '/_site/wishlist': typeof SiteWishlistRoute
   '/_site/': typeof SiteIndexRoute
+  '/_site/account/addresses': typeof SiteAccountAddressesRoute
+  '/_site/account/orders': typeof SiteAccountOrdersRoute
+  '/_site/account/profile': typeof SiteAccountProfileRoute
+  '/_site/account/wishlist': typeof SiteAccountWishlistRoute
   '/_site/product/$slug': typeof SiteProductSlugRoute
+  '/_site/account/': typeof SiteAccountIndexRoute
+  '/_site/account_/orders_/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
     | '/haircare'
+    | '/login'
     | '/shop'
     | '/skincare'
+    | '/verify-otp'
     | '/wishlist'
+    | '/account/addresses'
+    | '/account/orders'
+    | '/account/profile'
+    | '/account/wishlist'
     | '/product/$slug'
+    | '/account/'
+    | '/account/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cart'
     | '/checkout'
     | '/colour-cosmetics'
     | '/haircare'
+    | '/login'
     | '/shop'
     | '/skincare'
+    | '/verify-otp'
     | '/wishlist'
     | '/'
+    | '/account/addresses'
+    | '/account/orders'
+    | '/account/profile'
+    | '/account/wishlist'
     | '/product/$slug'
+    | '/account'
+    | '/account/orders/$id'
   id:
     | '__root__'
     | '/_site'
+    | '/_site/account'
     | '/_site/cart'
     | '/_site/checkout'
     | '/_site/colour-cosmetics'
     | '/_site/haircare'
+    | '/_site/login'
     | '/_site/shop'
     | '/_site/skincare'
+    | '/_site/verify-otp'
     | '/_site/wishlist'
     | '/_site/'
+    | '/_site/account/addresses'
+    | '/_site/account/orders'
+    | '/_site/account/profile'
+    | '/_site/account/wishlist'
     | '/_site/product/$slug'
+    | '/_site/account/'
+    | '/_site/account_/orders_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/account': {
+      id: '/_site/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof SiteAccountRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/cart': {
@@ -190,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteHaircareRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/login': {
+      id: '/_site/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof SiteLoginRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/shop': {
       id: '/_site/shop'
       path: '/shop'
@@ -204,12 +324,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteSkincareRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/verify-otp': {
+      id: '/_site/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof SiteVerifyOtpRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/wishlist': {
       id: '/_site/wishlist'
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof SiteWishlistRouteImport
       parentRoute: typeof SiteRoute
+    }
+    '/_site/account/': {
+      id: '/_site/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof SiteAccountIndexRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/addresses': {
+      id: '/_site/account/addresses'
+      path: '/addresses'
+      fullPath: '/account/addresses'
+      preLoaderRoute: typeof SiteAccountAddressesRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/orders': {
+      id: '/_site/account/orders'
+      path: '/orders'
+      fullPath: '/account/orders'
+      preLoaderRoute: typeof SiteAccountOrdersRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/profile': {
+      id: '/_site/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof SiteAccountProfileRouteImport
+      parentRoute: typeof SiteAccountRoute
+    }
+    '/_site/account/wishlist': {
+      id: '/_site/account/wishlist'
+      path: '/wishlist'
+      fullPath: '/account/wishlist'
+      preLoaderRoute: typeof SiteAccountWishlistRouteImport
+      parentRoute: typeof SiteAccountRoute
     }
     '/_site/product/$slug': {
       id: '/_site/product/$slug'
@@ -218,31 +380,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteProductSlugRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/account_/orders_/$id': {
+      id: '/_site/account_/orders_/$id'
+      path: '/account/orders/$id'
+      fullPath: '/account/orders/$id'
+      preLoaderRoute: typeof SiteAccountOrdersIdRouteImport
+      parentRoute: typeof SiteRoute
+    }
   }
 }
 
+interface SiteAccountRouteChildren {
+  SiteAccountAddressesRoute: typeof SiteAccountAddressesRoute
+  SiteAccountOrdersRoute: typeof SiteAccountOrdersRoute
+  SiteAccountProfileRoute: typeof SiteAccountProfileRoute
+  SiteAccountWishlistRoute: typeof SiteAccountWishlistRoute
+  SiteAccountIndexRoute: typeof SiteAccountIndexRoute
+}
+
+const SiteAccountRouteChildren: SiteAccountRouteChildren = {
+  SiteAccountAddressesRoute: SiteAccountAddressesRoute,
+  SiteAccountOrdersRoute: SiteAccountOrdersRoute,
+  SiteAccountProfileRoute: SiteAccountProfileRoute,
+  SiteAccountWishlistRoute: SiteAccountWishlistRoute,
+  SiteAccountIndexRoute: SiteAccountIndexRoute,
+}
+
+const SiteAccountRouteWithChildren = SiteAccountRoute._addFileChildren(
+  SiteAccountRouteChildren,
+)
+
 interface SiteRouteChildren {
+  SiteAccountRoute: typeof SiteAccountRouteWithChildren
   SiteCartRoute: typeof SiteCartRoute
   SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteColourCosmeticsRoute: typeof SiteColourCosmeticsRoute
   SiteHaircareRoute: typeof SiteHaircareRoute
+  SiteLoginRoute: typeof SiteLoginRoute
   SiteShopRoute: typeof SiteShopRoute
   SiteSkincareRoute: typeof SiteSkincareRoute
+  SiteVerifyOtpRoute: typeof SiteVerifyOtpRoute
   SiteWishlistRoute: typeof SiteWishlistRoute
   SiteIndexRoute: typeof SiteIndexRoute
   SiteProductSlugRoute: typeof SiteProductSlugRoute
+  SiteAccountOrdersIdRoute: typeof SiteAccountOrdersIdRoute
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
+  SiteAccountRoute: SiteAccountRouteWithChildren,
   SiteCartRoute: SiteCartRoute,
   SiteCheckoutRoute: SiteCheckoutRoute,
   SiteColourCosmeticsRoute: SiteColourCosmeticsRoute,
   SiteHaircareRoute: SiteHaircareRoute,
+  SiteLoginRoute: SiteLoginRoute,
   SiteShopRoute: SiteShopRoute,
   SiteSkincareRoute: SiteSkincareRoute,
+  SiteVerifyOtpRoute: SiteVerifyOtpRoute,
   SiteWishlistRoute: SiteWishlistRoute,
   SiteIndexRoute: SiteIndexRoute,
   SiteProductSlugRoute: SiteProductSlugRoute,
+  SiteAccountOrdersIdRoute: SiteAccountOrdersIdRoute,
 }
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
