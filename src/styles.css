@@ -258,3 +258,10 @@
 
 .ba-handle { box-shadow: 0 6px 24px -6px color-mix(in oklab, var(--primary) 45%, transparent); }
 .ba-handle:hover, .ba-handle:focus-visible { box-shadow: 0 0 0 8px color-mix(in oklab, var(--background) 35%, transparent), 0 8px 28px -6px color-mix(in oklab, var(--primary) 55%, transparent); }
+
+/* Scroll story scene crossfades (content stays readable without motion: mobile + no-JS show stacked scenes) */
+.story-text { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .8s cubic-bezier(.2,.7,.2,1); pointer-events: none; }
+.story-text[data-on] { opacity: 1; transform: none; pointer-events: auto; }
+.story-img { opacity: 0; transition: opacity .9s ease, transform .2s linear; }
+.story-img[data-on] { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .story-text, .story-img { transition: none; transform: none !important; } }
