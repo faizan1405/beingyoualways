@@ -265,3 +265,6 @@
 .story-img { opacity: 0; transition: opacity .9s ease, transform .2s linear; }
 .story-img[data-on] { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .story-text, .story-img { transition: none; transform: none !important; } }
+
+/* Reveal offsets (slide-in) must never cause sideways scrolling */
+body { overflow-x: clip; }
