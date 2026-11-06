@@ -22,7 +22,7 @@ export function Hero() {
             )}
           </h1>
           <p className="hero-in mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mx-0" style={{ animationDelay: "800ms" }}>
-            See the transformation. Botanical skincare, haircare and colour — gentle rituals for every day.
+            See the transformation. Plant-powered care for pigmentation, dullness and uneven tone — for a healthier-looking glow, naturally.
           </p>
           <div className="hero-in mt-9 flex flex-col items-center gap-3 sm:flex-row md:justify-start" style={{ animationDelay: "950ms" }}>
             <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>

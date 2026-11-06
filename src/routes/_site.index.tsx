@@ -1,5 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Leaf, Sparkles, HeartHandshake } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { FounderQuote, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
+import { RealResults, Testimonials } from "@/components/home/Testimonials";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
@@ -18,6 +20,8 @@ export const Route = createFileRoute("/_site/")({
       { name: "description", content: "Discover plant-based skincare, haircare and colour cosmetics from Being You – Always, an Indian beauty brand." },
       { property: "og:title", content: "Being You – Always | Plant-Based Beauty" },
       { property: "og:description", content: "Plant-based skincare, haircare and colour cosmetics for everyday rituals." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: async () => ({ featured: await productService.featured(), categories: await productService.categories() }),
@@ -67,8 +71,10 @@ function Home() {
         </div>
       </section>
 
+      <ShopByConcern />
+
       <section className="container-lux pb-24">
-        <SectionHead eyebrow="Bestsellers · Sample products" title="Featured favourites" link={{ to: "/shop", label: "Shop all" }} />
+        <SectionHead eyebrow="Bestsellers · Sample products" title="Our best sellers" link={{ to: "/shop", label: "Shop all" }} />
         <StaggerContainer step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
           {featured.slice(0, 8).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
         </StaggerContainer>
@@ -91,49 +97,27 @@ function Home() {
         </div>
       </section>
 
+      <RealResults />
+
+      <Testimonials />
+
       <section className="container-lux py-20 md:py-28">
-        <SectionHead eyebrow="Curated collections" title="Edits we love" />
-        <div className="grid gap-5 md:grid-cols-[1.3fr_1fr]">
-          {[
-            { name: "The Glow Ritual", copy: "Serum, oil & night cream for a radiant routine.", shape: "dropper", tint: "oklch(0.7 0.11 60)", to: "/skincare" },
-            { name: "Everyday Colour", copy: "Soft shades for lips and cheeks.", shape: "compact", tint: "oklch(0.7 0.1 10)", to: "/colour-cosmetics" },
-          ].map((c, i) => (
-            <ImageReveal key={c.name} from={i ? "bottom" : "left"} delay={i * 140} className="rounded-xl">
-            <Link to={c.to as "/skincare"} className="group relative flex min-h-[340px] items-end overflow-hidden bg-card md:min-h-[420px]">
-              <Parallax speed={-0.07} className="absolute -inset-y-10 inset-x-0">
-                <ProductVisual shape={c.shape as "dropper"} tint={c.tint} label={c.name} variant={i + 2} tag={false} className="!aspect-auto h-full w-full transition-transform duration-[1200ms] ease-[var(--ease-lux)] group-hover:scale-[1.04]" />
-              </Parallax>
-              <div className="bg-veil absolute inset-0" />
-              <div className="relative p-8 text-primary-foreground transition-transform duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-1.5">
-                <h3 className="text-4xl md:text-5xl">{c.name}</h3>
-                <p className="mt-2 max-w-xs text-sm opacity-85">{c.copy}</p>
-                <span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]">Discover <ArrowRight className="arrow-nudge size-3.5" /></span>
-              </div>
+        <SectionHead eyebrow="Featured collections" title="Explore the range" link={{ to: "/shop", label: "Shop all" }} />
+        <StaggerContainer step={70} className="grid grid-cols-2 gap-4 md:grid-cols-5">
+          {collections.map((c, i) => (
+            <Link key={c.name} to={c.to} className={`group relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-2xl p-6 transition-transform duration-500 hover:-translate-y-1 md:min-h-[300px] ${i % 2 ? "bg-secondary" : "bg-primary text-primary-foreground"} ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
+              <span className="absolute right-5 top-5 font-serif text-5xl italic opacity-20">0{i + 1}</span>
+              <h3 className="text-3xl leading-tight">{c.name}</h3>
+              <p className="mt-1 text-xs opacity-75">{c.copy}</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]">Discover <ArrowRight className="arrow-nudge size-3" /></span>
             </Link>
-            </ImageReveal>
           ))}
-        </div>
+        </StaggerContainer>
       </section>
 
-      <section className="bg-primary text-primary-foreground">
-        <div className="container-lux py-20 md:py-24">
-          <RevealOnScroll as="p" kind="fade" className="eyebrow !text-primary-foreground/60 text-center">Our philosophy</RevealOnScroll>
-          <TextReveal by="line" text={["Rooted in plants.", "Made for self-care. Shaped by you."]} className="mx-auto mt-4 max-w-3xl text-center text-4xl leading-tight md:text-5xl" />
-          <StaggerContainer step={100} kind="scale" className="mt-14 grid gap-10 md:grid-cols-3">
-            {[
-              { I: Leaf, t: "Plant-based", d: "Formulas built around plant-derived ingredients, with full ingredient lists on every product." },
-              { I: Sparkles, t: "Everyday rituals", d: "Simple routines that fit real life — a few mindful minutes, every day." },
-              { I: HeartHandshake, t: "Made to be you", d: "Shades and textures that celebrate your natural self, not a filter." },
-            ].map(({ I, t, d }) => (
-              <div key={t} className="text-center">
-                <I className="mx-auto size-6 text-accent" strokeWidth={1.4} />
-                <h3 className="mt-4 text-2xl">{t}</h3>
-                <p className="mx-auto mt-2 max-w-xs text-sm opacity-75">{d}</p>
-              </div>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
+      <WhyChooseUs />
+
+      <FounderQuote />
 
       <section className="container-lux grid gap-10 py-20 md:grid-cols-[1fr_1.5fr] md:py-28">
         <div>

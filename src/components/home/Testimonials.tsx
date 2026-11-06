@@ -65,7 +65,7 @@ export function Testimonials() {
                   <div className="flex gap-0.5 text-accent" aria-label="5 out of 5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-3.5 fill-current" />)}</div>
                   <Quote className="size-5 text-accent/50" />
                 </div>
-                <blockquote className="mt-4 flex-1 font-heading text-xl leading-snug">“{s.text}”</blockquote>
+                <blockquote className="mt-4 flex-1 font-serif text-xl leading-snug">“{s.text}”</blockquote>
                 <figcaption className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm">
                   <span><strong className="font-semibold">{s.name}</strong> <span className="text-muted-foreground">· {s.city}</span></span>
                   <span className="flex gap-1.5">

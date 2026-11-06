@@ -25,7 +25,7 @@ export function ShopByConcern() {
         {concerns.map(({ t, I, to }) => (
           <Link key={t} to={to} className="group flex flex-col items-center gap-4 rounded-2xl border border-border bg-card px-4 py-8 text-center transition-all duration-500 hover:-translate-y-1 hover:border-primary hover:shadow-lg">
             <span className="grid size-14 place-items-center rounded-full bg-secondary text-primary transition-colors duration-500 group-hover:bg-primary group-hover:text-primary-foreground"><I className="size-6" strokeWidth={1.4} /></span>
-            <span className="font-heading text-xl">{t}</span>
+            <span className="font-serif text-xl">{t}</span>
             <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground group-hover:text-primary">Shop <ArrowRight className="arrow-nudge size-3" /></span>
           </Link>
         ))}
@@ -68,7 +68,7 @@ export function FounderQuote() {
     <section className="container-lux py-20 md:py-28">
       <div className="mx-auto max-w-4xl text-center">
         <RevealOnScroll as="p" kind="fade" className="eyebrow">A note from our founder</RevealOnScroll>
-        <RevealOnScroll as="blockquote" delay={120} className="mt-8 font-heading text-3xl italic leading-snug md:text-5xl">
+        <RevealOnScroll as="blockquote" delay={120} className="mt-8 font-serif text-3xl italic leading-snug md:text-5xl">
           “I started Being You – Always for my own family — products I'd trust on the people I love. Today, that same care goes into every jar we make for you.”
         </RevealOnScroll>
         <RevealOnScroll delay={260} className="mt-8 flex items-center justify-center gap-4">
