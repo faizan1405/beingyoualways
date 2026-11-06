@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentPage } from "@/components/site/ContentPage";
+import { PolicyPage } from "@/components/site/PolicyPage";
 
 export const Route = createFileRoute("/_site/shipping-policy")({
   head: () => ({
     meta: [
       { title: "Shipping Policy | Being You – Always" },
-      { name: "description", content: "Shipping timelines and charges for Being You – Always orders (draft)." },
+      { name: "description", content: "How Being You – Always orders are shipped. Final policy pending client approval." },
       { property: "og:title", content: "Shipping Policy | Being You – Always" },
-      { property: "og:description", content: "Shipping timelines and charges for Being You – Always orders (draft)." },
+      { property: "og:description", content: "How Being You – Always orders are shipped. Final policy pending client approval." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => (
-    <ContentPage eyebrow="Help" title="Shipping Policy" draft>
-      <h2>Dispatch</h2><p>Placeholder: orders dispatch within 2–4 working days.</p><h2>Charges</h2><p>Placeholder: free shipping above ₹999; ₹79 below that (sample values).</p><h2>Delivery areas</h2><p>Placeholder: serviceable PIN codes and COD availability.</p>
-    </ContentPage>
-  ),
+  component: () => <PolicyPage title="Shipping Policy" originalPath="/shipping-policy/" />,
 });

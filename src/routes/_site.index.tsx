@@ -8,6 +8,7 @@ import { Hero } from "@/components/home/Hero";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Newsletter } from "@/components/site/SiteFooter";
+import { contactConfig } from "@/config/business";
 import { Button } from "@/components/ui/button";
 import { ImageReveal, Parallax, RevealOnScroll, StaggerContainer, TextReveal } from "@/components/motion/Reveal";
 import { productImages } from "@/lib/product-images";
@@ -103,6 +104,12 @@ function Home() {
         <RevealOnScroll kind="slide-right" delay={150}><FaqList items={faqs.slice(0, 4)} /></RevealOnScroll>
       </section>
 
+      <section className="container-lux py-16 text-center">
+        <RevealOnScroll as="p" kind="fade" className="eyebrow">We're here for you</RevealOnScroll>
+        <TextReveal text="Questions about your routine?" className="mt-3 text-4xl md:text-5xl" />
+        <p className="mt-4 text-sm text-muted-foreground">Call <a className="font-semibold text-foreground hover:underline" href={`tel:${contactConfig.phones[0].tel}`}>{contactConfig.phones[0].display}</a> or email <a className="font-semibold text-foreground hover:underline" href={`mailto:${contactConfig.email}`}>{contactConfig.email}</a></p>
+        <Button variant="luxOutline" size="xl" className="mt-6" asChild><Link to="/contact">Contact us</Link></Button>
+      </section>
       <Newsletter />
     </>
   );

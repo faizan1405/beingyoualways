@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { SHIPPING_RATES_CONFIRMED } from "@/config/business";
 import { ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export function CartDrawer() {
           <SheetTitle className="font-serif text-2xl">Your Bag ({count})</SheetTitle>
           {count > 0 && (
             <p className="mt-1 text-xs text-muted-foreground">
-              {remaining > 0 ? `Add ${inr(remaining)} more for free shipping` : "You've unlocked free shipping"}
+              {SHIPPING_RATES_CONFIRMED ? (remaining > 0 ? `Add ${inr(remaining)} more for free shipping` : "You've unlocked free shipping") : "Shipping charges will be confirmed with your order"}
             </p>
           )}
         </div>

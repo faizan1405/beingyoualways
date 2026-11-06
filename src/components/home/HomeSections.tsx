@@ -66,7 +66,7 @@ export function FounderQuote() {
         </RevealOnScroll>
         <RevealOnScroll delay={260} className="mt-8 flex items-center justify-center gap-4">
           <span className="h-px w-10 bg-accent" />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Priyanka & Anirudhh Rajput · Co-Founders</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]">Priyanka & Anirudhh Rajput · Co-Founders, Being You Always</span>
           <span className="h-px w-10 bg-accent" />
         </RevealOnScroll>
       </div>

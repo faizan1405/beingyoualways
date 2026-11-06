@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentPage } from "@/components/site/ContentPage";
+import { PolicyPage } from "@/components/site/PolicyPage";
 
 export const Route = createFileRoute("/_site/terms")({
   head: () => ({
     meta: [
       { title: "Terms & Conditions | Being You – Always" },
-      { name: "description", content: "Terms of use for the Being You – Always website (draft)." },
+      { name: "description", content: "Terms for using the Being You – Always website. Final terms pending client approval." },
       { property: "og:title", content: "Terms & Conditions | Being You – Always" },
-      { property: "og:description", content: "Terms of use for the Being You – Always website (draft)." },
+      { property: "og:description", content: "Terms for using the Being You – Always website. Final terms pending client approval." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => (
-    <ContentPage eyebrow="Legal" title="Terms & Conditions" draft>
-      <h2>Use of this website</h2><p>Placeholder terms of use.</p><h2>Orders & pricing</h2><p>Placeholder: pricing, availability and order acceptance.</p><h2>Governing law</h2><p>Placeholder.</p>
-    </ContentPage>
-  ),
+  component: () => <PolicyPage title="Terms & Conditions" originalPath="/terms-of-service/" />,
 });
