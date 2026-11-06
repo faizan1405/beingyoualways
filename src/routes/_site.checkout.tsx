@@ -31,7 +31,7 @@ function Field({ id, label, error, children }: { id: string; label: string; erro
     <div>
       <label htmlFor={id} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
       {children}
-      {error && <p id={`${id}-err`} className="mt-1.5 text-xs text-destructive">{error}</p>}
+      {error && <p id={`${id}-err`} role="alert" className="animate-in fade-in slide-in-from-top-1 mt-1.5 text-xs text-destructive duration-200">{error}</p>}
     </div>
   );
 }
