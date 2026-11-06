@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export function AdminPage({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
+export function AdminPage({ title, subtitle, actions, children }: { title: string; subtitle?: string | undefined; actions?: ReactNode | undefined; children: ReactNode }) {
   return (
     <div className="page-enter space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -16,7 +16,7 @@ export function AdminPage({ title, subtitle, actions, children }: { title: strin
   );
 }
 
-export function Panel({ title, children, className, action }: { title?: string; children: ReactNode; className?: string; action?: ReactNode }) {
+export function Panel({ title, children, className, action }: { title?: string | undefined; children: ReactNode; className?: string | undefined; action?: ReactNode | undefined}) {
   return (
     <section className={cn("rounded-xl border border-border bg-card p-5 shadow-soft", className)}>
       {title && <div className="mb-4 flex items-center justify-between"><h2 className="font-sans text-sm font-semibold uppercase tracking-wider">{title}</h2>{action}</div>}
@@ -25,7 +25,7 @@ export function Panel({ title, children, className, action }: { title?: string; 
   );
 }
 
-export function NotConnected({ label = "WhatsApp API Not Connected" }: { label?: string }) {
+export function NotConnected({ label = "WhatsApp API Not Connected" }: { label?: string | undefined}) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
       <span className="size-2 rounded-full bg-destructive" />{label}
@@ -46,4 +46,4 @@ export function Table({ head, children }: { head: string[]; children: ReactNode 
     </div>
   );
 }
-export const Td = ({ children, className }: { children: ReactNode; className?: string }) => <td className={cn("px-3 py-3", className)}>{children}</td>;
+export const Td = ({ children, className }: { children: ReactNode; className?: string | undefined}) => <td className={cn("px-3 py-3", className)}>{children}</td>;

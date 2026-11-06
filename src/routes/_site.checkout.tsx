@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_site/checkout")({
 
 const empty: CheckoutForm = { name: "", phone: "", email: "", address: "", city: "", state: "", pincode: "" };
 
-function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
+function Field({ id, label, error, children }: { id: string; label: string; error?: string | undefined; children: ReactNode }) {
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
@@ -82,7 +82,7 @@ function Checkout() {
           setErrors(errs);
           if (Object.keys(errs).length) {
             toast.error("Please fix the highlighted fields");
-            document.getElementById(Object.keys(errs)[0])?.focus();
+            document.getElementById(Object.keys(errs)[0] ?? "")?.focus();
             return;
           }
           setReviewed(true);

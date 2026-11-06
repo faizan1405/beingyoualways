@@ -8,7 +8,7 @@ export const faqs = [
   { q: "How do I track my order?", a: "Once live, you'll receive WhatsApp updates and can also track orders from My Account." },
 ];
 
-export function FaqList({ items = faqs }: { items?: typeof faqs }) {
+export function FaqList({ items = faqs }: { items?: typeof faqs | undefined}) {
   return (
     <Accordion type="single" collapsible className="w-full">
       {items.map((f, i) => (

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
 
-export function ContentPage({ eyebrow, title, draft, children }: { eyebrow: string; title: string; draft?: boolean; children: ReactNode }) {
+export function ContentPage({ eyebrow, title, draft, children }: { eyebrow: string; title: string; draft?: boolean | undefined; children: ReactNode }) {
   return (
     <article className="container-lux max-w-3xl py-16 md:py-24">
       <p className="eyebrow">{eyebrow}</p>

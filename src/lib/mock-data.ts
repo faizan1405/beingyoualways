@@ -177,7 +177,7 @@ export const products: Product[] = [
 ];
 
 const addr = (name: string, city: string, state: string, pincode: string) => ({
-  id: `a-${name.split(" ")[0].toLowerCase()}`,
+  id: `a-${name.split(" ")[0]!.toLowerCase()}`,
   label: "Home",
   name,
   phone: "+91 98XXX XXXXX",
@@ -205,16 +205,16 @@ const item = (pid: string, vid: string, qty: number) => {
 const mkOrder = (id: string, c: Customer, createdAt: string, items: ReturnType<typeof item>[], o: Pick<Order, "paymentMethod" | "paymentStatus" | "status">): Order => {
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const shipping = subtotal >= 999 ? 0 : 79;
-  return { id, customerId: c.id, customerName: c.name, createdAt, items, subtotal, shipping, total: subtotal + shipping, shippingAddress: c.addresses[0], ...o };
+  return { id, customerId: c.id, customerName: c.name, createdAt, items, subtotal, shipping, total: subtotal + shipping, shippingAddress: c.addresses[0]!, ...o };
 };
 
 export const orders: Order[] = [
-  mkOrder("BYA-1042", customers[0], "2026-11-05T10:20:00Z", [item("p1", "p1-30", 1), item("p8", "p8-rose", 2)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "shipped" }),
-  mkOrder("BYA-1041", customers[1], "2026-11-04T15:05:00Z", [item("p5", "p5-200", 1)], { paymentMethod: "cod", paymentStatus: "cod", status: "confirmed" }),
-  mkOrder("BYA-1040", customers[2], "2026-11-03T09:45:00Z", [item("p1", "p1-50", 1)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "delivered" }),
-  mkOrder("BYA-1039", customers[4], "2026-11-02T18:30:00Z", [item("p10", "p10-medium", 1), item("p9", "p9-peach", 1)], { paymentMethod: "razorpay", paymentStatus: "pending", status: "placed" }),
-  mkOrder("BYA-1038", customers[0], "2026-10-30T12:10:00Z", [item("p3", "p3-50", 1), item("p11", "p11-15", 1)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "delivered" }),
-  mkOrder("BYA-1037", customers[3], "2026-10-27T08:00:00Z", [item("p2", "p2-200", 1)], { paymentMethod: "razorpay", paymentStatus: "refunded", status: "cancelled" }),
+  mkOrder("BYA-1042", customers[0]!, "2026-11-05T10:20:00Z", [item("p1", "p1-30", 1), item("p8", "p8-rose", 2)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "shipped" }),
+  mkOrder("BYA-1041", customers[1]!, "2026-11-04T15:05:00Z", [item("p5", "p5-200", 1)], { paymentMethod: "cod", paymentStatus: "cod", status: "confirmed" }),
+  mkOrder("BYA-1040", customers[2]!, "2026-11-03T09:45:00Z", [item("p1", "p1-50", 1)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "delivered" }),
+  mkOrder("BYA-1039", customers[4]!, "2026-11-02T18:30:00Z", [item("p10", "p10-medium", 1), item("p9", "p9-peach", 1)], { paymentMethod: "razorpay", paymentStatus: "pending", status: "placed" }),
+  mkOrder("BYA-1038", customers[0]!, "2026-10-30T12:10:00Z", [item("p3", "p3-50", 1), item("p11", "p11-15", 1)], { paymentMethod: "razorpay", paymentStatus: "paid", status: "delivered" }),
+  mkOrder("BYA-1037", customers[3]!, "2026-10-27T08:00:00Z", [item("p2", "p2-200", 1)], { paymentMethod: "razorpay", paymentStatus: "refunded", status: "cancelled" }),
 ];
 
 export const salesSeries = [

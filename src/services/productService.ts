@@ -8,11 +8,11 @@ const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "name";
 export interface ProductQuery {
-  category?: CategorySlug;
-  q?: string;
-  maxPrice?: number;
-  sort?: SortKey;
-  includeInactive?: boolean;
+  category?: CategorySlug | undefined;
+  q?: string | undefined;
+  maxPrice?: number | undefined;
+  sort?: SortKey | undefined;
+  includeInactive?: boolean | undefined;
 }
 
 export const minPrice = (p: Product) => Math.min(...p.variants.map((v) => v.price));

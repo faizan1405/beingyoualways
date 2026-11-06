@@ -18,9 +18,9 @@ export interface ProductVariant {
   label: string; // e.g. "50 ml" or "Rosewood"
   kind: "size" | "shade";
   price: number; // INR
-  compareAtPrice?: number;
+  compareAtPrice?: number | undefined;
   stock: number;
-  swatch?: string; // css colour for shade chips
+  swatch?: string | undefined; // css colour for shade chips
 }
 
 export interface Product {
@@ -28,7 +28,7 @@ export interface Product {
   slug: string;
   name: string;
   category: CategorySlug;
-  collection?: string;
+  collection?: string | undefined;
   shortDescription: string;
   description: string;
   ingredients: string[];
@@ -54,11 +54,11 @@ export interface Address {
   name: string;
   phone: string;
   line1: string;
-  line2?: string;
+  line2?: string | undefined;
   city: string;
   state: string;
   pincode: string;
-  isDefault?: boolean;
+  isDefault?: boolean | undefined;
 }
 
 export interface Customer {
@@ -108,7 +108,7 @@ export interface WhatsAppCampaign {
   name: string;
   template: string;
   segment: Customer["segment"] | "all";
-  scheduledFor?: string;
+  scheduledFor?: string | undefined;
   status: CampaignStatus;
   recipients: number;
 }

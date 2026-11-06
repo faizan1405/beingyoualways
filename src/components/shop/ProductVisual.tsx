@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  */
 export function ProductVisual({
   shape, tint, label, className, variant = 0,
-}: { shape: ProductShape; tint: string; label: string; className?: string; variant?: number }) {
+}: { shape: ProductShape; tint: string; label: string; className?: string | undefined; variant?: number | undefined}) {
   const bgs = ["var(--secondary)", "oklch(0.93 0.02 60)", "oklch(0.92 0.02 140)", "oklch(0.95 0.01 20)"];
   return (
     <div

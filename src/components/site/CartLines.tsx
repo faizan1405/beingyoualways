@@ -15,7 +15,7 @@ export function QtyStepper({ value, onChange, label }: { value: number; onChange
   );
 }
 
-export function CartLines({ compact = false }: { compact?: boolean }) {
+export function CartLines({ compact = false }: { compact?: boolean | undefined}) {
   const { lines, setQty, remove, setDrawerOpen } = useShop();
   return (
     <ul className="divide-y divide-border">

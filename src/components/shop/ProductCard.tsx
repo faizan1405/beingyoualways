@@ -9,13 +9,13 @@ import { minPrice, totalStock } from "@/services/productService";
 import { cn } from "@/lib/utils";
 import { ProductVisual } from "./ProductVisual";
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+export function ProductCard({ product, index = 0 }: { product: Product; index?: number | undefined}) {
   const { add, toggleWish, isWished } = useShop();
   const wished = isWished(product.id);
-  const first = product.variants.find((v) => v.stock > 0) ?? product.variants[0];
+  const first = product.variants.find((v) => v.stock > 0) ?? product.variants[0]!;
   const out = totalStock(product) === 0;
   const cat = categories.find((c) => c.slug === product.category)?.name;
-  const compare = product.variants[0].compareAtPrice;
+  const compare = product.variants[0]?.compareAtPrice;
 
   return (
     <article className="group relative flex flex-col">
@@ -69,7 +69,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   );
 }
 
-export function ProductGridSkeleton({ n = 8 }: { n?: number }) {
+export function ProductGridSkeleton({ n = 8 }: { n?: number | undefined}) {
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: n }).map((_, i) => (

@@ -51,7 +51,7 @@ function Bottle() {
   );
 }
 
-function Leaf({ position, rotation, scale = 1 }: { position: [number, number, number]; rotation: [number, number, number]; scale?: number }) {
+function Leaf({ position, rotation, scale = 1 }: { position: [number, number, number]; rotation: [number, number, number]; scale?: number | undefined}) {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
     s.moveTo(0, 0);

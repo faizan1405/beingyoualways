@@ -15,7 +15,7 @@ export function Newsletter() {
           className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("Please enter a valid email address");
+            if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("Please enter a valid email address"); return; }
             toast("Thanks! (Demo only — not saved until the backend is connected.)");
             setEmail("");
           }}

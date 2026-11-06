@@ -14,7 +14,7 @@ const MAX = 1600;
 
 export function ShopView({
   products, title, intro, category, initialQuery = "",
-}: { products: Product[]; title: string; intro: string; category?: CategorySlug; initialQuery?: string }) {
+}: { products: Product[]; title: string; intro: string; category?: CategorySlug | undefined; initialQuery?: string | undefined}) {
   const [q, setQ] = useState(initialQuery);
   const [cat, setCat] = useState<CategorySlug | undefined>(category);
   const [max, setMax] = useState(MAX);
@@ -57,7 +57,7 @@ export function ShopView({
             </div>
             <div>
               <span id="price-lbl" className="eyebrow">Max price · {max >= MAX ? "Any" : inr(max)}</span>
-              <Slider aria-labelledby="price-lbl" className="mt-5" min={300} max={MAX} step={50} value={[max]} onValueChange={([v]) => setMax(v)} />
+              <Slider aria-labelledby="price-lbl" className="mt-5" min={300} max={MAX} step={50} value={[max]} onValueChange={([v]) => setMax(v ?? MAX)} />
             </div>
             <div>
               <label htmlFor="shop-sort" className="eyebrow">Sort by</label>

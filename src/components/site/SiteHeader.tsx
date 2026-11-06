@@ -16,7 +16,7 @@ const nav = [
   { to: "/about", label: "About Us" },
 ] as const;
 
-export function Wordmark({ className = "" }: { className?: string }) {
+export function Wordmark({ className = "" }: { className?: string | undefined}) {
   return (
     <Link to="/" className={`flex flex-col items-center leading-none ${className}`} aria-label="Being You – Always, home">
       <span className="font-serif text-2xl tracking-wide md:text-[1.7rem]">Being You</span>
