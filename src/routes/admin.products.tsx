@@ -35,7 +35,7 @@ function Products() {
 
   return (
     <AdminPage title="Products" subtitle="Real catalogue from beingyoualways.com. Demo edits are saved in this browser only; stock numbers are demo values."
-      actions={<div className="flex gap-2"><Button variant="luxOutline" size="xl" onClick={() => reset.mutate()}><RotateCcw /> Reset demo data</Button><Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
+      actions={<div className="flex flex-wrap gap-2"><Button variant="luxOutline" size="xl" onClick={() => reset.mutate()}><RotateCcw /> Reset demo data</Button><Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
       <Panel>
         <input aria-label="Search products" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className={`${adminInput} mb-4 max-w-sm`} />
         {isLoading ? <div className="h-40 animate-pulse rounded bg-secondary" /> : (
