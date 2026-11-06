@@ -38,7 +38,7 @@ const groups: Record<string, Story[]> = {
 
 export function Testimonials() {
   const tabs = Object.keys(groups);
-  const [tab, setTab] = useState(tabs[0]);
+  const [tab, setTab] = useState<string>("Skin");
   return (
     <section className="bg-secondary">
       <div className="container-lux py-20 md:py-28">
@@ -58,7 +58,7 @@ export function Testimonials() {
         <AnimatePresence mode="wait">
           <motion.div key={tab} role="tabpanel" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35 }}
             className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {groups[tab].map((s) => (
+            {(groups[tab] ?? []).map((s) => (
               <figure key={s.name} className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft,0_1px_2px_rgb(0_0_0/0.04))]">
                 {s.photo && <img src={s.photo} alt={`${s.name}, customer`} loading="lazy" className="mb-5 aspect-[4/3] w-full rounded-xl object-cover object-top" />}
                 <div className="flex items-center justify-between">
