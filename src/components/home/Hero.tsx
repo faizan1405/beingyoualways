@@ -1,37 +1,92 @@
 import { Link } from "@tanstack/react-router";
-
-import { Button } from "@/components/ui/button";
-import { BeforeAfter } from "./BeforeAfter";
-import { Parallax } from "@/components/motion/Reveal";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
+import before from "@/assets/hero-pig-before.jpg";
+import after from "@/assets/hero-pig-after.jpg";
+import { Button } from "@/components/ui/button";
+
+/** Map 0–1 scroll progress to the transformation: hold the Before state briefly, ease through, hold After. */
+export function transformAmount(progress: number) {
+  const t = Math.min(1, Math.max(0, (progress - 0.08) / 0.8));
+  return t * t * (3 - 2 * t);
+}
+
+/**
+ * Hero with a scroll-controlled skin transformation. The section is taller than the screen;
+ * its inner panel is sticky, and normal page scroll drives the crossfade between two aligned
+ * photos of the same woman. No autoplay, no slider, no scroll locking. Reduced motion → static.
+ */
 export function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const [amount, setAmount] = useState(0);
+  const [still, setStill] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setStill(true); return; }
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const on = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        const travel = r.height - window.innerHeight;
+        setAmount(transformAmount(travel > 0 ? -r.top / travel : 0));
+      });
+    };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", on); window.removeEventListener("resize", on); };
+  }, []);
+
+  const pct = Math.round(amount * 100);
+
   return (
-    <section className="bg-hero relative overflow-hidden">
-      <div className="container-lux grid min-h-[calc(100svh-6.5rem)] md:max-h-[860px] items-center gap-4 py-10 md:grid-cols-2 md:py-0">
-        <div className="order-2 text-center md:order-1 md:text-left">
-          <Parallax speed={0.05}>
-          <p className="eyebrow hero-in" style={{ animationDelay: "100ms" }}>Plant-based beauty · Made in India</p>
-          <h1 className="mt-5 text-[2.9rem] leading-[0.98] sm:text-6xl lg:text-[5.4rem]" aria-label="Beauty that feels like you, always.">
-            {["Beauty", "that", "feels", "|", "like you,", "always."].map((w, i) =>
-              w === "|" ? <br key={i} /> : (
-                <span key={i} aria-hidden className="text-mask mr-[0.22em]">
-                  <span className={`hero-word ${w === "like you," ? "italic text-accent" : ""}`} style={{ animationDelay: `${220 + i * 85}ms` }}>{w}</span>
-                </span>
-              ),
-            )}
-          </h1>
-          <p className="hero-in mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mx-0" style={{ animationDelay: "800ms" }}>
-            See the transformation. Plant-powered care for pigmentation, dullness and uneven tone — for a healthier-looking glow, naturally.
-          </p>
-          <div className="hero-in mt-9 flex flex-col items-center gap-3 sm:flex-row md:justify-start" style={{ animationDelay: "950ms" }}>
-            <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
-            <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
+    <section ref={ref} className={`bg-hero relative ${still ? "" : "h-[165svh] md:h-[190vh]"}`} aria-label="Introduction">
+      <div className={`${still ? "" : "sticky top-14 md:top-16"} flex min-h-[calc(100svh-3.5rem)] items-center overflow-hidden md:min-h-[calc(100vh-4rem)]`}>
+        <div className="container-lux grid w-full items-center gap-6 py-6 md:grid-cols-2 md:gap-10 md:py-8">
+          <div className="order-2 text-center md:order-1 md:text-left">
+            <p className="eyebrow hero-in" style={{ animationDelay: "100ms" }}>Plant-based beauty · Made in India</p>
+            <h1 className="mt-4 text-[2.4rem] leading-[0.98] sm:text-6xl md:mt-5 lg:text-[5.2rem]" aria-label="Beauty that feels like you, always.">
+              {["Beauty", "that", "feels", "|", "like you,", "always."].map((w, i) =>
+                w === "|" ? <br key={i} /> : (
+                  <span key={i} aria-hidden className="text-mask mr-[0.22em]">
+                    <span className={`hero-word ${w === "like you," ? "italic text-accent" : ""}`} style={{ animationDelay: `${220 + i * 85}ms` }}>{w}</span>
+                  </span>
+                ),
+              )}
+            </h1>
+            <p className="hero-in mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mx-0 md:mt-6" style={{ animationDelay: "800ms" }}>
+              Plant-powered care for pigmentation, dullness and uneven tone — for a healthier-looking glow, naturally.
+            </p>
+            <div className="hero-in mt-6 flex flex-col items-center gap-2 sm:flex-row md:mt-9 md:justify-start md:gap-3" style={{ animationDelay: "950ms" }}>
+              <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
+              <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
+            </div>
           </div>
-          </Parallax>
-        </div>
-        <div className="hero-in order-1 mx-auto aspect-[4/5] w-full max-w-[min(100%,440px)] md:order-2 md:max-h-[min(78vh,680px)] md:max-w-[520px]" style={{ animationDelay: "300ms" }}>
-          <BeforeAfter />
+
+          <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,300px)] sm:max-w-[380px] md:order-2 md:max-w-[520px]" style={{ animationDelay: "300ms" }}>
+            <div className="relative aspect-[4/5] max-h-[46svh] w-full overflow-hidden rounded-[1.75rem] bg-secondary shadow-[var(--shadow-soft)] md:max-h-[min(76vh,680px)]" style={{ marginInline: "auto" }}>
+              <img src={before} alt="Illustrative portrait: woman with visible dark spots and uneven skin tone" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+              <img src={after} alt={still ? "" : "The same woman with clearer, more even-looking skin"} aria-hidden={still || amount < 0.5} width={1024} height={1280}
+                className="absolute inset-0 h-full w-full object-cover object-[50%_30%] will-change-[opacity]"
+                style={{ opacity: still ? 0 : amount }} />
+              {!still && (
+                <div className="absolute inset-x-4 top-4 flex items-center gap-3 rounded-full bg-background/80 px-4 py-2 backdrop-blur" aria-hidden>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Before</span>
+                  <span className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-border"><span className="absolute inset-y-0 left-0 bg-primary" style={{ width: `${pct}%` }} /></span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">After</span>
+                </div>
+              )}
+              {!still && amount < 0.05 && <p className="absolute inset-x-0 bottom-10 text-center text-[11px] font-medium tracking-[0.12em] text-background/95 transition-opacity">Scroll to see the change ↓</p>}
+            </div>
+            {still && (
+              <img src={after} alt="The same woman with clearer, more even-looking skin" width={1024} height={1280} loading="lazy" className="mt-3 aspect-[4/5] max-h-[46svh] w-full rounded-[1.75rem] object-cover object-[50%_30%]" />
+            )}
+            <figcaption className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Illustrative imagery — not actual product results</figcaption>
+          </figure>
         </div>
       </div>
     </section>
