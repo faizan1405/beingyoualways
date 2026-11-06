@@ -4,7 +4,14 @@ import { categories, products as seed } from "@/lib/mock-data";
 import type { CategorySlug, Product } from "@/lib/types";
 import { productConcerns, type ConcernSlug } from "@/lib/concerns";
 
-let store: Product[] = structuredClone(seed);
+// Demo admin edits persist in localStorage; resetDemo() restores the imported catalogue.
+const KEY = "bya.products.v2";
+const load = (): Product[] => {
+  if (typeof window === "undefined") return structuredClone(seed);
+  try { const v = JSON.parse(localStorage.getItem(KEY) ?? "null"); return Array.isArray(v) ? v : structuredClone(seed); } catch { return structuredClone(seed); }
+};
+let store: Product[] = load();
+const persist = () => { if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(store)); };
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "name";
@@ -46,14 +53,22 @@ export const productService = {
   byConcern: (c: ConcernSlug) => delay(store.filter((p) => p.status === "active" && (productConcerns[p.slug] ?? []).includes(c))),
   bySlugs: (slugs: string[]) => delay(store.filter((p) => p.status === "active" && slugs.includes(p.slug))),
   getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
-  // Admin (demo, in-memory — resets on reload)
+  // Admin (demo — saved in this browser only)
   save: (product: Product) => {
     const i = store.findIndex((p) => p.id === product.id);
     store = i >= 0 ? store.map((p) => (p.id === product.id ? product : p)) : [product, ...store];
+    persist();
     return delay(product);
   },
   remove: (id: string) => {
     store = store.filter((p) => p.id !== id);
+    persist();
+    return delay(true);
+  },
+  /** Restore the imported catalogue and discard demo edits. */
+  resetDemo: () => {
+    store = structuredClone(seed);
+    if (typeof window !== "undefined") localStorage.removeItem(KEY);
     return delay(true);
   },
   /** Synchronous lookup used by the cart to render line items. */

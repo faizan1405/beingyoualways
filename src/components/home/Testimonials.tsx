@@ -11,7 +11,9 @@ const getServer = () => [] as ReturnType<typeof testimonialService.publicList>;
 export function Testimonials() {
   const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, getServer);
   const list = all.filter((t) => t.verified && t.consent && t.published);
-  const [tab, setTab] = useState<TestimonialCategory>("Skin");
+  const tabs = testimonialCategories.filter((c) => list.some((t) => t.category === c));
+  const [picked, setTab] = useState<TestimonialCategory>("Skin");
+  const tab = tabs.includes(picked) ? picked : (tabs[0] ?? picked);
   const items = list.filter((t) => t.category === tab);
 
   return (
@@ -22,8 +24,15 @@ export function Testimonials() {
           <TextReveal text="In their own words" className="mt-3 text-4xl md:text-5xl" delay={80} />
           <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">Only verified reviews shared with the customer's permission appear here.</p>
         </div>
+        {list.length === 0 ? (
+          <div className="mx-auto mt-10 max-w-md rounded-2xl border border-dashed border-border bg-card px-8 py-12 text-center">
+            <MessageSquareQuote className="mx-auto size-7 text-accent" strokeWidth={1.4} />
+            <p className="mt-4 font-serif text-2xl">Customer stories are on their way</p>
+            <p className="mt-2 text-sm text-muted-foreground">We'll share skin, hair and de-tan stories here once customers have given permission.</p>
+          </div>
+        ) : (<>
         <div role="tablist" aria-label="Story categories" className="mx-auto mt-10 flex max-w-full gap-2 overflow-x-auto pb-2 md:justify-center">
-          {testimonialCategories.map((t) => (
+          {tabs.map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
               className={`press shrink-0 rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:border-primary"}`}>
               {t}
@@ -46,15 +55,10 @@ export function Testimonials() {
                   </figure>
                 ))}
               </div>
-            ) : (
-              <div className="mx-auto max-w-md rounded-2xl border border-dashed border-border bg-card px-8 py-12 text-center">
-                <MessageSquareQuote className="mx-auto size-7 text-accent" strokeWidth={1.4} />
-                <p className="mt-4 font-serif text-2xl">Verified stories coming soon</p>
-                <p className="mt-2 text-sm text-muted-foreground">We're collecting {tab.toLowerCase()} reviews from customers who've agreed to share them.</p>
-              </div>
-            )}
+            ) : null}
           </motion.div>
         </AnimatePresence>
+        </>)}
       </div>
     </section>
   );
