@@ -92,7 +92,7 @@ function ProductPage() {
           <div className="mt-6 flex items-baseline gap-3">
             <AnimatePresence mode="popLayout" initial={false}><motion.span key={v.price} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ duration: 0.25 }} className="text-2xl font-semibold tabular-nums">{inr(v.price)}</motion.span></AnimatePresence>
             {v.compareAtPrice && <span className="text-muted-foreground line-through">{inr(v.compareAtPrice)}</span>}
-            <span className="text-xs text-muted-foreground">Sample price · incl. taxes</span>
+            <span className="text-xs text-muted-foreground">Price as listed · taxes to be confirmed</span>
           </div>
 
           <fieldset className="mt-8">

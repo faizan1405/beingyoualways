@@ -30,7 +30,7 @@ export function ShopView({
     <div>
       <section className="bg-secondary py-14 text-center md:py-20">
         <div className="container-lux">
-          <p className="eyebrow hero-in">Collection · sample catalogue</p>
+          <p className="eyebrow hero-in">Collection</p>
           <TextReveal as="h1" text={title} className="mt-3 text-5xl md:text-7xl" />
           <p className="hero-in mx-auto mt-4 max-w-lg text-sm text-muted-foreground" style={{ animationDelay: "300ms" }}>{intro}</p>
         </div>
