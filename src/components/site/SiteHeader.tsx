@@ -10,12 +10,13 @@ export const ANNOUNCEMENT = "Naturally you, beautifully always · Plant-based sk
 const nav = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop All" },
-  { to: "/skincare", label: "Skincare" },
-  { to: "/haircare", label: "Haircare" },
+  { to: "/skincare", label: "Skin Care" },
+  { to: "/haircare", label: "Hair Care" },
   { to: "/de-tan-care", label: "De-Tan Care" },
   { to: "/colour-cosmetics", label: "Colour Cosmetics" },
   { to: "/combos", label: "Combos", wide: true },
   { to: "/about", label: "About Us", wide: true },
+  { to: "/contact", label: "Contact Us", wide: true },
 ] as const;
 
 export function Wordmark({ className = "" }: { className?: string | undefined}) {
