@@ -1,31 +1,40 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Mail, Phone } from "lucide-react";
-import type { ReactNode } from "react";
 
-import { brandConfig, contactConfig } from "@/config/business";
+import { contactConfig, policyLinks } from "@/config/business";
+import { policies, policyReview, type PolicyKey } from "@/content/policies";
 
-/** Policy page shell: never shows invented terms — status stays "Pending Client Approval" until real text arrives. */
-export function PolicyPage({ title, originalPath, children }: { title: string; originalPath: string; children?: ReactNode }) {
+/** Renders a policy migrated verbatim from the original website. Text is static, trusted, script-free HTML from src/content. */
+export function PolicyPage({ title, policy }: { title: string; policy: PolicyKey }) {
+  const p = policies[policy];
+  const review = policyReview[policy];
   return (
     <article className="container-lux max-w-3xl py-16 md:py-24">
-      <p className="eyebrow hero-in">Customer care</p>
-      <h1 className="hero-in mt-3 text-5xl md:text-6xl" style={{ animationDelay: "100ms" }}>{title}</h1>
-      <div className="hero-in mt-8 rounded-2xl border border-border bg-secondary p-6" style={{ animationDelay: "200ms" }}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Status · Pending client approval</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          The final wording of this policy is being reviewed with Being You – Always. Until it is approved, please refer to the policy on the current website or contact our team.
-        </p>
-        <a href={`${brandConfig.originalWebsite.replace(/\/$/, "")}${originalPath}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-4 hover:underline">
-          View current policy <ArrowUpRight className="size-4" />
-        </a>
-      </div>
-      {children && <div className="mt-10 space-y-5 text-[15px] leading-relaxed text-muted-foreground [&_h2]:mt-10 [&_h2]:text-3xl [&_h2]:text-foreground">{children}</div>}
-      <div className="mt-12 border-t border-border pt-8 text-sm">
+      <p className="eyebrow">Customer care</p>
+      <h1 className="mt-3 text-5xl md:text-6xl">{title}</h1>
+      <p className="mt-4 text-xs text-muted-foreground">
+        Source: <a href={p.sourceUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-foreground">{p.sourceUrl.replace("https://", "")}</a> · last updated there {p.sourceModified.slice(0, 10)}
+        {!review.legallyApproved && <> · <span className="font-semibold text-accent">Awaiting client legal review</span></>}
+      </p>
+
+      <div
+        className="policy-body mt-10 space-y-5 text-[15px] leading-[1.8] text-foreground/85 [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:!mt-12 [&_h2]:font-serif [&_h2]:text-3xl [&_h2]:text-foreground [&_strong]:font-semibold [&_strong]:text-foreground"
+        dangerouslySetInnerHTML={{ __html: p.html }}
+      />
+
+      <nav aria-label="Other policies" className="mt-14 border-t border-border pt-8">
+        <p className="eyebrow">All policies</p>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {policyLinks.map((l) => <li key={l.to}><Link to={l.to} className="link-underline text-muted-foreground hover:text-foreground" activeProps={{ className: "!text-primary font-semibold" }}>{l.label}</Link></li>)}
+        </ul>
+      </nav>
+
+      <div className="mt-10 rounded-2xl bg-secondary p-6 text-sm md:p-8">
         <p className="font-serif text-2xl">Questions?</p>
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-muted-foreground">
           <a href={`tel:${contactConfig.phones[0].tel}`} className="inline-flex items-center gap-2 hover:text-foreground"><Phone className="size-4" />{contactConfig.phones[0].display}</a>
           <a href={`mailto:${contactConfig.email}`} className="inline-flex items-center gap-2 hover:text-foreground"><Mail className="size-4" />{contactConfig.email}</a>
-          <Link to="/contact" className="font-semibold text-primary hover:underline">Contact page</Link>
+          <Link to="/contact" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">Contact page <ArrowUpRight className="size-4" /></Link>
         </div>
       </div>
     </article>
