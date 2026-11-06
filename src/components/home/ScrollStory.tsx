@@ -69,7 +69,7 @@ export function ScrollStory() {
   const { i, blend, active } = stageAt(p);
   const a = stages[i]!, b = stages[Math.min(stages.length - 1, i + 1)]!;
   const bg = mix(a.bg, b.bg, blend), fg = mix(a.fg, b.fg, blend), muted = mix(a.muted, b.muted, blend);
-  const x = p * (stages.length - 1); // 0 → 3 panels travelled
+  const x = i + blend; // eased: each stage rests, then slides right→left to the next
 
   return (
     <section ref={ref} aria-label="The beauty of being you" className="story relative" style={{ backgroundColor: bg, color: fg }} data-stage={stages[active]!.k}>
