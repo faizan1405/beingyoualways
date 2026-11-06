@@ -24,15 +24,10 @@ export const Route = createFileRoute("/_site/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async () => ({ featured: await productService.featured(), categories: await productService.categories() }),
+  loader: async () => ({ featured: await productService.featured() }),
   component: Home,
 });
 
-const catVisual = {
-  skincare: { shape: "dropper", tint: "oklch(0.82 0.06 20)" },
-  haircare: { shape: "bottle", tint: "oklch(0.72 0.09 85)" },
-  "colour-cosmetics": { shape: "lipstick", tint: "oklch(0.58 0.12 40)" },
-} as const;
 
 function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string; link?: { to: "/shop"; label: string } | undefined }) {
   return (
@@ -47,7 +42,7 @@ function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string;
 }
 
 function Home() {
-  const { featured, categories } = Route.useLoaderData();
+  const { featured } = Route.useLoaderData();
   return (
     <>
       <Hero />
