@@ -13,5 +13,5 @@ export const Route = createFileRoute("/_site/refund-policy")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <PolicyPage title="Refund & Returns Policy" policy="refund" />,
+  component: () => <PolicyPage title="Refund & Returns" policy="refund" />,
 });
