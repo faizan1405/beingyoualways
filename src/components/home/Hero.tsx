@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import before from "@/assets/concerns/pig-before.jpg";
-import after from "@/assets/concerns/pig-after.jpg";
+import before from "@/assets/hero-pig-before.jpg";
+import after from "@/assets/hero-pig-after.jpg";
 import { DISCLOSURE } from "@/components/concerns/ConcernStory";
 import { Button } from "@/components/ui/button";
 
