@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import before from "@/assets/hero-acne-before.jpg";
-import after from "@/assets/hero-pig-after.jpg";
+import before from "@/assets/concerns/pig-before.jpg";
+import after from "@/assets/concerns/pig-after.jpg";
+import { DISCLOSURE } from "@/components/concerns/ConcernStory";
 import { Button } from "@/components/ui/button";
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -66,10 +67,11 @@ export function Hero() {
               )}
             </h1>
             <p className="hero-in mx-auto mt-3 hidden max-w-md text-[15px] leading-relaxed text-muted-foreground sm:block md:mx-0 md:mt-6" style={{ animationDelay: "800ms" }}>
-              Plant-powered care for pigmentation, dullness and uneven tone — for a healthier-looking glow, naturally.
+              Nature-inspired beauty rituals for uneven skin tone, dark spots and everyday radiance.
             </p>
-            <div className="hero-in mt-5 flex flex-col items-center gap-1 sm:flex-row md:mt-9 md:justify-start md:gap-3" style={{ animationDelay: "950ms" }}>
+            <div className="hero-in mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:mt-9 md:justify-start" style={{ animationDelay: "950ms" }}>
               <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
+              <Button variant="outline" size="xl" asChild className="rounded-full border-primary/40 bg-transparent"><Link to="/explore-concerns">Explore by Concern</Link></Button>
               <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
             </div>
           </div>
@@ -77,12 +79,12 @@ export function Hero() {
           <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,340px)] sm:max-w-[400px] md:order-2 md:max-w-none" style={{ animationDelay: "300ms" }}>
             <div className="relative mx-auto aspect-[4/5] max-h-[52svh] overflow-hidden rounded-t-[999px] rounded-b-[2rem] bg-secondary shadow-[var(--shadow-soft)] md:max-h-[min(78vh,720px)]">
               {still ? (
-                <img src={after} alt="Illustrative portrait: woman with clear-looking skin" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
+                <img src={after} alt="Illustrative portrait: woman with a more even-looking complexion" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
               ) : (
                 <>
-                  <img src={before} alt="Illustrative portrait: woman with visible acne on her cheeks, forehead and chin" width={1024} height={1280} fetchPriority="high"
+                  <img src={before} alt="Illustrative portrait: woman with visible pigmentation, dark spots and uneven skin tone" width={1024} height={1280} fetchPriority="high"
                     className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" style={{ transform: `scale(${(1.06 - amount * 0.04).toFixed(3)})` }} />
-                  <img src={after} alt={amount > 0.5 ? "The same woman with clearer-looking skin" : ""} aria-hidden={amount <= 0.5} width={1024} height={1280}
+                  <img src={after} alt={amount > 0.5 ? "The same woman with lighter-looking dark spots and a more even tone" : ""} aria-hidden={amount <= 0.5} width={1024} height={1280}
                     className="absolute inset-0 h-full w-full object-cover object-[50%_30%] will-change-[opacity]"
                     style={{ opacity: amount, transform: `scale(${(1.06 - amount * 0.04).toFixed(3)})` }} />
                   <p aria-hidden className="absolute inset-x-0 bottom-6 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-background transition-opacity duration-500" style={{ opacity: started ? 0 : 0.95 }}>
@@ -91,6 +93,7 @@ export function Hero() {
                 </>
               )}
             </div>
+            <figcaption className="mt-2 text-center text-[11px] text-muted-foreground">{DISCLOSURE}</figcaption>
           </figure>
         </div>
       </div>
