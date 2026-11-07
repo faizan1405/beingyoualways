@@ -91,7 +91,6 @@ export function Hero() {
                 </>
               )}
             </div>
-            <figcaption className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI-generated illustrative imagery — not actual product results</figcaption>
           </figure>
         </div>
       </div>
