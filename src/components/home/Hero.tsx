@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import before from "@/assets/hero-pig-before.jpg";
 import after from "@/assets/hero-pig-after.jpg";
-import { DISCLOSURE } from "@/components/concerns/ConcernStory";
 import { Button } from "@/components/ui/button";
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -77,7 +76,9 @@ export function Hero() {
           </div>
 
           <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,340px)] sm:max-w-[400px] md:order-2 md:max-w-none" style={{ animationDelay: "300ms" }}>
-            <div className="relative mx-auto aspect-[4/5] max-h-[52svh] overflow-hidden rounded-t-[999px] rounded-b-[2rem] bg-secondary shadow-[var(--shadow-soft)] md:max-h-[min(78vh,720px)]">
+            <div className="relative mx-auto aspect-[4/5] max-h-[54svh] md:max-h-[min(78vh,720px)]">
+            <span aria-hidden className="pointer-events-none absolute -bottom-3 -right-3 hidden h-full w-full border border-primary/25 sm:block md:-bottom-4 md:-right-4" />
+            <div className="relative h-full w-full overflow-hidden rounded-[3px] bg-secondary shadow-[var(--shadow-soft)]">
               {still ? (
                 <img src={after} alt="Illustrative portrait: woman with a more even-looking complexion" width={1024} height={1280} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
               ) : (
@@ -93,7 +94,7 @@ export function Hero() {
                 </>
               )}
             </div>
-            <figcaption className="mt-2 text-center text-[11px] text-muted-foreground">{DISCLOSURE}</figcaption>
+            </div>
           </figure>
         </div>
       </div>

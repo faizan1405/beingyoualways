@@ -77,7 +77,7 @@ function EditProduct() {
               <div className="sm:col-span-2"><label htmlFor="pdir" className={adminLabel}>How to use</label><textarea id="pdir" rows={3} className={`${adminInput} h-auto py-2`} value={isUnconfirmed(p.directions) ? "" : p.directions} placeholder="Awaiting usage instructions from the client" onChange={(e) => up({ directions: e.target.value })} />
                 <p className={hint}>Shown on the product page only once filled in.</p></div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={p.featured} onChange={(e) => up({ featured: e.target.checked })} /> Featured on homepage</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestSeller} onChange={(e) => up({ bestSeller: e.target.checked })} /> Best seller</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestSeller} onChange={(e) => up({ bestSeller: e.target.checked })} /> High demand</label>
             </div>
           </Panel>
           <Panel title="Shop by concern">
