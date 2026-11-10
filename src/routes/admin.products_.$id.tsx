@@ -97,13 +97,13 @@ function EditProduct() {
             <p className="mb-3 text-xs text-muted-foreground">Stock numbers are demo values, not real inventory. 0 shows “Currently unavailable”; any other number shows “Available to order” — counts are never shown to shoppers. Sizes labelled “to be confirmed” are hidden on the shop.</p>
             <div className="space-y-3">
               {p.variants.map((v, i) => (
-                <div key={v.id} className="grid grid-cols-2 items-end gap-3 rounded-md bg-secondary/60 p-3 sm:grid-cols-[1fr_100px_100px_100px_80px_auto]">
+                <div key={v.id} className="grid grid-cols-2 items-end gap-3 rounded-md bg-secondary/60 p-3 sm:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
                   {v.kind === "shade" && (
-                    <div className="col-span-2 flex items-center gap-2 sm:col-span-6"><label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor={`vc${i}`}>Shade colour</label>
+                    <div className="col-span-2 flex items-center gap-2 sm:col-span-5"><label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor={`vc${i}`}>Shade colour</label>
                       <input id={`vc${i}`} type="color" className="h-8 w-12 cursor-pointer rounded border border-input bg-card" value={/^#[0-9a-f]{6}$/i.test(v.swatch ?? "") ? v.swatch : "#c78e78"} onChange={(e) => upV(i, { swatch: e.target.value })} />
                       <span className="text-[11px] text-muted-foreground">{v.swatch ? "Shown as the shade chip" : "No chip colour set"}</span></div>
                   )}
-                  <div><label className={adminLabel} htmlFor={`vl${i}`}>Label</label><input id={`vl${i}`} className={adminInput} value={v.label} onChange={(e) => upV(i, { label: e.target.value })} /></div>
+                  <div className="col-span-2 sm:col-span-5"><label className={adminLabel} htmlFor={`vl${i}`}>{v.kind === "shade" ? "Shade name" : "Size"}</label><input id={`vl${i}`} className={adminInput} value={v.label} onChange={(e) => upV(i, { label: e.target.value })} /></div>
                   <div><label className={adminLabel} htmlFor={`vk${i}`}>Type</label><select id={`vk${i}`} className={adminInput} value={v.kind} onChange={(e) => upV(i, { kind: e.target.value as "size" })}><option value="size">Size</option><option value="shade">Shade</option></select></div>
                   <div><label className={adminLabel} htmlFor={`vp${i}`}>Selling ₹</label><input id={`vp${i}`} type="number" min={0} className={adminInput} value={v.price} onChange={(e) => upV(i, { price: Number(e.target.value) })} /></div>
                   <div><label className={adminLabel} htmlFor={`vm${i}`}>MRP ₹</label><input id={`vm${i}`} type="number" min={0} className={adminInput} value={v.compareAtPrice ?? ""} onChange={(e) => upV(i, { compareAtPrice: e.target.value ? Number(e.target.value) : undefined })} /></div>
