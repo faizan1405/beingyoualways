@@ -318,7 +318,12 @@ body { overflow-x: clip; }
   @media (hover: hover) { &:hover { background-size: 100% 1px; } }
   &:focus-visible { background-size: 100% 1px; }
 }
+/* Scroll cue: a soft bead travelling down a hairline */
+@keyframes scroll-cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(260%); } }
+.scroll-cue::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: var(--primary); animation: scroll-cue 2.2s var(--ease-soft) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
+  .scroll-cue::after { animation: none; }
   .btn-motion, .btn-motion:hover, .btn-motion:active, .btn-lift:hover, .btn-lift:active { transform: none !important; }
   .btn-motion svg { transform: none !important; }
 }
