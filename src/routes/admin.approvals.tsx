@@ -7,7 +7,7 @@ import { AdminPage, Panel } from "@/components/admin/AdminUI";
 import { buildApprovalChecklist, type ApprovalStatus } from "@/lib/approvals";
 import { cn } from "@/lib/utils";
 import { productService } from "@/services/productService";
-import { testimonialService } from "@/services/testimonialService";
+import { isPublic, testimonialService } from "@/services/testimonialService";
 
 export const Route = createFileRoute("/admin/approvals")({
   head: () => ({
@@ -26,13 +26,15 @@ export const Route = createFileRoute("/admin/approvals")({
 
 const STATUS: Record<ApprovalStatus, { label: string; I: typeof CheckCircle2; cls: string }> = {
   confirmed: { label: "Confirmed", I: CheckCircle2, cls: "bg-success/10 text-success" },
-  partial: { label: "Partly done", I: CircleDot, cls: "bg-accent/15 text-accent-foreground" },
+  partial: { label: "Partly done", I: CircleDot, cls: "bg-accent/15 text-foreground" },
   waiting: { label: "Waiting on client", I: CircleDashed, cls: "bg-destructive/10 text-destructive" },
 };
 
 function Approvals() {
   const { data: products = [] } = useQuery({ queryKey: ["admin", "products", "approvals"], queryFn: () => productService.list({ includeInactive: true }) });
-  const reviews = useSyncExternalStore(testimonialService.subscribe, testimonialService.publicList, testimonialService.publicList);
+  // `all` returns a stable reference; filtering inside the snapshot would loop.
+  const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.all);
+  const reviews = all.filter(isPublic);
   const items = buildApprovalChecklist({ products, publicReviewCount: reviews.length });
   const done = items.filter((i) => i.status === "confirmed").length;
 

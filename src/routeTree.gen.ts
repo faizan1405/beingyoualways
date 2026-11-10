@@ -35,6 +35,7 @@ import { Route as SiteVerifyOtpRouteImport } from './routes/_site.verify-otp'
 import { Route as SiteWishlistRouteImport } from './routes/_site.wishlist'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAbandonedCartRouteImport } from './routes/admin.abandoned-cart'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -183,6 +184,11 @@ const AdminAbandonedCartRoute = AdminAbandonedCartRouteImport.update({
   path: '/abandoned-cart',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminChatbotRoute = AdminChatbotRouteImport.update({
   id: '/chatbot',
   path: '/chatbot',
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/verify-otp': typeof SiteVerifyOtpRoute
   '/wishlist': typeof SiteWishlistRoute
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/_site/verify-otp': typeof SiteVerifyOtpRoute
   '/_site/wishlist': typeof SiteWishlistRoute
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -436,6 +445,7 @@ export interface FileRouteTypes {
     | '/verify-otp'
     | '/wishlist'
     | '/admin/abandoned-cart'
+    | '/admin/approvals'
     | '/admin/chatbot'
     | '/admin/customers'
     | '/admin/orders'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/verify-otp'
     | '/wishlist'
     | '/admin/abandoned-cart'
+    | '/admin/approvals'
     | '/admin/chatbot'
     | '/admin/customers'
     | '/admin/orders'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/_site/verify-otp'
     | '/_site/wishlist'
     | '/admin/abandoned-cart'
+    | '/admin/approvals'
     | '/admin/chatbot'
     | '/admin/customers'
     | '/admin/orders'
@@ -735,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAbandonedCartRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/chatbot': {
       id: '/admin/chatbot'
       path: '/chatbot'
@@ -944,6 +963,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 interface AdminRouteChildren {
   AdminAbandonedCartRoute: typeof AdminAbandonedCartRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminChatbotRoute: typeof AdminChatbotRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -959,6 +979,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAbandonedCartRoute: AdminAbandonedCartRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminChatbotRoute: AdminChatbotRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminOrdersRoute: AdminOrdersRoute,
