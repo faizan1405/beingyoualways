@@ -22,12 +22,11 @@ export function VideoReviews() {
   };
 
   return (
-    <section aria-labelledby="video-reviews-h" className="overflow-hidden py-20 md:py-28">
+    <section aria-label="Customer videos" className="overflow-hidden py-20 md:py-28">
       <div className="container-lux">
         <div className="flex flex-col items-center justify-between gap-5 text-center md:flex-row md:items-end md:text-left">
           <div>
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Customer videos</RevealOnScroll>
-            <h2 id="video-reviews-h" className="sr-only">Trusted &amp; engaging experience</h2>
             <TextReveal text="Trusted & engaging experience" className="mt-3 text-4xl md:text-5xl" delay={80} />
             <p className="mt-4 max-w-md text-sm text-muted-foreground">Real customers sharing their experience — as published on our original website.</p>
           </div>
