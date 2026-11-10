@@ -53,9 +53,25 @@ export interface CartItem {
   quantity: number;
 }
 
+/** Shipping is "pending" until the client confirms rates; totals stay unknown until then. */
+export type ShippingStatus = { state: "pending" } | { state: "free" } | { state: "charged"; amount: number };
+
+export interface OrderSummary {
+  subtotal: number;
+  /** Only confirmed discounts; 0 in this prototype. */
+  discount: number;
+  shipping: ShippingStatus;
+  /** Final payable amount, or null while any part of it (e.g. shipping) is unknown. */
+  total: number | null;
+  itemCount: number;
+}
+
+export type AddressType = "home" | "work" | "other";
+
 export interface Address {
   id: string;
   label: string;
+  addressType?: AddressType | undefined;
   name: string;
   phone: string;
   line1: string;
