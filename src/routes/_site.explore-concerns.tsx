@@ -50,8 +50,8 @@ function ExploreConcerns() {
   return (
     <>
       <header className="relative isolate overflow-hidden bg-hero">
-        <Parallax speed={-0.12} className="pointer-events-none absolute -left-24 top-10 -z-10 size-72 rounded-full story-orb" />
-        <Parallax speed={0.1} className="pointer-events-none absolute -right-16 bottom-0 -z-10 size-96 rounded-full bg-sage/20 blur-3xl" />
+        <Parallax speed={-0.12} className="pointer-events-none absolute -left-24 top-10 -z-10"><span aria-hidden className="story-orb block size-72 rounded-full" /></Parallax>
+        <Parallax speed={0.1} className="pointer-events-none absolute -right-16 bottom-0 -z-10"><span aria-hidden className="block size-96 rounded-full bg-sage/20 blur-3xl" /></Parallax>
         <div className="container-lux grid items-center gap-8 pb-12 pt-8 md:grid-cols-[1.05fr_1fr] md:gap-14 md:pb-16 md:pt-12 lg:gap-20 lg:pb-20">
           <div className="order-2 md:order-1">
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Explore by concern</RevealOnScroll>
