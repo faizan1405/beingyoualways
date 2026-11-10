@@ -93,12 +93,12 @@ export function WhyChooseUs() {
           {standForContent.items.map(({ title, text }, i) => {
             const I = standIcons[i] ?? Leaf;
             return (
-              <article key={title} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-[var(--shadow-soft)] transition-[transform,box-shadow,border-color] duration-500 ease-[var(--ease-lux)] hover:-translate-y-1 hover:border-sage hover:shadow-lift md:p-10">
+              <article key={title} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] transition-[transform,box-shadow,border-color] duration-500 ease-[var(--ease-lux)] hover:-translate-y-1 hover:border-sage hover:shadow-lift sm:p-8 md:p-10">
                 <Sprig className="pointer-events-none absolute -right-6 -top-6 w-28 text-sage/40 transition-transform duration-700 ease-[var(--ease-lux)] group-hover:-translate-x-1 group-hover:translate-y-1 group-hover:rotate-6" />
                 <span className="relative grid size-16 place-items-center rounded-full border border-primary/15 bg-secondary text-primary transition-colors duration-500 group-hover:bg-primary group-hover:text-primary-foreground">
                   <I className="size-7" strokeWidth={1.2} />
                 </span>
-                <span className="mt-8 font-serif text-sm italic text-accent">0{i + 1}</span>
+                <span className="mt-6 font-serif text-sm italic text-accent md:mt-8">0{i + 1}</span>
                 <h3 className="mt-1 text-3xl md:text-[2.1rem]">{title}</h3>
                 <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
               </article>
