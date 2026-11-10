@@ -83,7 +83,6 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
               <span key={v.id} className="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">{v.label}</span>
             ))
           )}
-          {choose && !product.variants.some((v) => v.swatch) && <span className="text-[11px] text-muted-foreground">{product.variants.length} {kind}s</span>}
         </div>
       </div>
     </article>
