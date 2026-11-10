@@ -167,7 +167,9 @@
 }
 
 @utility page-enter {
-  animation: page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* "backwards" so no transform lingers after the fade — a leftover transform would
+     break position:fixed bars (mobile Add to Bag / checkout) inside the page. */
+  animation: page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes page-enter {
