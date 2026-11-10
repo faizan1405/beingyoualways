@@ -59,15 +59,15 @@ function ExploreConcerns() {
             <RevealOnScroll as="p" kind="fade" delay={320} className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground md:mt-6 md:text-base">
               Explore thoughtful beauty rituals through interactive stories of skin and hair care.
             </RevealOnScroll>
-            <nav aria-label="Jump to concern" className="mt-7 grid gap-2.5 sm:grid-cols-3 md:mt-9">
+            <nav aria-label="Jump to concern" className="mt-7 grid grid-cols-3 gap-2 sm:gap-2.5 md:mt-9">
               {chapters.map(({ id, label }, i) => (
                 <RevealOnScroll key={id} kind="fade-up" delay={420 + i * 90}>
-                  <a href={`#${id}`} className="btn-motion group flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-card/80 px-4 py-3 backdrop-blur hover:border-primary/50 hover:bg-card hover:shadow-[var(--shadow-soft)]">
-                    <span className="flex items-baseline gap-2.5">
+                  <a href={`#${id}`} className="btn-motion group relative flex min-h-14 flex-col justify-center gap-0.5 rounded-2xl border border-primary/15 bg-card/80 px-3 py-3 backdrop-blur hover:border-primary/50 hover:bg-card hover:shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4">
+                    <span className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2.5">
                       <span className="font-serif text-sm italic text-accent">0{i + 1}</span>
                       <span className="text-sm font-medium text-foreground">{label}</span>
                     </span>
-                    <ArrowDown className="size-4 text-primary transition-transform duration-500 ease-[var(--ease-lux)] group-hover:translate-y-0.5" />
+                    <ArrowDown className="absolute right-3 top-3 size-3.5 text-primary sm:static sm:size-4 transition-transform duration-500 ease-[var(--ease-lux)] group-hover:translate-y-0.5" />
                   </a>
                 </RevealOnScroll>
               ))}
@@ -82,14 +82,14 @@ function ExploreConcerns() {
 
           <div className="relative order-1 md:order-2">
             <ImageReveal className="rounded-[2rem] shadow-lift">
-              <img src={pigAfter} alt="Editorial portrait of a woman with naturally radiant skin" width={1024} height={1280} fetchPriority="high" className="aspect-[5/4] w-full object-cover object-[50%_30%] md:aspect-[4/5]" />
+              <img src={pigAfter} alt="Editorial portrait of a woman with naturally radiant skin" width={1024} height={1280} fetchPriority="high" className="aspect-[5/4] w-full object-cover object-[50%_30%] md:aspect-auto md:h-[min(68vh,600px)]" />
             </ImageReveal>
             <Parallax speed={0.08} className="absolute -bottom-6 -left-4 w-[34%] md:-bottom-8 md:-left-10 md:w-[38%]">
               <ImageReveal from="left" delay={300} className="rounded-2xl border-[5px] border-background shadow-lift">
                 <img src={supportImg} alt="Being You face serum among fresh botanicals" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
               </ImageReveal>
             </Parallax>
-            <RevealOnScroll kind="fade" delay={500} className="absolute right-3 top-3 md:-right-4 md:top-8">
+            <RevealOnScroll kind="fade" delay={500} className="absolute right-3 top-3 md:right-5 md:top-5">
               <span className="inline-flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground shadow-[var(--shadow-soft)] backdrop-blur">
                 <span className="size-1.5 rounded-full bg-accent" /> 3 stories · scroll to explore
               </span>
