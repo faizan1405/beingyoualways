@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { FounderQuote, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
+import { FounderQuote, GlobalStandards, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
 import { Testimonials } from "@/components/home/Testimonials";
 import { ScrollStory } from "@/components/home/ScrollStory";
 import { VideoReviews } from "@/components/home/VideoReviews";
@@ -102,6 +102,8 @@ function Home() {
       <Testimonials />
 
       <VideoReviews />
+
+      <GlobalStandards />
 
       <WhyChooseUs />
 

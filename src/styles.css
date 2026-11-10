@@ -206,6 +206,9 @@
 .motion-ok [data-reveal="slide-left"]:not(.is-in) { opacity: 0; transform: translateX(-36px); }
 .motion-ok [data-reveal="slide-right"]:not(.is-in) { opacity: 0; transform: translateX(36px); }
 .motion-ok [data-reveal="scale"]:not(.is-in) { opacity: 0; transform: scale(0.96); }
+/* Connecting line: draws left → right */
+.motion-ok [data-reveal="line"] { transform-origin: left center; transition-duration: 1.6s; }
+.motion-ok [data-reveal="line"]:not(.is-in) { transform: scaleX(0); }
 
 /* Masked image reveal: wipe up from bottom + gentle scale-down of the inner layer */
 /* Clip the inner layer (not the observed element) so IntersectionObserver still sees it. */
@@ -279,3 +282,48 @@ body { overflow-x: clip; }
 
 /* Horizontal carousels: keep native scrolling, hide the bar */
 @utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+
+/* ───────────── Luxury button motion ─────────────
+ * Shared by every <Button> variant (see ui/button.tsx) and the few hand-built CTAs.
+ * btn-motion: premium easing, arrow glide, gentle press. btn-lift: primary hover lift.
+ * btn-underline: text links. Hover effects only apply on hover-capable pointers; taps get
+ * the press state. Reduced-motion users keep colour changes but no movement.
+ */
+@utility btn-motion {
+  transition:
+    color 380ms var(--ease-lux), background-color 380ms var(--ease-lux), border-color 380ms var(--ease-lux),
+    box-shadow 480ms var(--ease-lux), transform 380ms var(--ease-lux), opacity 380ms var(--ease-lux), background-size 520ms var(--ease-lux);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  & svg.lucide-arrow-right, & svg.lucide-chevron-right, & svg.lucide-arrow-up-right { transition: transform 420ms var(--ease-lux); }
+  @media (hover: hover) {
+    &:hover svg.lucide-arrow-right, &:hover svg.lucide-chevron-right { transform: translateX(4px); }
+    &:hover svg.lucide-arrow-up-right { transform: translate(2px, -2px); }
+  }
+  &:focus-visible svg.lucide-arrow-right, &:focus-visible svg.lucide-chevron-right { transform: translateX(4px); }
+  &:active { transform: translateY(0) scale(0.98); transition-duration: 140ms; }
+}
+@utility btn-lift {
+  @media (hover: hover) { &:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift-value); } }
+  &:focus-visible { box-shadow: var(--shadow-lift-value); }
+  &:active { transform: translateY(0) scale(0.98); box-shadow: var(--shadow-soft-value); }
+}
+@utility btn-underline {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  @media (hover: hover) { &:hover { background-size: 100% 1px; } }
+  &:focus-visible { background-size: 100% 1px; }
+}
+/* Scroll cue: a soft bead travelling down a hairline */
+@keyframes scroll-cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(260%); } }
+.scroll-cue::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: var(--primary); animation: scroll-cue 2.2s var(--ease-soft) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue::after { animation: none; }
+  .btn-motion, .btn-motion:hover, .btn-motion:active, .btn-lift:hover, .btn-lift:active { transform: none !important; }
+  .btn-motion svg { transform: none !important; }
+}

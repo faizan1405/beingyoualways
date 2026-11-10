@@ -105,7 +105,7 @@ export function ConcernStory(p: ConcernStoryProps) {
               </div>
             ))}
           </div>
-          <Link to={p.ctaTo} tabIndex={m === 3 ? 0 : -1} aria-hidden={m !== 3} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-[transform,opacity] duration-500 hover:-translate-y-0.5 md:mt-8"
+          <Link to={p.ctaTo} tabIndex={m === 3 ? 0 : -1} aria-hidden={m !== 3} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium btn-motion text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8"
             style={{ opacity: m === 3 ? 1 : 0, transform: m === 3 ? "none" : "translateY(10px)", pointerEvents: m === 3 ? "auto" : "none" }}>
             {p.ctaLabel} <ArrowRight className="h-4 w-4" />
           </Link>

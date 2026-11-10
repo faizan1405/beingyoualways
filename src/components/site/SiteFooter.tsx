@@ -3,6 +3,7 @@ import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
+import { buttonVariants } from "@/components/ui/button";
 import { brandConfig, contactConfig, mapsUrl, navigationConfig, policyLinks } from "@/config/business";
 
 export function Newsletter() {
@@ -24,7 +25,7 @@ export function Newsletter() {
         >
           <label htmlFor="nl-email" className="sr-only">Email address</label>
           <input id="nl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email address" className="h-12 flex-1 rounded-full border border-input bg-card px-5 text-sm outline-none focus:border-primary" />
-          <button className="press h-12 rounded-full bg-primary px-7 text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-shadow hover:shadow-lift">Subscribe</button>
+          <button className={buttonVariants({ variant: "lux", size: "xl", className: "px-7" })}>Subscribe</button>
         </form>
       </div>
     </section>

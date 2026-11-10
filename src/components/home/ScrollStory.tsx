@@ -82,7 +82,7 @@ export function ScrollStory() {
                   <h2 className="story-line mt-1 text-[1.75rem] leading-[1.08] md:mt-3 md:text-5xl lg:text-6xl" style={{ color: fg }}>{s.title}</h2>
                   <p className="story-line mt-2 max-w-md text-sm leading-relaxed md:mt-5 md:text-[15px]" style={{ color: muted }}>{s.copy}</p>
                   {s.cta && (
-                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className="story-line mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5 md:mt-8">
+                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className="story-line mt-4 inline-flex min-h-11 items-center gap-2 btn-motion btn-lift rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8">
                       Explore the Collection <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}
