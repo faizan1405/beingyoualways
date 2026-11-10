@@ -37,7 +37,7 @@ export function VideoReviews() {
         </div>
       </div>
 
-      <div ref={track} className="no-scrollbar mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-4 md:scroll-px-[max(2rem,calc((100vw-80rem)/2+2rem))] md:px-[max(2rem,calc((100vw-80rem)/2+2rem))]" aria-label="Customer video reviews">
+      <div ref={track} className="no-scrollbar mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-4 md:scroll-px-[max(2.5rem,calc((100vw-80rem)/2+2.5rem))] md:px-[max(2.5rem,calc((100vw-80rem)/2+2.5rem))]" aria-label="Customer video reviews">
         {videos.map((v, i) => <VideoCard key={v.id} video={v} index={i} total={videos.length} />)}
       </div>
 
