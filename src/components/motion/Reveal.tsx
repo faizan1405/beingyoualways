@@ -8,7 +8,7 @@ import { Children, createElement, useEffect, useRef, type CSSProperties, type El
 
 import { cn } from "@/lib/utils";
 
-type RevealKind = "fade-up" | "fade" | "slide-left" | "slide-right" | "scale" | "image" | "image-left" | "text";
+type RevealKind = "fade-up" | "fade" | "slide-left" | "slide-right" | "scale" | "image" | "image-left" | "text" | "line";
 
 // ── shared observer ──────────────────────────────────────────────
 let io: IntersectionObserver | null = null;
