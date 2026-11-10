@@ -41,12 +41,15 @@ export const availabilityOf = (v: ProductVariant | undefined | null) =>
 export const mrpOf = (v: ProductVariant | undefined | null) =>
   v?.compareAtPrice && v.compareAtPrice > v.price ? v.compareAtPrice : null;
 
+/** Detail rows kept for admin reference only (raw tags from the old site aren't verified claims). */
+const INTERNAL_DETAIL_LABELS = new Set(["Original site tags"]);
+
 /** Public product information sections — sections without verified content are omitted. */
 export function productInfoSections(p: Product) {
   return {
     description: isUnconfirmed(p.description) ? null : p.description,
     ingredients: p.ingredients.filter((i) => !isUnconfirmed(i)),
     directions: isUnconfirmed(p.directions) ? null : p.directions,
-    details: p.details.filter((d) => !isUnconfirmed(d.value)),
+    details: p.details.filter((d) => !isUnconfirmed(d.value) && !INTERNAL_DETAIL_LABELS.has(d.label)),
   };
 }
