@@ -12,7 +12,7 @@ export interface CheckoutForm {
   addressType: AddressType;
 }
 
-export type CheckoutErrors = Partial<Record<keyof CheckoutForm | "payment", string>>;
+export type CheckoutErrors = Partial<Record<keyof CheckoutForm | "payment", string | undefined>>;
 
 export type CheckoutStep = "contact" | "address" | "payment" | "review";
 export const CHECKOUT_STEPS: { id: CheckoutStep; label: string }[] = [
