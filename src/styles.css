@@ -276,3 +276,6 @@
 
 /* Reveal offsets (slide-in) must never cause sideways scrolling */
 body { overflow-x: clip; }
+
+/* Horizontal carousels: keep native scrolling, hide the bar */
+@utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }

@@ -6,7 +6,9 @@ import hairAfter from "@/assets/concerns/hair-after.jpg";
 import hairBefore from "@/assets/concerns/hair-before.jpg";
 import pigAfter from "@/assets/concerns/pig-after.jpg";
 import pigBefore from "@/assets/concerns/pig-before.jpg";
-import { ConcernStory, DISCLOSURE } from "@/components/concerns/ConcernStory";
+import { ConcernStory } from "@/components/concerns/ConcernStory";
+import { Testimonials } from "@/components/home/Testimonials";
+import { VideoReviews } from "@/components/home/VideoReviews";
 import { productService } from "@/services/productService";
 
 const desc = "Scroll through pigmentation, acne and haircare stories, then explore Being You products for each area of care.";
@@ -46,7 +48,6 @@ function ExploreConcerns() {
             <a key={id} href={`#${id}`} className="rounded-full border border-border px-5 py-2 text-sm transition-colors hover:bg-secondary">{l}</a>
           ))}
         </nav>
-        <p className="mx-auto mt-6 max-w-md text-xs text-muted-foreground">{DISCLOSURE}</p>
       </header>
 
       <ConcernStory id="pigmentation" index={1} name="Pigmentation" before={pigBefore} after={pigAfter}
@@ -72,15 +73,18 @@ function ExploreConcerns() {
         products={acne} ctaLabel="Shop skincare products" ctaTo="/skincare" />
 
       <ConcernStory id="hair" index={3} name="Hair Care" before={hairBefore} after={hairAfter} pos="50% 30%"
-        beforeAlt="Illustrative portrait: woman with dry, frizzy, dull-looking long hair" afterAlt="The same woman with smoother, shinier-looking hair"
+        beforeAlt="Portrait: woman with thinner, shoulder-length, dull-looking hair and loose fallen strands" afterAlt="The same woman with longer, fuller, smoother and shinier-looking hair"
         fromBg="color-mix(in oklab, var(--accent) 22%, var(--secondary))" toBg="color-mix(in oklab, var(--sage) 40%, var(--background))"
         moments={[
-          { label: "The concern", title: "Dry, frizzy, dull.", copy: "Heat, hard water and weather can leave hair rough and hard to manage." },
-          { label: "Understanding", title: "Hair that's asking for moisture.", copy: "When strands lose moisture, the surface roughens — and shine and smoothness fade." },
-          { label: "Everyday care", title: "Oil, wash, nourish.", copy: "A weekly oiling ritual, a gentle wash and a mask when hair needs extra care." },
-          { label: "The reveal", title: "Smoother, more manageable hair.", copy: "An illustration of everyday haircare — not a promise of regrowth or treatment." },
+          { label: "The concern", title: "Hair fall, weak strands.", copy: "Strands on your pillow and comb, ends that break easily — hair can start to look thinner and duller." },
+          { label: "Understanding", title: "Hair that needs nourishing.", copy: "Stress, heat, hard water and a rushed routine can leave strands dry and prone to breaking." },
+          { label: "Care & ritual", title: "Oil, wash, nourish.", copy: "A weekly warm-oil massage, a gentle wash and a mask to keep lengths soft and cared for." },
+          { label: "The reveal", title: "Longer-looking, healthier-looking hair.", copy: "Smoother, fuller-looking lengths with less breakage — results vary, and this is everyday care, not a treatment." },
         ]}
         products={hair} ctaLabel="Explore haircare collection" ctaTo="/haircare" />
+
+      <Testimonials id="stories" />
+      <VideoReviews />
     </>
   );
 }

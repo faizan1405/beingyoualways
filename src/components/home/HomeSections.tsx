@@ -25,9 +25,16 @@ const concernArt: Record<ConcernSlug, { src: string | undefined; pos: string; to
 export function ShopByConcern() {
   return (
     <section className="container-lux py-20 md:py-28">
-      <div className="text-center">
-        <RevealOnScroll as="p" kind="fade" className="eyebrow">Shop by concern</RevealOnScroll>
-        <TextReveal text="What does your skin need?" className="mt-3 text-4xl md:text-5xl" delay={80} />
+      <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
+        <div>
+          <RevealOnScroll as="p" kind="fade" className="eyebrow">Shop by concern</RevealOnScroll>
+          <TextReveal text="What does your skin need?" className="mt-3 text-4xl md:text-5xl" delay={80} />
+        </div>
+        <RevealOnScroll kind="fade" delay={200}>
+          <Link to="/explore-concerns" className="press group inline-flex items-center gap-2 rounded-full border border-primary/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
+            View All <ArrowRight className="arrow-nudge size-3.5" />
+          </Link>
+        </RevealOnScroll>
       </div>
       <StaggerContainer step={60} className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
         {concerns.map(({ slug, name: t }) => { const I = icons[slug]; const a = concernArt[slug]; return (

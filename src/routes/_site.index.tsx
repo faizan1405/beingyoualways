@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { FounderQuote, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
 import { Testimonials } from "@/components/home/Testimonials";
 import { ScrollStory } from "@/components/home/ScrollStory";
+import { VideoReviews } from "@/components/home/VideoReviews";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
@@ -52,7 +53,7 @@ function Home() {
       <ShopByConcern />
 
       <section className="container-lux pb-24">
-        <SectionHead eyebrow="Bestsellers · Sample products" title="Our best sellers" link={{ to: "/shop", label: "Shop all" }} />
+        <SectionHead eyebrow="High Demand · Sample products" title="High demand" link={{ to: "/shop", label: "Shop all" }} />
         <StaggerContainer step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
           {featured.slice(0, 8).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
         </StaggerContainer>
@@ -99,6 +100,8 @@ function Home() {
       </section>
 
       <Testimonials />
+
+      <VideoReviews />
 
       <WhyChooseUs />
 

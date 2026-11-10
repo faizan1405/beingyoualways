@@ -17,3 +17,17 @@ describe("testimonials", () => {
     expect(testimonialService.publicList().some((t) => t.id === "x3")).toBe(true);
   });
 });
+
+import { customerMediaService, isPublicMedia } from "./testimonialService";
+
+describe("customer media", () => {
+  it("ships the Navsari photo story and 10 customer videos as public", () => {
+    expect(customerMediaService.photoStories().filter(isPublicMedia).map((s) => s.city)).toEqual(["Navsari"]);
+    expect(customerMediaService.videoReviews().filter(isPublicMedia)).toHaveLength(10);
+  });
+  it("hides a video once it is unpublished", () => {
+    customerMediaService.setVideoPublished("video-1", false);
+    expect(customerMediaService.videoReviews().filter(isPublicMedia).some((v) => v.id === "video-1")).toBe(false);
+    customerMediaService.setVideoPublished("video-1", true);
+  });
+});

@@ -36,8 +36,6 @@ export const transformAt = (p: number) => ease(clamp((p - 0.25) / 0.6));
 /** Four editorial moments at 0–25 / 25–50 / 50–75 / 75–100%. */
 export const momentAt = (p: number) => Math.min(3, Math.floor(p * 4));
 
-export const DISCLOSURE = "Illustrative visual — not actual product results.";
-
 export function ConcernStory(p: ConcernStoryProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [p0, setP] = useState(0);
@@ -88,7 +86,6 @@ export function ConcernStory(p: ConcernStoryProps) {
               </div>
             </div>
           )}
-          <figcaption className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">{DISCLOSURE}</figcaption>
         </figure>
 
         <div>
