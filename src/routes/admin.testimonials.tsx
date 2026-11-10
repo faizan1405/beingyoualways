@@ -13,7 +13,7 @@ import resultAfter from "@/assets/testimonials/result-after.webp";
 import { AdminPage, Panel, adminInput, adminLabel } from "@/components/admin/AdminUI";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { isPublic, testimonialCategories, testimonialService, type Testimonial, type TestimonialCategory } from "@/services/testimonialService";
+import { customerMediaService, isPublic, isPublicMedia, testimonialCategories, testimonialService, type Testimonial, type TestimonialCategory } from "@/services/testimonialService";
 
 export const Route = createFileRoute("/admin/testimonials")({ component: Testimonials });
 
@@ -33,6 +33,8 @@ function Testimonials() {
   const [draft, setDraft] = useState<Testimonial>(blank);
   const { data: products = [] } = useQuery({ queryKey: ["admin", "products", "for-stories"], queryFn: () => productService.list() });
   const up = (patch: Partial<Testimonial>) => setDraft({ ...draft, ...patch });
+  const photoStories = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.photoStories, customerMediaService.photoStories);
+  const videos = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.videoReviews, customerMediaService.videoReviews);
 
   const save = () => {
     if (!draft.name.trim() || !draft.quote.trim()) { toast.error("Add the customer's name and their exact words."); return; }
@@ -125,6 +127,31 @@ function Testimonials() {
             ))}
             <Button className="w-full" onClick={save}>Save story</Button>
           </div>
+        </Panel>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-[380px_1fr]">
+        <Panel title="Customer photo stories">
+          <ul className="space-y-3">
+            {photoStories.map((st) => (
+              <li key={st.id} className="flex items-center gap-3 rounded-md bg-secondary/60 p-3">
+                <div className="flex gap-1">{st.photos.map((ph) => <img key={ph.label} src={ph.src} alt="" className="h-14 w-9 rounded object-cover" />)}</div>
+                <div className="min-w-0 flex-1 text-sm"><p className="font-semibold">{st.city} · {st.photos.length} photos</p><p className="text-[11px] text-muted-foreground">{st.source}</p></div>
+                <label className="flex items-center gap-2 text-xs">{isPublicMedia(st) ? "Live" : "Hidden"}<Switch checked={st.published} onCheckedChange={(v) => customerMediaService.setPhotoPublished(st.id, v)} /></label>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+        <Panel title={`Customer videos (${videos.filter(isPublicMedia).length}/${videos.length} live)`}>
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {videos.map((v) => (
+              <li key={v.id} className="overflow-hidden rounded-md bg-secondary/60">
+                <img src={v.poster} alt="" className="aspect-[9/16] w-full object-cover" />
+                <label className="flex items-center justify-between gap-2 p-2 text-[11px]"><span className="truncate">{v.title}</span><Switch checked={v.published} onCheckedChange={(on) => customerMediaService.setVideoPublished(v.id, on)} aria-label={`Show ${v.title} on storefront`} /></label>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] text-muted-foreground">Migrated from beingyoualways.com, where they are already public. Toggles are demo-only and reset on reload.</p>
         </Panel>
       </div>
     </AdminPage>
