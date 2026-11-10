@@ -41,7 +41,7 @@ export function saveCheckoutDraft(form: CheckoutForm, pay: PaymentMethod | null)
   if (!s) return;
   const isEmpty = FORM_KEYS.every((k) => form[k] === emptyCheckout[k]) && !pay;
   if (isEmpty) { s.removeItem(CHECKOUT_DRAFT_KEY); return; }
-  const clean: Partial<CheckoutForm> = {};
+  const clean: Record<string, string> = {};
   for (const k of FORM_KEYS) clean[k] = form[k];
   s.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify({ form: clean, pay }));
 }
