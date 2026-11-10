@@ -3,6 +3,7 @@ import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
+import { buttonVariants } from "@/components/ui/button";
 import { brandConfig, contactConfig, mapsUrl, navigationConfig, policyLinks } from "@/config/business";
 
 export function Newsletter() {
