@@ -23,7 +23,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   const cat = categories.find((c) => c.slug === product.category)?.name;
   const mrp = choose ? null : mrpOf(only);
   const kind = variantKindLabel(product);
-  const quickCls = "absolute inset-x-3 bottom-3 flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground shadow-lift transition-all duration-300 ease-[var(--ease-lux)] active:scale-[0.97] md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100";
+  const quickCls = "absolute inset-x-3 bottom-3 flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold uppercase tracking-[0.12em] btn-motion text-primary-foreground shadow-lift hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100";
 
   const quickAdd = () => {
     if (busy.current || !only) return;

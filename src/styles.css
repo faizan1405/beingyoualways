@@ -292,7 +292,7 @@ body { overflow-x: clip; }
 @utility btn-motion {
   transition:
     color 380ms var(--ease-lux), background-color 380ms var(--ease-lux), border-color 380ms var(--ease-lux),
-    box-shadow 480ms var(--ease-lux), transform 380ms var(--ease-lux), background-size 520ms var(--ease-lux);
+    box-shadow 480ms var(--ease-lux), transform 380ms var(--ease-lux), opacity 380ms var(--ease-lux), background-size 520ms var(--ease-lux);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   & svg.lucide-arrow-right, & svg.lucide-chevron-right, & svg.lucide-arrow-up-right { transition: transform 420ms var(--ease-lux); }
