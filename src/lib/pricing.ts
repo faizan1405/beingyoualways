@@ -3,8 +3,21 @@
 import { SHIPPING_RATES_CONFIRMED } from "@/config/business";
 import type { OrderSummary, ShippingStatus } from "@/lib/types";
 
-/** Most units of one product variant a single bag line may hold (prototype rule). */
-export const MAX_QTY_PER_LINE = 10;
+/**
+ * DEMO purchase limit: the most units of one product (shade/size) a single bag
+ * can hold. This is a shopping-bag safety cap, NOT stock or inventory — it must
+ * never be shown as "only N left". Change this one number to adjust it; replace
+ * it with a value from the Hostinger inventory API once real stock is connected.
+ */
+export const DEMO_QTY_LIMIT_PER_ITEM = 10;
+export const MAX_QTY_PER_LINE = DEMO_QTY_LIMIT_PER_ITEM;
+
+/** Shopper-facing wording for the limit — phrased as an order rule, never as stock. */
+export const qtyLimitText = {
+  full: `You can add up to ${MAX_QTY_PER_LINE} of each item per order, and you already have ${MAX_QTY_PER_LINE} in your bag.`,
+  capped: (added: number) => `Added ${added} — you can add up to ${MAX_QTY_PER_LINE} of each item per order.`,
+  inBag: (n: number) => `${n} already in your bag${n >= MAX_QTY_PER_LINE ? ` — up to ${MAX_QTY_PER_LINE} of each item per order` : ""}.`,
+};
 
 // Sample rates kept for admin reference only; not charged or advertised until the client confirms them.
 export const FREE_SHIPPING_THRESHOLD = 999;

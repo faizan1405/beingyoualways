@@ -11,7 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { categories } from "@/lib/mock-data";
 import { inr } from "@/lib/format";
-import { MAX_QTY_PER_LINE, roomLeft } from "@/lib/pricing";
+import { qtyLimitText, roomLeft } from "@/lib/pricing";
 import { useShop } from "@/lib/shop-store";
 import { cn } from "@/lib/utils";
 import {
@@ -101,7 +101,7 @@ function ProductPage() {
       variantsRef.current?.querySelector<HTMLButtonElement>("button:not([disabled])")?.focus({ preventScroll: true });
       return null;
     }
-    if (room === 0) { setError(`You already have the maximum of ${MAX_QTY_PER_LINE} in your bag.`); return null; }
+    if (room === 0) { setError(qtyLimitText.full); return null; }
     setError(null);
     return r.variant;
   };
@@ -240,7 +240,7 @@ function ProductPage() {
             <Button variant="luxOutline" size="xl" className="w-full" disabled={allOut} onClick={buyNow}>Buy now</Button>
             {inBag > 0 && (
               <p className="text-xs text-muted-foreground">
-                {inBag} already in your bag{room === 0 ? ` — that's the maximum of ${MAX_QTY_PER_LINE}` : ""}.
+                {qtyLimitText.inBag(inBag)}
               </p>
             )}
           </div>

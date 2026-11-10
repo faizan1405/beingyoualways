@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 import { cartService } from "@/services/cartService";
 import { productService } from "@/services/productService";
-import { MAX_QTY_PER_LINE, clampQty, lineTotal, roomLeft, summarize } from "@/lib/pricing";
+import { clampQty, lineTotal, qtyLimitText, roomLeft, summarize } from "@/lib/pricing";
 import type { CartItem, OrderSummary, Product, ProductVariant } from "@/lib/types";
 
 export interface CartLine extends CartItem {
@@ -76,7 +76,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const wanted = clampQty(qty);
     const added = Math.min(wanted, roomLeft(current));
     if (added === 0) {
-      toast(`You already have the maximum of ${MAX_QTY_PER_LINE} in your bag.`);
+      toast(qtyLimitText.full);
       return { ok: false, reason: "full" };
     }
     const next = current
@@ -84,7 +84,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       : [...itemsRef.current, { productId, variantId, quantity: added }];
     itemsRef.current = next;
     setItems(next);
-    if (added < wanted) toast(`Only ${added} more could be added — the limit is ${MAX_QTY_PER_LINE} per item.`);
+    if (added < wanted) toast(qtyLimitText.capped(added));
     if (opts.openDrawer !== false) setDrawerOpen(true);
     return { ok: true, added, capped: added < wanted };
   }, []);

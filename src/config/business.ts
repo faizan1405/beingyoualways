@@ -81,3 +81,9 @@ export const policyLinks = [
 
 // Shipping charges are not confirmed by the client — keep false until approved.
 export const SHIPPING_RATES_CONFIRMED = false;
+
+// Cash on Delivery availability, limits and charges are not confirmed — keep false until approved.
+export const COD_RULES_CONFIRMED = false;
+
+// Product stock is demo data until the client's real inventory is connected.
+export const INVENTORY_CONNECTED = false;
