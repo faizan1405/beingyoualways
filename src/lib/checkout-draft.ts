@@ -29,6 +29,7 @@ export function loadCheckoutDraft(): CheckoutDraft | null {
     if (!d || typeof d !== "object") return null;
     const form = { ...emptyCheckout };
     for (const k of FORM_KEYS) if (typeof d.form?.[k] === "string") (form as Record<string, string>)[k] = d.form[k];
+    if (!["home", "work", "other"].includes(form.addressType)) form.addressType = "home";
     const pay = d.pay === "razorpay" || d.pay === "cod" ? d.pay : null;
     return { form, pay };
   } catch { return null; }

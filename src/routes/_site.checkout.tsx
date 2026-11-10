@@ -12,6 +12,7 @@ import {
   CHECKOUT_STEPS, INDIAN_STATES, emptyCheckout, firstInvalidStep, normalisePhone, validateStep,
   type CheckoutErrors, type CheckoutForm, type CheckoutStep,
 } from "@/lib/checkout-validation";
+import { clearCheckoutDraft, loadCheckoutDraft, saveCheckoutDraft } from "@/lib/checkout-draft";
 import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 import type { AddressType, PaymentMethod } from "@/lib/types";
@@ -33,7 +34,6 @@ export const Route = createFileRoute("/_site/checkout")({
   component: Checkout,
 });
 
-const DRAFT_KEY = "bya.checkout.draft.v1";
 
 function Field({ id, label, error, hint, optional, children }: { id: string; label: string; error?: string | undefined; hint?: string | undefined; optional?: boolean; children: ReactNode }) {
   return (
@@ -66,16 +66,20 @@ function Checkout() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const loaded = useRef(false);
 
-  // Keep entered details across reloads and step changes (this browser only).
+  // Details survive a reload or step change in THIS tab only (sessionStorage),
+  // and are wiped when checkout finishes, the shopper clears them, or the tab closes.
   useEffect(() => {
-    try {
-      const d = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null");
-      if (d?.form) setF({ ...emptyCheckout, ...d.form });
-      if (d?.pay === "razorpay" || d?.pay === "cod") setPay(d.pay);
-    } catch { /* ignore */ }
+    const d = loadCheckoutDraft();
+    if (d) { setF(d.form); setPay(d.pay); }
     loaded.current = true;
   }, []);
-  useEffect(() => { if (loaded.current) sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ form: f, pay })); }, [f, pay]);
+  useEffect(() => { if (loaded.current && !done) saveCheckoutDraft(f, pay); }, [f, pay, done]);
+
+  const forgetDetails = () => {
+    clearCheckoutDraft();
+    setF(emptyCheckout); setPay(null); setErrors({}); setReached(0); setStep("contact");
+    toast("Your details have been cleared from this browser");
+  };
 
   const idx = CHECKOUT_STEPS.findIndex((s) => s.id === step);
   const goTo = (s: CheckoutStep) => {
@@ -111,6 +115,7 @@ function Checkout() {
   const submit = () => {
     const bad = firstInvalidStep(f, pay);
     if (bad) { setErrors(validateStep(bad, f, pay)); goTo(bad); toast.error("Some details need attention"); return; }
+    clearCheckoutDraft();
     setDone(true);
     window.scrollTo({ top: 0 });
   };
@@ -178,7 +183,10 @@ function Checkout() {
         <h1 className="text-4xl md:text-5xl">Checkout</h1>
         <Link to="/cart" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">Back to bag</Link>
       </div>
-      <DemoNotice className="mt-5">Demo checkout — your details stay in this browser. No payment is taken and no order is placed in this prototype.</DemoNotice>
+      <DemoNotice className="mt-5">Demo checkout — no payment is taken and no order is placed. Your contact and delivery details are kept only in this browser tab, and are cleared when you finish, close the tab or press “Clear my details”. We never store card or payment details.</DemoNotice>
+      <div className="mt-2 flex justify-end">
+        <button type="button" onClick={forgetDetails} className="press text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">Clear my details</button>
+      </div>
 
       {/* Mobile order summary */}
       <details className="group mt-6 rounded-xl bg-secondary lg:hidden">
