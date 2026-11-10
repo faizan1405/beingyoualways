@@ -1,9 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { cartService, shippingFor } from "@/services/cartService";
+import { cartService } from "@/services/cartService";
 import { productService } from "@/services/productService";
-import type { CartItem, Product, ProductVariant } from "@/lib/types";
+import { MAX_QTY_PER_LINE, clampQty, lineTotal, roomLeft, summarize } from "@/lib/pricing";
+import type { CartItem, OrderSummary, Product, ProductVariant } from "@/lib/types";
 
 export interface CartLine extends CartItem {
   product: Product;
@@ -11,14 +12,19 @@ export interface CartLine extends CartItem {
   lineTotal: number;
 }
 
+export type AddResult =
+  | { ok: true; added: number; capped: boolean }
+  | { ok: false; reason: "unavailable" | "full" | "unknown" };
+
 interface ShopState {
   items: CartItem[];
   lines: CartLine[];
   count: number;
   subtotal: number;
-  shipping: number;
-  total: number;
-  add: (productId: string, variantId: string, qty?: number) => void;
+  summary: OrderSummary;
+  /** Units of this variant already in the bag. */
+  qtyInBag: (productId: string, variantId: string) => number;
+  add: (productId: string, variantId: string, qty?: number, opts?: { openDrawer?: boolean }) => AddResult;
   setQty: (productId: string, variantId: string, qty: number) => void;
   remove: (productId: string, variantId: string) => void;
   clear: () => void;
@@ -36,6 +42,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   useEffect(() => {
     setItems(cartService.loadCart());
@@ -50,24 +58,42 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     return items.flatMap((i) => {
       const product = all.find((p) => p.id === i.productId);
       const variant = product?.variants.find((v) => v.id === i.variantId);
-      return product && variant ? [{ ...i, product, variant, lineTotal: variant.price * i.quantity }] : [];
+      return product && variant ? [{ ...i, product, variant, lineTotal: lineTotal(variant.price, i.quantity) }] : [];
     });
   }, [items]);
 
-  const add = useCallback((productId: string, variantId: string, qty = 1) => {
-    setItems((prev) => {
-      const ex = prev.find((i) => i.productId === productId && i.variantId === variantId);
-      return ex
-        ? prev.map((i) => (i === ex ? { ...i, quantity: Math.min(10, i.quantity + qty) } : i))
-        : [...prev, { productId, variantId, quantity: qty }];
-    });
-    setDrawerOpen(true);
+  const qtyInBag = useCallback(
+    (productId: string, variantId: string) =>
+      itemsRef.current.find((i) => i.productId === productId && i.variantId === variantId)?.quantity ?? 0,
+    [],
+  );
+
+  const add = useCallback((productId: string, variantId: string, qty = 1, opts: { openDrawer?: boolean } = {}): AddResult => {
+    const variant = productService.peekAll().find((p) => p.id === productId)?.variants.find((v) => v.id === variantId);
+    if (!variant) return { ok: false, reason: "unknown" };
+    if (variant.stock <= 0) return { ok: false, reason: "unavailable" };
+    const current = itemsRef.current.find((i) => i.productId === productId && i.variantId === variantId)?.quantity ?? 0;
+    const wanted = clampQty(qty);
+    const added = Math.min(wanted, roomLeft(current));
+    if (added === 0) {
+      toast(`You already have the maximum of ${MAX_QTY_PER_LINE} in your bag.`);
+      return { ok: false, reason: "full" };
+    }
+    const next = current
+      ? itemsRef.current.map((i) => (i.productId === productId && i.variantId === variantId ? { ...i, quantity: current + added } : i))
+      : [...itemsRef.current, { productId, variantId, quantity: added }];
+    itemsRef.current = next;
+    setItems(next);
+    if (added < wanted) toast(`Only ${added} more could be added — the limit is ${MAX_QTY_PER_LINE} per item.`);
+    if (opts.openDrawer !== false) setDrawerOpen(true);
+    return { ok: true, added, capped: added < wanted };
   }, []);
+
   const setQty = useCallback((productId: string, variantId: string, qty: number) => {
     setItems((prev) =>
       qty <= 0
         ? prev.filter((i) => !(i.productId === productId && i.variantId === variantId))
-        : prev.map((i) => (i.productId === productId && i.variantId === variantId ? { ...i, quantity: Math.min(10, qty) } : i)),
+        : prev.map((i) => (i.productId === productId && i.variantId === variantId ? { ...i, quantity: clampQty(qty) } : i)),
     );
   }, []);
   const remove = useCallback((productId: string, variantId: string) => setQty(productId, variantId, 0), [setQty]);
@@ -79,12 +105,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
-  const shipping = shippingFor(subtotal);
+  const summary = useMemo(() => summarize(lines.map((l) => ({ price: l.variant.price, quantity: l.quantity }))), [lines]);
   const value: ShopState = {
-    items, lines, subtotal, shipping, total: subtotal + shipping,
-    count: lines.reduce((s, l) => s + l.quantity, 0),
-    add, setQty, remove, clear: () => setItems([]),
+    items, lines, summary, subtotal: summary.subtotal,
+    count: summary.itemCount,
+    qtyInBag, add, setQty, remove, clear: () => setItems([]),
     wishlist, toggleWish, isWished: (id) => wishlist.includes(id),
     drawerOpen, setDrawerOpen,
   };

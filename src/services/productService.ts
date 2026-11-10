@@ -43,14 +43,32 @@ export function filterProducts(list: Product[], query: ProductQuery): Product[] 
   return out;
 }
 
+export const concernsOf = (p: Product): string[] => p.concerns ?? productConcerns[p.slug] ?? [];
+
+/** Recommendations based only on shared concern tags — never filler. */
+export function recommendByConcern(list: Product[], p: Product, exclude: string[] = [], limit = 4): Product[] {
+  const mine = new Set(concernsOf(p));
+  if (mine.size === 0) return [];
+  return list
+    .filter((x) => x.id !== p.id && x.status === "active" && !exclude.includes(x.id))
+    .map((x) => ({ x, shared: concernsOf(x).filter((c) => mine.has(c)).length }))
+    .filter((r) => r.shared > 0)
+    .sort((a, b) => b.shared - a.shared)
+    .slice(0, limit)
+    .map((r) => r.x);
+}
+
 export const productService = {
   list: (query: ProductQuery = {}) => delay(filterProducts(store, query)),
   featured: () => delay(store.filter((p) => p.featured && p.status === "active")),
   getBySlug: (slug: string) => delay(store.find((p) => p.slug === slug) ?? null),
   getById: (id: string) => delay(store.find((p) => p.id === id) ?? null),
+  /** More from the same category. */
   related: (p: Product) => delay(store.filter((x) => x.category === p.category && x.id !== p.id && x.status === "active").slice(0, 4)),
+  /** Products sharing at least one verified concern tag, most shared first. */
+  alsoLike: (p: Product, exclude: string[] = []) => delay(recommendByConcern(store, p, exclude)),
   categories: () => delay(categories),
-  byConcern: (c: ConcernSlug) => delay(store.filter((p) => p.status === "active" && (p.concerns ?? productConcerns[p.slug] ?? []).includes(c))),
+  byConcern: (c: ConcernSlug) => delay(store.filter((p) => p.status === "active" && concernsOf(p).includes(c))),
   bySlugs: (slugs: string[]) => delay(store.filter((p) => p.status === "active" && slugs.includes(p.slug))),
   getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
   // Admin (demo — saved in this browser only)
