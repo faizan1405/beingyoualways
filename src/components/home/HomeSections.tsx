@@ -82,12 +82,11 @@ const standIcons = [FlaskConical, Sprout, Rabbit];
 /** Original "What We Stand For" content from beingyoualways.com (claims pending client confirmation — see /admin/approvals). */
 export function WhyChooseUs() {
   return (
-    <section aria-labelledby="stand-for-h" className="relative overflow-hidden bg-secondary">
+    <section aria-label={standForContent.heading} className="relative overflow-hidden bg-secondary">
       <Sprig className="pointer-events-none absolute -left-10 top-10 hidden w-64 text-sage/60 md:block" />
       <Sprig className="pointer-events-none absolute -right-12 bottom-6 hidden w-72 -scale-x-100 text-sage/50 md:block" />
       <div className="container-lux relative py-20 md:py-28">
         <RevealOnScroll as="p" kind="fade" className="eyebrow text-center">Our promise</RevealOnScroll>
-        <h2 id="stand-for-h" className="sr-only">{standForContent.heading}</h2>
         <TextReveal text={standForContent.heading} className="mx-auto mt-3 max-w-3xl text-center text-4xl leading-tight md:text-6xl" delay={80} />
         <RevealOnScroll kind="fade" delay={200} className="mx-auto mt-6 h-px w-16 bg-accent" />
         <StaggerContainer step={110} className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6" itemClassName="h-full">
@@ -115,10 +114,9 @@ export function WhyChooseUs() {
 export function GlobalStandards() {
   const { heading, countries } = globalStandardsContent;
   return (
-    <section aria-labelledby="global-h" className="container-lux py-20 md:py-28">
+    <section aria-label={heading} className="container-lux py-20 md:py-28">
       <div className="text-center">
         <RevealOnScroll as="p" kind="fade" className="eyebrow">Ingredients from around the world</RevealOnScroll>
-        <h2 id="global-h" className="sr-only">{heading}</h2>
         <TextReveal text={heading} className="mx-auto mt-3 max-w-3xl text-4xl leading-tight md:text-5xl" delay={80} />
       </div>
       <div className="relative mt-14 md:mt-16">
