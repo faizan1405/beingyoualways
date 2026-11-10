@@ -99,7 +99,7 @@ function EditProduct() {
               {p.variants.map((v, i) => (
                 <div key={v.id} className="grid grid-cols-2 items-end gap-3 rounded-md bg-secondary/60 p-3 sm:grid-cols-[1fr_100px_100px_100px_80px_auto]">
                   {v.kind === "shade" && (
-                    <div className="col-span-2 flex items-center gap-2 sm:col-span-6"><label className={adminLabel + " mb-0"} htmlFor={`vc${i}`}>Shade colour</label>
+                    <div className="col-span-2 flex items-center gap-2 sm:col-span-6"><label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" htmlFor={`vc${i}`}>Shade colour</label>
                       <input id={`vc${i}`} type="color" className="h-8 w-12 cursor-pointer rounded border border-input bg-card" value={/^#[0-9a-f]{6}$/i.test(v.swatch ?? "") ? v.swatch : "#c78e78"} onChange={(e) => upV(i, { swatch: e.target.value })} />
                       <span className="text-[11px] text-muted-foreground">{v.swatch ? "Shown as the shade chip" : "No chip colour set"}</span></div>
                   )}
