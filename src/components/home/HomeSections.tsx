@@ -1,9 +1,12 @@
 import { productImages } from "@/lib/product-images";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Droplets, Eye, Feather, HandHeart, Leaf, ShieldCheck, Sparkles, Sun, Waves, Wind, BadgeCheck } from "lucide-react";
+import { ArrowRight, Droplets, Eye, Feather, FlaskConical, Leaf, Rabbit, Sparkles, Sprout, Sun, Waves, Wind } from "lucide-react";
 
 import { concerns, type ConcernSlug } from "@/lib/concerns";
+import { globalStandardsContent, standForContent } from "@/config/business";
 import { RevealOnScroll, StaggerContainer, TextReveal } from "@/components/motion/Reveal";
+import { Button } from "@/components/ui/button";
+import { Flag } from "@/components/home/Flags";
 
 const icons: Record<ConcernSlug, typeof Sparkles> = {
   pigmentation: Sparkles, "acne-prone-skin": Droplets, "dull-dry-skin": Waves, "dark-circles": Eye,
@@ -31,9 +34,9 @@ export function ShopByConcern() {
           <TextReveal text="What does your skin need?" className="mt-3 text-4xl md:text-5xl" delay={80} />
         </div>
         <RevealOnScroll kind="fade" delay={200}>
-          <Link to="/explore-concerns" className="press group inline-flex items-center gap-2 rounded-full border border-primary/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
-            View All <ArrowRight className="arrow-nudge size-3.5" />
-          </Link>
+          <Button variant="luxOutline" size="lg" asChild>
+            <Link to="/shop">View All <ArrowRight /></Link>
+          </Button>
         </RevealOnScroll>
       </div>
       <StaggerContainer step={60} className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
@@ -52,36 +55,84 @@ export function ShopByConcern() {
           <p className="eyebrow">New · Explore by concern</p>
           <p className="mt-2 font-serif text-2xl md:text-3xl">See pigmentation, acne and haircare stories unfold as you scroll.</p>
         </div>
-        <Link to="/explore-concerns" className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
-          Explore by Concern <ArrowRight className="arrow-nudge size-4" />
-        </Link>
+        <Button variant="lux" size="lg" className="shrink-0" asChild>
+          <Link to="/explore-concerns">Explore by Concern <ArrowRight /></Link>
+        </Button>
       </RevealOnScroll>
     </section>
   );
 }
 
-export function WhyChooseUs() {
-  const items = [
-    { I: Leaf, t: "Plant-based", d: "Nature-powered skin and hair care." },
-    { I: HandHeart, t: "Gentle", d: "Care that's soft on you and the planet." },
-    { I: BadgeCheck, t: "Honest", d: "Transparent ingredients with nothing to hide." },
-    { I: ShieldCheck, t: "Effective", d: "Care you can trust, every day." },
-  ];
+/** Thin-line botanical sprig used as card decoration (inherits currentColor). */
+function Sprig({ className }: { className?: string }) {
   return (
-    <section className="bg-primary text-primary-foreground">
-      <div className="container-lux py-20 md:py-24">
-        <RevealOnScroll as="p" kind="fade" className="eyebrow !text-primary-foreground/60 text-center">What we stand for</RevealOnScroll>
-        <TextReveal by="line" text={["Rooted in plants.", "Made with care."]} className="mx-auto mt-4 max-w-3xl text-center text-4xl leading-tight md:text-5xl" />
-        <StaggerContainer step={80} kind="scale" className="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 lg:grid-cols-4">
-          {items.map(({ I, t, d }) => (
-            <div key={t} className="text-center">
-              <span className="mx-auto grid size-14 place-items-center rounded-full border border-primary-foreground/25"><I className="size-6 text-accent" strokeWidth={1.4} /></span>
-              <h3 className="mt-4 text-2xl">{t}</h3>
-              <p className="mx-auto mt-1 max-w-[12rem] text-xs opacity-70">{d}</p>
-            </div>
+    <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth={1} strokeLinecap="round" aria-hidden className={className}>
+      <path d="M18 112 C40 84 62 58 104 14" />
+      <path d="M40 84 C30 74 28 62 32 52 C42 58 46 72 40 84 Z" />
+      <path d="M52 70 C60 60 72 56 82 58 C78 68 64 74 52 70 Z" />
+      <path d="M64 56 C56 46 56 34 60 26 C70 34 70 46 64 56 Z" />
+      <path d="M78 40 C86 32 96 30 104 32 C100 40 88 44 78 40 Z" />
+      <path d="M30 98 C22 94 16 86 16 78 C26 80 30 90 30 98 Z" />
+    </svg>
+  );
+}
+
+const standIcons = [FlaskConical, Sprout, Rabbit];
+
+/** Original "What We Stand For" content from beingyoualways.com (claims pending client confirmation — see /admin/approvals). */
+export function WhyChooseUs() {
+  return (
+    <section aria-labelledby="stand-for-h" className="relative overflow-hidden bg-secondary">
+      <Sprig className="pointer-events-none absolute -left-10 top-10 hidden w-64 text-sage/60 md:block" />
+      <Sprig className="pointer-events-none absolute -right-12 bottom-6 hidden w-72 -scale-x-100 text-sage/50 md:block" />
+      <div className="container-lux relative py-20 md:py-28">
+        <RevealOnScroll as="p" kind="fade" className="eyebrow text-center">Our promise</RevealOnScroll>
+        <h2 id="stand-for-h" className="sr-only">{standForContent.heading}</h2>
+        <TextReveal text={standForContent.heading} className="mx-auto mt-3 max-w-3xl text-center text-4xl leading-tight md:text-6xl" delay={80} />
+        <RevealOnScroll kind="fade" delay={200} className="mx-auto mt-6 h-px w-16 bg-accent" />
+        <StaggerContainer step={110} className="mt-14 grid gap-5 md:grid-cols-3 md:gap-6" itemClassName="h-full">
+          {standForContent.items.map(({ title, text }, i) => {
+            const I = standIcons[i] ?? Leaf;
+            return (
+              <article key={title} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-[var(--shadow-soft)] transition-[transform,box-shadow,border-color] duration-500 ease-[var(--ease-lux)] hover:-translate-y-1 hover:border-sage hover:shadow-lift md:p-10">
+                <Sprig className="pointer-events-none absolute -right-6 -top-6 w-28 text-sage/40 transition-transform duration-700 ease-[var(--ease-lux)] group-hover:-translate-x-1 group-hover:translate-y-1 group-hover:rotate-6" />
+                <span className="relative grid size-16 place-items-center rounded-full border border-primary/15 bg-secondary text-primary transition-colors duration-500 group-hover:bg-primary group-hover:text-primary-foreground">
+                  <I className="size-7" strokeWidth={1.2} />
+                </span>
+                <span className="mt-8 font-serif text-sm italic text-accent">0{i + 1}</span>
+                <h3 className="mt-1 text-3xl md:text-[2.1rem]">{title}</h3>
+                <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
+              </article>
+            );
+          })}
+        </StaggerContainer>
+      </div>
+    </section>
+  );
+}
+
+/** Original "Global Standards" section: heading + six countries. Flags only — no certification or sourcing claims are added. */
+export function GlobalStandards() {
+  const { heading, countries } = globalStandardsContent;
+  return (
+    <section aria-labelledby="global-h" className="container-lux py-20 md:py-28">
+      <div className="text-center">
+        <RevealOnScroll as="p" kind="fade" className="eyebrow">Ingredients from around the world</RevealOnScroll>
+        <h2 id="global-h" className="sr-only">{heading}</h2>
+        <TextReveal text={heading} className="mx-auto mt-3 max-w-3xl text-4xl leading-tight md:text-5xl" delay={80} />
+      </div>
+      <div className="relative mt-14 md:mt-16">
+        <RevealOnScroll kind="line" delay={250} className="absolute inset-x-[8%] top-[calc(50%-1.25rem)] hidden h-px bg-gradient-to-r from-transparent via-accent to-transparent md:block" />
+        <StaggerContainer step={90} max={6} className="relative grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-6 md:grid-cols-6 md:gap-x-5">
+          {countries.map(({ code, name }) => (
+            <figure key={code} className="group flex flex-col items-center text-center">
+              <div className="w-full rounded-2xl border border-border bg-card p-2.5 shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-1 group-hover:shadow-lift sm:p-3">
+                <Flag code={code} title={name} className="block aspect-[3/2] w-full overflow-hidden rounded-lg ring-1 ring-border" />
+              </div>
+              <figcaption className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground/80 sm:text-xs">{name}</figcaption>
+            </figure>
           ))}
         </StaggerContainer>
-        <p className="mt-10 text-center text-[11px] opacity-50">Product-level claims (e.g. paraben-free, cruelty-free) will be shown only once confirmed for each product.</p>
       </div>
     </section>
   );
