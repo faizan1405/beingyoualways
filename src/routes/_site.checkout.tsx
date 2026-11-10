@@ -204,7 +204,7 @@ function Checkout() {
                   <span className={cn("grid size-5 shrink-0 place-items-center rounded-full border text-[10px]", current ? "border-primary bg-primary text-primary-foreground" : complete ? "border-primary text-primary" : "border-border")}>
                     {complete && !current ? <Check className="size-3" /> : i + 1}
                   </span>
-                  <span className="truncate">{s.label}</span>
+                  <span className={cn("truncate", !current && "sr-only sm:not-sr-only")}>{s.label}</span>
                 </span>
               </button>
             </li>
