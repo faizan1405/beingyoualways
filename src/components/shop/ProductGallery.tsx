@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import type { ProductShape } from "@/lib/types";
@@ -28,6 +28,8 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
     return () => mq.removeEventListener("change", on);
   }, []);
 
+  const dragged = useRef(false);
+  const markLoaded = useCallback((i: number) => setLoaded((l) => (l[i] ? l : { ...l, [i]: true })), []);
   const go = useCallback((d: number) => setIdx((i) => (i + d + n) % n), [n]);
   const alt = (i: number) => `${name} — photo ${i + 1} of ${n}`;
 
@@ -50,34 +52,40 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
         className={cn("group relative aspect-[4/5] overflow-hidden rounded-xl bg-secondary hero-in", canZoom && "cursor-zoom-in")}
         onMouseMove={onMove}
         onMouseLeave={() => setZoom(null)}
-        onClick={() => setFull(true)}
+        onClick={() => { if (!dragged.current) setFull(true); }}
         role="group"
         aria-roledescription="carousel"
         aria-label={`${name} photos`}
       >
         {!loaded[idx] && <div className="skeleton-shimmer absolute inset-0" aria-hidden />}
         <AnimatePresence initial={false} mode="popLayout">
-          <motion.img
+          <motion.div
             key={idx}
-            src={images[idx]}
-            alt={alt(idx)}
-            width={900}
-            height={1125}
-            loading={idx === 0 ? "eager" : "lazy"}
-            decoding="async"
-            draggable={false}
-            onLoad={() => setLoaded((l) => ({ ...l, [idx]: true }))}
             initial={reduce ? false : { opacity: 0, scale: 1.03 }}
-            animate={{ opacity: loaded[idx] ? 1 : 0, scale: 1 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             drag={n > 1 && !canZoom ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.25}
-            onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 50) go(info.offset.x < 0 ? 1 : -1); }}
-            className="absolute inset-0 h-full w-full touch-pan-y select-none object-cover transition-transform duration-300 ease-out"
-            style={zoom ? { transform: "scale(2)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
-          />
+            onDragStart={() => { dragged.current = true; }}
+            onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 50) go(info.offset.x < 0 ? 1 : -1); setTimeout(() => { dragged.current = false; }, 0); }}
+            className="absolute inset-0 touch-pan-y"
+          >
+            <img
+              ref={(el) => { if (el?.complete && el.naturalWidth > 0 && !loaded[idx]) markLoaded(idx); }}
+              src={images[idx]}
+              alt={alt(idx)}
+              width={900}
+              height={1125}
+              loading={idx === 0 ? "eager" : "lazy"}
+              decoding="async"
+              draggable={false}
+              onLoad={() => markLoaded(idx)}
+              className={cn("absolute inset-0 h-full w-full select-none object-cover transition-[opacity,transform] duration-300 ease-out", loaded[idx] ? "opacity-100" : "opacity-0")}
+              style={zoom ? { transform: "scale(2)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
+            />
+          </motion.div>
         </AnimatePresence>
 
         <button
