@@ -190,13 +190,13 @@ function Checkout() {
       </details>
 
       {/* Stepper */}
-      <ol className="mt-8 grid grid-cols-4 gap-2" aria-label="Checkout steps">
+      <ol className="mt-8 flex gap-2" aria-label="Checkout steps">
         {CHECKOUT_STEPS.map((s, i) => {
           const current = s.id === step;
           const complete = i < idx || (i <= reached && i !== idx && Object.keys(validateStep(s.id, f, pay)).length === 0);
           const canGo = i <= reached;
           return (
-            <li key={s.id} className="min-w-0">
+            <li key={s.id} className={cn("min-w-0 flex-1", current && "flex-[2.6] sm:flex-1")}>
               <button type="button" disabled={!canGo || current} onClick={() => goTo(s.id)} aria-current={current ? "step" : undefined}
                 className="group flex w-full flex-col gap-2 text-left disabled:cursor-default">
                 <span className={cn("h-1 w-full rounded-full transition-colors duration-500", i <= idx ? "bg-primary" : "bg-border")} />
