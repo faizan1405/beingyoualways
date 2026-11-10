@@ -87,3 +87,42 @@ export const COD_RULES_CONFIRMED = false;
 
 // Product stock is demo data until the client's real inventory is connected.
 export const INVENTORY_CONNECTED = false;
+
+// "What We Stand For" and "Global Standards" are restored word-for-word from beingyoualways.com.
+// They contain formulation, suitability, animal-testing and sourcing claims that have NOT been
+// independently verified — keep false until the client confirms them in writing.
+export const BRAND_CLAIMS_CONFIRMED = false;
+
+export const claimsSource = { url: "https://beingyoualways.com/", checkedOn: "2026-11-10" } as const;
+
+/** Original "What We Stand For" cards — headings and descriptions copied exactly. */
+export const standForContent = {
+  heading: "What We Stand For",
+  items: [
+    {
+      title: "Paraben Free",
+      text: "We source the finest ingredients and adhere to the highest standards to deliver products that are effective, safe, and luxurious.",
+    },
+    {
+      title: "Natural",
+      text: "Our formulas are inspired by nature and free from harsh chemicals, making them suitable for all skin types, including sensitive skin.",
+    },
+    {
+      title: "Cruelty-Free",
+      text: "We are committed to ethical practices, ensuring that our products are never tested on animals and are packaged with eco-conscious materials.",
+    },
+  ],
+} as const;
+
+/** Original "Global Standards" section — heading and the six countries shown on the old site. */
+export const globalStandardsContent = {
+  heading: "Global Standards for Importing Cosmetic Ingredients",
+  countries: [
+    { code: "IN", name: "India" },
+    { code: "KR", name: "South Korea" },
+    { code: "ES", name: "Spain" },
+    { code: "BR", name: "Brazil" },
+    { code: "DE", name: "Germany" },
+    { code: "US", name: "United States" },
+  ],
+} as const;

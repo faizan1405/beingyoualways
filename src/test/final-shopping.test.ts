@@ -46,10 +46,14 @@ describe("checkout draft privacy", () => {
 describe("client approval checklist", () => {
   const items = buildApprovalChecklist({ products, publicReviewCount: 0 });
   const status = (id: string) => items.find((i) => i.id === id)?.status;
-  it("lists all nine required items", () =>
-    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp"]));
+  it("lists all ten required items", () =>
+    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims"]));
   it("keeps unconfirmed facts waiting on the client", () => {
-    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp"]) expect(status(id)).toBe("waiting");
+    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims"]) expect(status(id)).toBe("waiting");
+  });
+  it("marks brand claims confirmed only once the client confirms them", () => {
+    const ok = buildApprovalChecklist({ products, publicReviewCount: 0, claimsConfirmed: true });
+    expect(ok.find((i) => i.id === "claims")?.status).toBe("confirmed");
   });
   it("turns confirmed only when the fact is supplied", () => {
     const ok = buildApprovalChecklist({ products, publicReviewCount: 0, shippingConfirmed: true, whatsappNumber: "+919737422248" });

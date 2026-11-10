@@ -1,7 +1,7 @@
 // Internal client-approval checklist. Each item's status is worked out from the
 // live data and config flags, so ticking something here is never manual — it
 // only turns "Confirmed" when the underlying fact has actually been supplied.
-import { COD_RULES_CONFIRMED, INVENTORY_CONNECTED, SHIPPING_RATES_CONFIRMED, contactConfig } from "@/config/business";
+import { BRAND_CLAIMS_CONFIRMED, COD_RULES_CONFIRMED, INVENTORY_CONNECTED, SHIPPING_RATES_CONFIRMED, contactConfig } from "@/config/business";
 import { policyReview } from "@/content/policies";
 import { isUnconfirmed } from "@/lib/variants";
 import type { Product } from "@/lib/types";
@@ -30,6 +30,7 @@ interface Inputs {
   codConfirmed?: boolean;
   inventoryConnected?: boolean;
   whatsappNumber?: string | null;
+  claimsConfirmed?: boolean;
 }
 
 const productStatus = (missing: number, total: number): ApprovalStatus =>
@@ -42,6 +43,7 @@ export function buildApprovalChecklist({
   codConfirmed = COD_RULES_CONFIRMED,
   inventoryConnected = INVENTORY_CONNECTED,
   whatsappNumber = contactConfig.whatsappNumber,
+  claimsConfirmed = BRAND_CLAIMS_CONFIRMED,
 }: Inputs): ApprovalItem[] {
   const live = products.filter((p) => p.status === "active");
   const n = live.length;
@@ -105,6 +107,14 @@ export function buildApprovalChecklist({
       current: whatsappNumber ? `Set to ${whatsappNumber}.` : "Not set — no WhatsApp buttons link to a number yet.",
       needed: "Which number is registered on WhatsApp Business (and API access, for automated messages).",
       affects: "WhatsApp contact links, OTP sign-in and marketing tools.", adminLink: "/admin/settings",
+    },
+    {
+      id: "claims", title: "Brand claims & ingredient sourcing", status: claimsConfirmed ? "confirmed" : "waiting",
+      current: claimsConfirmed
+        ? "Client has confirmed the What We Stand For and Global Standards wording."
+        : "\"What We Stand For\" (Paraben Free, Natural, Cruelty-Free — suitable for all skin types, never tested on animals, eco-conscious packaging) and \"Global Standards\" (six country flags) are shown word-for-word from the old site but are not verified.",
+      needed: "Written confirmation that each claim is true for every product, plus which ingredients come from India, South Korea, Spain, Brazil, Germany and the United States. Supporting documents if any certification is to be mentioned.",
+      affects: "Homepage \"What We Stand For\" and \"Global Standards\" sections.",
     },
   ];
 }
