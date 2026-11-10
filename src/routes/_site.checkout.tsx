@@ -9,7 +9,7 @@ import { ProductVisual } from "@/components/shop/ProductVisual";
 import { OrderTotals } from "@/components/site/OrderTotals";
 import { Button } from "@/components/ui/button";
 import {
-  CHECKOUT_STEPS, INDIAN_STATES, emptyCheckout, firstInvalidStep, validateStep,
+  CHECKOUT_STEPS, INDIAN_STATES, emptyCheckout, firstInvalidStep, normalisePhone, validateStep,
   type CheckoutErrors, type CheckoutForm, type CheckoutStep,
 } from "@/lib/checkout-validation";
 import { inr } from "@/lib/format";
@@ -186,7 +186,7 @@ function Checkout() {
           <span className="flex items-center gap-2">Order summary <ChevronDown className="size-4 transition-transform group-open:rotate-180" /></span>
           <span className="tabular-nums">{summary.itemCount} {summary.itemCount === 1 ? "item" : "items"} · {inr(summary.subtotal)}</span>
         </summary>
-        <div className="space-y-5 border-t border-border p-4">{summaryList}<OrderTotals /></div>
+        <div className="space-y-5 border-t border-border p-4">{summaryList}{discountBox}<OrderTotals /></div>
       </details>
 
       {/* Stepper */}
@@ -272,7 +272,7 @@ function Checkout() {
             {step === "review" && (
               <div className="space-y-4">
                 <ReviewBlock title="Contact" action={edit("contact")}>
-                  <p>{f.name}</p><p>{f.email}</p><p>+91 {f.phone}</p>
+                  <p>{f.name}</p><p>{f.email}</p><p>+91 {normalisePhone(f.phone)}</p>
                 </ReviewBlock>
                 <ReviewBlock title={`Delivery address · ${ADDRESS_TYPES.find((t) => t.v === f.addressType)?.l}`} action={edit("address")}>
                   <p>{f.line1}</p>{f.line2 && <p>{f.line2}</p>}<p>{f.city}, {f.state} – {f.pincode}</p>
