@@ -90,7 +90,7 @@ function PhotoStoryCard({ story }: { story: PhotoStory }) {
         {story.photos.map((ph, i) => (
           <div key={ph.label} className="relative overflow-hidden rounded-xl bg-secondary">
             <img src={ph.src} alt={ph.alt} loading="lazy" decoding="async" width={520} height={1110} className="aspect-[3/5] w-full object-cover" style={{ objectPosition: pos[i] }} />
-            <span className="absolute inset-x-1.5 bottom-1.5 rounded-full bg-background/90 px-2 py-1 text-center text-[9px] font-semibold uppercase tracking-[0.14em] text-foreground backdrop-blur sm:inset-x-2 sm:bottom-2 sm:text-[10px]">{ph.label}</span>
+            <span className="absolute inset-x-1.5 bottom-1.5 rounded-full bg-background/90 px-2 py-1 whitespace-nowrap text-center text-[8px] font-semibold uppercase tracking-[0.06em] text-foreground backdrop-blur sm:inset-x-2 sm:bottom-2 sm:text-[10px] sm:tracking-[0.14em]">{ph.label}</span>
           </div>
         ))}
       </div>
