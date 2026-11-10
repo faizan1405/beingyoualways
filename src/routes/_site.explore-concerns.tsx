@@ -62,12 +62,12 @@ function ExploreConcerns() {
             <nav aria-label="Jump to concern" className="mt-7 grid grid-cols-3 gap-2 sm:gap-2.5 md:mt-9">
               {chapters.map(({ id, label }, i) => (
                 <RevealOnScroll key={id} kind="fade-up" delay={420 + i * 90}>
-                  <a href={`#${id}`} className="btn-motion group relative flex min-h-14 flex-col justify-center gap-0.5 rounded-2xl border border-primary/15 bg-card/80 px-3 py-3 backdrop-blur hover:border-primary/50 hover:bg-card hover:shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4">
-                    <span className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2.5">
+                  <a href={`#${id}`} className="btn-motion group relative flex min-h-14 flex-col justify-center gap-0.5 rounded-2xl border border-primary/15 bg-card/80 px-3 py-3 backdrop-blur hover:border-primary/50 hover:bg-card hover:shadow-[var(--shadow-soft)] lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-4">
+                    <span className="flex flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-2.5">
                       <span className="font-serif text-sm italic text-accent">0{i + 1}</span>
                       <span className="text-sm font-medium text-foreground">{label}</span>
                     </span>
-                    <ArrowDown className="absolute right-3 top-3 size-3.5 text-primary sm:static sm:size-4 transition-transform duration-500 ease-[var(--ease-lux)] group-hover:translate-y-0.5" />
+                    <ArrowDown className="absolute right-3 top-3 size-3.5 text-primary lg:static lg:size-4 transition-transform duration-500 ease-[var(--ease-lux)] group-hover:translate-y-0.5" />
                   </a>
                 </RevealOnScroll>
               ))}
