@@ -11,6 +11,8 @@ import { categories } from "@/lib/mock-data";
 import { concerns as concernList, productConcerns } from "@/lib/concerns";
 import type { Product, ProductVariant } from "@/lib/types";
 import { productService } from "@/services/productService";
+import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
+import { withExtraImage, withMainImage } from "@/lib/product-images";
 import { isUnconfirmed } from "@/lib/variants";
 
 const hint = "mt-1 text-[11px] text-muted-foreground";
@@ -41,6 +43,7 @@ function EditProduct() {
   const save = useMutation({
     mutationFn: (x: Product) => productService.save(x),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin"] }); toast(isNew ? "Product created (demo state)" : "Product saved (demo state)"); navigate({ to: "/admin/products" }); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't save the product"),
   });
 
   if (isLoading || !p) return isLoading ? <div className="h-96 animate-pulse rounded-xl bg-card" /> : <p>Product not found.</p>;
@@ -134,11 +137,24 @@ function EditProduct() {
                 ))}
               </div>
             )}
-            <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground hover:border-primary">
-              <Upload className="size-4" /> Upload image (preview only)
-              <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPreview(URL.createObjectURL(f)); }} />
-            </label>
-            <p className="mt-2 text-xs text-muted-foreground">Images are not uploaded until storage is connected.</p>
+            {preview ? (
+              <div className="mt-3 grid gap-2" role="group" aria-label="Use the uploaded photo">
+                <Button type="button" size="sm" onClick={() => { up({ images: withMainImage(p.images, preview) }); setPreview(null); toast("Main photo replaced — press Save changes to keep it"); }}>Replace main photo</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: withExtraImage(p.images, preview) }); setPreview(null); toast("Photo added — press Save changes to keep it"); }}>Add as extra photo</Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setPreview(null)}>Discard upload</Button>
+              </div>
+            ) : (
+              <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground hover:border-primary">
+                <Upload className="size-4" /> Upload new photo
+                <input type="file" accept="image/*" className="sr-only" onChange={async (e) => {
+                  const f = e.target.files?.[0]; e.target.value = "";
+                  if (!f) return;
+                  const bad = checkImageFile(f); if (bad) { toast.error(bad); return; }
+                  try { setPreview(await fileToDemoImage(f)); } catch { toast.error("That image couldn't be read — try a JPG or PNG."); }
+                }} />
+              </label>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">Demo: photos are saved in this browser only, until storage is connected. Replacing photos never changes the product ID, prices or sizes.</p>
           </Panel>
           <Button variant="lux" size="xl" className="w-full" type="submit" disabled={save.isPending}>{isNew ? "Create product" : "Save changes"}</Button>
           <Button variant="ghost" className="w-full" type="button" onClick={() => navigate({ to: "/admin/products" })}>Cancel</Button>

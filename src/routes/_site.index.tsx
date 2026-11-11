@@ -52,7 +52,7 @@ function Home() {
 
       <ShopByConcern />
 
-      <section className="container-lux pb-24">
+      <section className="container-lux pb-20 md:pb-28">
         <SectionHead eyebrow="High Demand · Sample products" title="High demand" link={{ to: "/shop", label: "Shop all" }} />
         <StaggerContainer step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
           {featured.slice(0, 8).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
@@ -64,7 +64,6 @@ function Home() {
           <div className="relative mx-auto w-full max-w-lg pb-16 pr-10 md:pb-20 md:pr-16">
             <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("toner")[0]} alt="Being You toner among fresh fennel flowers" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
             <Parallax speed={0.08} className="absolute bottom-0 right-0 w-[48%]"><ImageReveal from="left" delay={200} className="overflow-hidden rounded-2xl border-[6px] border-secondary shadow-lift"><img src={productImages("aloe-vera-gel")[0]} alt="Being You aloe vera gel with fresh aloe leaves" loading="lazy" decoding="async" className="aspect-square w-full object-cover" /></ImageReveal></Parallax>
-            <span aria-hidden className="absolute -left-3 top-8 hidden rounded-full bg-background/90 px-4 py-2 font-serif text-sm italic text-foreground shadow-[var(--shadow-soft)] backdrop-blur md:block">Naturally you</span>
           </div>
           <div>
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Our story</RevealOnScroll>
@@ -90,7 +89,7 @@ function Home() {
                 ))}
               </div>
               <div aria-hidden className="absolute inset-0 -z-10 transition-opacity duration-500 group-hover:opacity-90" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${c.tone} 92%, transparent) 0%, color-mix(in oklab, ${c.tone} 55%, transparent) 38%, transparent 68%, color-mix(in oklab, ${c.tone} 45%, transparent) 100%)` }} />
-              <span className="absolute right-5 top-4 font-serif text-5xl italic opacity-80 [text-shadow:0_2px_12px_oklch(0_0_0/0.35)]">0{i + 1}</span>
+              <span aria-hidden className="absolute right-5 top-4 font-serif text-2xl italic opacity-75">0{i + 1}</span>
               <h3 className="text-3xl leading-tight">{c.name}</h3>
               <p className="mt-1 text-xs opacity-85">{c.copy}</p>
               <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em]">Discover <ArrowRight className="arrow-nudge size-3" /></span>
@@ -119,7 +118,7 @@ function Home() {
         <RevealOnScroll kind="slide-right" delay={150}><FaqList items={faqs.slice(0, 4)} /></RevealOnScroll>
       </section>
 
-      <section className="container-lux py-16 text-center">
+      <section className="container-lux py-20 text-center md:py-24">
         <RevealOnScroll as="p" kind="fade" className="eyebrow">We're here for you</RevealOnScroll>
         <TextReveal text="Questions about your routine?" className="mt-3 text-4xl md:text-5xl" />
         <p className="mt-4 text-sm text-muted-foreground">Call <a className="font-semibold text-foreground hover:underline" href={`tel:${contactConfig.phones[0].tel}`}>{contactConfig.phones[0].display}</a> or email <a className="font-semibold text-foreground hover:underline" href={`mailto:${contactConfig.email}`}>{contactConfig.email}</a></p>

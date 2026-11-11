@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { ShopProvider } from "@/lib/shop-store";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { themePreInitScript } from "@/lib/theme-preview";
 
 function NotFoundComponent() {
   return (
@@ -121,6 +122,8 @@ function RootShell({ children }: { children: ReactNode }) {
               "try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion-ok')}catch(e){}",
           }}
         />
+        {/* Internal theme preview (?theme=white). Shoppers get the approved theme; runs pre-paint to avoid a flash. */}
+        <script dangerouslySetInnerHTML={{ __html: themePreInitScript }} />
         <HeadContent />
       </head>
       <body>

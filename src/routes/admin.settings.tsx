@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { AdminPage, NotConnected, Panel, adminInput, adminLabel } from "@/components/admin/AdminUI";
+import { ThemePreviewPanel } from "@/components/admin/ThemePreviewPanel";
 import { Button } from "@/components/ui/button";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/services/cartService";
 
@@ -27,6 +28,7 @@ function Settings() {
           </ul>
         </Panel>
       </div>
+      <ThemePreviewPanel />
       <Button variant="lux" size="xl" onClick={() => toast("Settings will save once the backend is connected.")}>Save settings</Button>
     </AdminPage>
   );

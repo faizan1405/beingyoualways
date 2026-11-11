@@ -327,3 +327,20 @@ body { overflow-x: clip; }
   .btn-motion, .btn-motion:hover, .btn-motion:active, .btn-lift:hover, .btn-lift:active { transform: none !important; }
   .btn-motion svg { transform: none !important; }
 }
+
+/* ───────────── Option B · Pure White theme (internal preview only) ─────────────
+ * Applied via html[data-theme="white"] from src/lib/theme-preview.ts. Only neutral
+ * surfaces change; brand greens/terracotta and the colour-story scenes keep their hues.
+ */
+[data-theme="white"] {
+  --background: oklch(1 0 0);
+  --card: oklch(1 0 0);
+  --popover: oklch(1 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.972 0.002 120);
+  --muted: oklch(0.972 0.002 120);
+  --border: oklch(0.925 0.003 120);
+  --input: oklch(0.9 0.004 120);
+  --accent-foreground: oklch(1 0 0);
+  --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.965 0.006 75) 0%, var(--secondary) 45%, var(--background) 100%);
+}

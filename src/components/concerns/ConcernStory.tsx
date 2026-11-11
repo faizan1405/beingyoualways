@@ -31,10 +31,12 @@ const ease = (t: number) => t * t * (3 - 2 * t);
 export function chapterProgress(top: number, height: number, vh: number) {
   return clamp(-top / Math.max(1, height - vh));
 }
-/** Face/hair change: Before held to 25%, fades until 85%, After held to the end. */
-export const transformAt = (p: number) => ease(clamp((p - 0.25) / 0.6));
-/** Four editorial moments at 0–25 / 25–50 / 50–75 / 75–100%. */
-export const momentAt = (p: number) => Math.min(3, Math.floor(p * 4));
+/** Before held to 20%, changes through 20–80%, After held from 80% to the end. */
+export const transformAt = (p: number) => ease(clamp((p - 0.2) / 0.6));
+/** Four editorial moments: 0–20 / 20–50 / 50–75 / 75–100%. */
+export const momentAt = (p: number) => (p < 0.2 ? 0 : p < 0.5 ? 1 : p < 0.75 ? 2 : 3);
+/** The chapter CTA appears once the After visual has settled (last ~12%). */
+export const ctaAt = (p: number) => p >= 0.88;
 
 export function ConcernStory(p: ConcernStoryProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ export function ConcernStory(p: ConcernStoryProps) {
 
   const t = still ? 1 : transformAt(p0);
   const m = still ? 3 : momentAt(p0);
+  const cta = still || ctaAt(p0);
   const bg = `color-mix(in oklab, ${p.fromBg} ${((1 - t) * 100).toFixed(1)}%, ${p.toBg})`;
 
   return (
@@ -105,8 +108,8 @@ export function ConcernStory(p: ConcernStoryProps) {
               </div>
             ))}
           </div>
-          <Link to={p.ctaTo} tabIndex={m === 3 ? 0 : -1} aria-hidden={m !== 3} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium btn-motion text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8"
-            style={{ opacity: m === 3 ? 1 : 0, transform: m === 3 ? "none" : "translateY(10px)", pointerEvents: m === 3 ? "auto" : "none" }}>
+          <Link to={p.ctaTo} tabIndex={cta ? 0 : -1} aria-hidden={!cta} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium btn-motion transition-[opacity,transform] duration-500 text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8"
+            style={{ opacity: cta ? 1 : 0, transform: cta ? "none" : "translateY(10px)", pointerEvents: cta ? "auto" : "none" }}>
             {p.ctaLabel} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

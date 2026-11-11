@@ -158,7 +158,7 @@ function ProductPage() {
             <Link to={`/${cat.slug}` as "/skincare"} className="eyebrow hover:text-primary">{cat.name}</Link>
             {p.isSample && <SampleBadge />}
           </div>
-          <h1 className="mt-3 text-[2rem] leading-[1.1] sm:text-4xl md:text-5xl">{p.name}</h1>
+          <h1 className="mt-3 text-[1.9rem] leading-[1.1] sm:text-4xl lg:text-[2.75rem] lg:leading-[1.08]">{p.name}</h1>
           {!isUnconfirmed(p.shortDescription) && <p className="mt-4 leading-relaxed text-muted-foreground">{p.shortDescription}</p>}
 
           <div className="mt-6">

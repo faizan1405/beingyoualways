@@ -14,16 +14,25 @@ describe("scroll story stages", () => {
   });
 });
 
-import { chapterProgress, momentAt, transformAt } from "../concerns/ConcernStory";
+import { chapterProgress, ctaAt, momentAt, transformAt } from "../concerns/ConcernStory";
 
 describe("concern chapter (sticky)", () => {
-  it("holds Before for the first 25%", () => expect(transformAt(0.25)).toBe(0));
-  it("is fully After by 85% and held to the end", () => {
-    expect(transformAt(0.85)).toBe(1);
+  it("holds Before for the first 20%", () => expect(transformAt(0.2)).toBe(0));
+  it("is mid-change through 20–75%", () => {
+    expect(transformAt(0.5)).toBeGreaterThan(0.3);
+    expect(transformAt(0.5)).toBeLessThan(0.7);
+  });
+  it("is fully After by 80% (inside 75–90%) and held to the end", () => {
+    expect(transformAt(0.8)).toBe(1);
     expect(transformAt(chapterProgress(-1700, 2080, 800))).toBe(1);
   });
   it("moves through four moments and reverses", () => {
     expect([0.1, 0.3, 0.6, 0.9].map(momentAt)).toEqual([0, 1, 2, 3]);
+    expect([0.19, 0.2, 0.5, 0.75].map(momentAt)).toEqual([0, 1, 2, 3]);
     expect(momentAt(chapterProgress(0, 2080, 800))).toBe(0);
+  });
+  it("reveals the product CTA only in the final hold (90%+)", () => {
+    expect(ctaAt(0.8)).toBe(false);
+    expect(ctaAt(0.9)).toBe(true);
   });
 });

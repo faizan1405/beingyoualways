@@ -88,7 +88,7 @@ export function Hero() {
                   <img src={after} alt={amount > 0.5 ? "The same woman with lighter-looking dark spots and a more even tone" : ""} aria-hidden={amount <= 0.5} width={1024} height={1280}
                     className="absolute inset-0 h-full w-full object-cover object-[50%_30%] will-change-[opacity]"
                     style={{ opacity: amount, transform: `scale(${(1.06 - amount * 0.04).toFixed(3)})` }} />
-                  <p aria-hidden className="absolute inset-x-0 bottom-6 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-background transition-opacity duration-500" style={{ opacity: started ? 0 : 0.95 }}>
+                  <p aria-hidden className="absolute bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-foreground/45 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-background backdrop-blur-sm transition-opacity duration-500" style={{ opacity: started ? 0 : 1 }}>
                     Scroll to reveal ↓
                   </p>
                 </>

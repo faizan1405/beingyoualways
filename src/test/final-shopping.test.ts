@@ -46,10 +46,10 @@ describe("checkout draft privacy", () => {
 describe("client approval checklist", () => {
   const items = buildApprovalChecklist({ products, publicReviewCount: 0 });
   const status = (id: string) => items.find((i) => i.id === id)?.status;
-  it("lists all ten required items", () =>
-    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims"]));
+  it("lists all eleven required items", () =>
+    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "theme"]));
   it("keeps unconfirmed facts waiting on the client", () => {
-    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims"]) expect(status(id)).toBe("waiting");
+    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "theme"]) expect(status(id)).toBe("waiting");
   });
   it("marks brand claims confirmed only once the client confirms them", () => {
     const ok = buildApprovalChecklist({ products, publicReviewCount: 0, claimsConfirmed: true });

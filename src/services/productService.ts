@@ -73,9 +73,14 @@ export const productService = {
   getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
   // Admin (demo — saved in this browser only)
   save: (product: Product) => {
+    const before = store;
     const i = store.findIndex((p) => p.id === product.id);
     store = i >= 0 ? store.map((p) => (p.id === product.id ? product : p)) : [product, ...store];
-    persist();
+    try { persist(); } catch {
+      // Usually the browser's demo storage is full (large uploaded photos). Nothing is half-saved.
+      store = before;
+      return Promise.reject(new Error("This browser's demo storage is full. Remove an uploaded photo or use Reset demo data, then try again."));
+    }
     return delay(product);
   },
   remove: (id: string) => {

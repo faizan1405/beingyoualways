@@ -3,6 +3,7 @@
 // only turns "Confirmed" when the underlying fact has actually been supplied.
 import { BRAND_CLAIMS_CONFIRMED, COD_RULES_CONFIRMED, INVENTORY_CONNECTED, SHIPPING_RATES_CONFIRMED, contactConfig } from "@/config/business";
 import { policyReview } from "@/content/policies";
+import { APPROVED_THEME, THEMES, THEME_CHOICE_CONFIRMED } from "@/lib/theme-preview";
 import { isUnconfirmed } from "@/lib/variants";
 import type { Product } from "@/lib/types";
 
@@ -31,6 +32,7 @@ interface Inputs {
   inventoryConnected?: boolean;
   whatsappNumber?: string | null;
   claimsConfirmed?: boolean;
+  themeConfirmed?: boolean;
 }
 
 const productStatus = (missing: number, total: number): ApprovalStatus =>
@@ -44,6 +46,7 @@ export function buildApprovalChecklist({
   inventoryConnected = INVENTORY_CONNECTED,
   whatsappNumber = contactConfig.whatsappNumber,
   claimsConfirmed = BRAND_CLAIMS_CONFIRMED,
+  themeConfirmed = THEME_CHOICE_CONFIRMED,
 }: Inputs): ApprovalItem[] {
   const live = products.filter((p) => p.status === "active");
   const n = live.length;
@@ -115,6 +118,14 @@ export function buildApprovalChecklist({
         : "\"What We Stand For\" (Paraben Free, Natural, Cruelty-Free — suitable for all skin types, never tested on animals, eco-conscious packaging) and \"Global Standards\" (six country flags) are shown word-for-word from the old site but are not verified.",
       needed: "Written confirmation that each claim is true for every product, plus which ingredients come from India, South Korea, Spain, Brazil, Germany and the United States. Supporting documents if any certification is to be mentioned.",
       affects: "Homepage \"What We Stand For\" and \"Global Standards\" sections.",
+    },
+      {
+      id: "theme", title: "Website theme (Ivory or Pure White)", status: themeConfirmed ? "confirmed" : "waiting",
+      current: themeConfirmed
+        ? `Client chose ${THEMES[APPROVED_THEME].label}.`
+        : `Shoppers see ${THEMES[APPROVED_THEME].label} (Option A). Pure White (Option B) is available as an internal preview only.`,
+      needed: "The client's final choice after comparing both options on phone and desktop.",
+      affects: "Background and surface colours across the storefront (layout, content and colour-story scenes stay the same).", adminLink: "/admin/settings",
     },
   ];
 }

@@ -3,8 +3,8 @@ import { ArrowDown } from "lucide-react";
 
 import acneAfter from "@/assets/concerns/acne-after.jpg";
 import acneBefore from "@/assets/concerns/acne-before.jpg";
-import hairAfter from "@/assets/concerns/hair-after.jpg";
-import hairBefore from "@/assets/concerns/hair-before.jpg";
+import hairAfter from "@/assets/concerns/hair-comb-after.jpg";
+import hairBefore from "@/assets/concerns/hair-comb-before.jpg";
 import pigAfter from "@/assets/concerns/pig-after.jpg";
 import pigBefore from "@/assets/concerns/pig-before.jpg";
 import { ConcernStory } from "@/components/concerns/ConcernStory";
@@ -120,14 +120,14 @@ function ExploreConcerns() {
         ]}
         products={acne} ctaLabel="Shop skincare products" ctaTo="/skincare" />
 
-      <ConcernStory id="hair" index={3} name="Hair Care" before={hairBefore} after={hairAfter} pos="50% 30%"
-        beforeAlt="Portrait: woman with thinner, shoulder-length, dull-looking hair and loose fallen strands" afterAlt="The same woman with longer, fuller, smoother and shinier-looking hair"
+      <ConcernStory id="hair" index={3} name="Hair Care" before={hairBefore} after={hairAfter} pos="60% 35%"
+        beforeAlt="Woman holding a wooden comb after combing, with a noticeable clump of shed hair caught in its teeth" afterAlt="The same woman holding the same comb, with only a few loose strands in it"
         fromBg="color-mix(in oklab, var(--accent) 22%, var(--secondary))" toBg="color-mix(in oklab, var(--sage) 40%, var(--background))"
         moments={[
-          { label: "The concern", title: "Hair fall, weak strands.", copy: "Strands on your pillow and comb, ends that break easily — hair can start to look thinner and duller." },
-          { label: "Understanding", title: "Hair that needs nourishing.", copy: "Stress, heat, hard water and a rushed routine can leave strands dry and prone to breaking." },
-          { label: "Care & ritual", title: "Oil, wash, nourish.", copy: "A weekly warm-oil massage, a gentle wash and a mask to keep lengths soft and cared for." },
-          { label: "The reveal", title: "Longer-looking, healthier-looking hair.", copy: "Smoother, fuller-looking lengths with less breakage — results vary, and this is everyday care, not a treatment." },
+          { label: "The concern", title: "Hair fall, in every comb.", copy: "Hair shedding can be a frustrating part of an everyday routine." },
+          { label: "Understanding", title: "Know what your hair needs.", copy: "Hair and scalp care begin with understanding your individual needs." },
+          { label: "Everyday care", title: "Cleanse, condition, repeat.", copy: "Make thoughtful cleansing and conditioning part of your regular routine." },
+          { label: "The reveal", title: "A ritual made for you.", copy: "Explore a haircare ritual designed around your everyday needs." },
         ]}
         products={hair} ctaLabel="Explore haircare collection" ctaTo="/haircare" />
 
