@@ -120,10 +120,10 @@ export function buildApprovalChecklist({
       affects: "Homepage \"What We Stand For\" and \"Global Standards\" sections.",
     },
       {
-      id: "theme", title: "Website theme (Ivory or Pure White)", status: themeConfirmed ? "confirmed" : "waiting",
+      id: "theme", title: "Website theme (Clean White)", status: themeConfirmed ? "confirmed" : "waiting",
       current: themeConfirmed
         ? `Client chose ${THEMES[APPROVED_THEME].label}.`
-        : `Shoppers see ${THEMES[APPROVED_THEME].label} (Option A). Pure White (Option B) is available as an internal preview only.`,
+        : `Shoppers see ${THEMES[APPROVED_THEME].label}. The client has not confirmed it yet.`,
       needed: "The client's final choice after comparing both options on phone and desktop.",
       affects: "Background and surface colours across the storefront (layout, content and colour-story scenes stay the same).", adminLink: "/admin/settings",
     },

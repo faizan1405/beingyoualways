@@ -1,6 +1,6 @@
-# Roadmap — High Demand dynamic + premium buttons
+# Roadmap — Clean White theme + Our Story button
 
-- [x] 1. Homepage High Demand shows only admin-marked products (live update, empty state, no auto-marking)
-- [x] 2. Premium bordered buttons everywhere via shared variants (thin borders, refined radius, arrow glide, gentle lift, reduced motion)
-- [x] 3. QA (admin toggle → homepage, buttons navigate, mobile/desktop, cart/checkout/admin) + tests; added to QA report
-- [ ] Waiting on client: final theme choice (A or B); new product photos; confirm brand claims + ingredient sourcing countries; Safari/iPhone video check on a real device; confirm starting High Demand picks
+- [x] 1. Clean White (#FFFFFF) is the public theme on every page; colour-story scenes untouched; old Ivory kept as internal preview
+- [x] 2. Hero "Our Story" is a bordered button; three hero buttons form one aligned set on phone, tablet, laptop, desktop
+- [x] 3. Responsive check (320/390/820/1111/1280), no sideways scroll, tests updated
+- [ ] Waiting on client: new product photos; confirm brand claims + ingredient sourcing countries; Safari/iPhone video check on a real device; confirm starting High Demand picks

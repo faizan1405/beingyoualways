@@ -11,7 +11,7 @@ export function ThemePreviewPanel() {
   const preview = useSyncExternalStore(subscribePreview, readPreview, serverSnap);
   return (
     <Panel title="Theme preview (internal)">
-      <p className="text-sm text-muted-foreground">Compare the two options on this device only. Shoppers keep seeing <strong className="text-foreground">{THEMES[APPROVED_THEME].label}</strong> until the client picks a final theme.</p>
+      <p className="text-sm text-muted-foreground">Compare the two options on this device only. Shoppers always see <strong className="text-foreground">{THEMES[APPROVED_THEME].label}</strong>, the theme the client chose.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {(Object.keys(THEMES) as SiteTheme[]).map((t) => (
           <div key={t} className="rounded-lg border p-4">

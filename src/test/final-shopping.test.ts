@@ -49,8 +49,9 @@ describe("client approval checklist", () => {
   it("lists all eleven required items", () =>
     expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "theme"]));
   it("keeps unconfirmed facts waiting on the client", () => {
-    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "theme"]) expect(status(id)).toBe("waiting");
+    for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims"]) expect(status(id)).toBe("waiting");
   });
+  it("records the client's Clean White theme choice as confirmed", () => expect(status("theme")).toBe("confirmed"));
   it("marks brand claims confirmed only once the client confirms them", () => {
     const ok = buildApprovalChecklist({ products, publicReviewCount: 0, claimsConfirmed: true });
     expect(ok.find((i) => i.id === "claims")?.status).toBe("confirmed");

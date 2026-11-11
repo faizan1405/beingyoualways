@@ -18,6 +18,8 @@ const buttonVariants = cva(
         accent: "btn-lift btn-fill border-accent bg-accent text-accent-foreground text-[11px] font-semibold uppercase tracking-[0.16em] [--btn-fill:color-mix(in_oklab,var(--accent)_80%,var(--foreground))]",
         // Secondary family: thin border that deepens + faint tinted sweep
         luxOutline: "btn-rise btn-fill border-primary/35 bg-transparent text-primary text-[11px] font-semibold uppercase tracking-[0.16em] hover:border-primary [--btn-fill:color-mix(in_oklab,var(--primary)_7%,transparent)]",
+        // Lightest bordered CTA (e.g. hero "Our story"): neutral hairline, charcoal text, deepens to green
+        luxLight: "btn-rise btn-fill border-foreground/20 bg-background text-foreground/85 text-[11px] font-semibold uppercase tracking-[0.16em] hover:border-primary/60 hover:text-primary [--btn-fill:color-mix(in_oklab,var(--primary)_5%,transparent)]",
         outline: "btn-rise btn-fill border-border bg-background text-foreground hover:border-primary/55 [--btn-fill:var(--secondary)]",
         secondary: "btn-fill border-border/70 bg-secondary text-secondary-foreground hover:border-primary/30 [--btn-fill:color-mix(in_oklab,var(--secondary)_82%,var(--primary))]",
         ghost: "hover:bg-secondary hover:text-foreground",

@@ -64,25 +64,25 @@
 
 :root {
   --radius: 0.5rem;
-  /* Warm Ivory #FAF8F3 */
-  --background: oklch(0.982 0.007 88);
+  /* Clean White #FFFFFF (client-approved, Nov 2026) */
+  --background: oklch(1 0 0);
   /* Rich Charcoal #252722 */
   --foreground: oklch(0.262 0.008 120);
-  --card: oklch(0.995 0.004 88);
+  --card: oklch(1 0 0);
   --card-foreground: oklch(0.262 0.008 120);
-  --popover: oklch(0.995 0.004 88);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.262 0.008 120);
   /* Deep Botanical Green #263B31 */
   --primary: oklch(0.33 0.036 160);
-  --primary-foreground: oklch(0.975 0.008 88);
-  /* Soft Cream #F1EDE4 */
-  --secondary: oklch(0.945 0.013 85);
+  --primary-foreground: oklch(1 0 0);
+  /* Very light neutral grey for supporting sections */
+  --secondary: oklch(0.972 0.002 120);
   --secondary-foreground: oklch(0.33 0.036 160);
-  --muted: oklch(0.945 0.013 85);
-  --muted-foreground: oklch(0.5 0.012 120);
+  --muted: oklch(0.972 0.002 120);
+  --muted-foreground: oklch(0.47 0.01 120);
   /* Muted Terracotta #C78E78 */
   --accent: oklch(0.7 0.07 40);
-  --accent-foreground: oklch(0.99 0.004 88);
+  --accent-foreground: oklch(1 0 0);
   /* Soft Sage #A8B8A3 */
   --sage: oklch(0.76 0.032 135);
   --sage-foreground: oklch(0.28 0.03 150);
@@ -90,8 +90,8 @@
   --warning: oklch(0.72 0.12 75);
   --destructive: oklch(0.56 0.17 28);
   --destructive-foreground: oklch(0.985 0.004 88);
-  --border: oklch(0.9 0.014 85);
-  --input: oklch(0.88 0.014 85);
+  --border: oklch(0.925 0.003 120);
+  --input: oklch(0.9 0.004 120);
   --ring: oklch(0.33 0.036 160);
   --chart-1: oklch(0.33 0.036 160);
   --chart-2: oklch(0.7 0.07 40);
@@ -109,7 +109,7 @@
 
   --shadow-soft-value: 0 1px 2px oklch(0.3 0.03 150 / 0.04), 0 8px 24px -12px oklch(0.3 0.03 150 / 0.14);
   --shadow-lift-value: 0 2px 4px oklch(0.3 0.03 150 / 0.05), 0 24px 48px -20px oklch(0.3 0.03 150 / 0.28);
-  --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.93 0.02 75) 0%, var(--secondary) 45%, var(--background) 100%);
+  --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.965 0.006 75) 0%, var(--secondary) 45%, var(--background) 100%);
   --gradient-veil: linear-gradient(180deg, transparent 40%, oklch(0.25 0.03 155 / 0.72) 100%);
 }
 
@@ -358,19 +358,21 @@ body { overflow-x: clip; }
   .btn-fill:hover::before, .btn-fill:focus-visible::before { opacity: 1; }
 }
 
-/* ───────────── Option B · Pure White theme (internal preview only) ─────────────
- * Applied via html[data-theme="white"] from src/lib/theme-preview.ts. Only neutral
- * surfaces change; brand greens/terracotta and the colour-story scenes keep their hues.
+/* ───────────── Previous Ivory theme (internal preview only) ─────────────
+ * The public site is Clean White (:root). html[data-theme="ivory"] from
+ * src/lib/theme-preview.ts restores the old warm surfaces for comparison only;
+ * brand greens/terracotta and the colour-story scenes are unchanged.
  */
-[data-theme="white"] {
-  --background: oklch(1 0 0);
-  --card: oklch(1 0 0);
-  --popover: oklch(1 0 0);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.972 0.002 120);
-  --muted: oklch(0.972 0.002 120);
-  --border: oklch(0.925 0.003 120);
-  --input: oklch(0.9 0.004 120);
-  --accent-foreground: oklch(1 0 0);
-  --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.965 0.006 75) 0%, var(--secondary) 45%, var(--background) 100%);
+[data-theme="ivory"] {
+  --background: oklch(0.982 0.007 88);
+  --card: oklch(0.995 0.004 88);
+  --popover: oklch(0.995 0.004 88);
+  --primary-foreground: oklch(0.975 0.008 88);
+  --secondary: oklch(0.945 0.013 85);
+  --muted: oklch(0.945 0.013 85);
+  --muted-foreground: oklch(0.5 0.012 120);
+  --border: oklch(0.9 0.014 85);
+  --input: oklch(0.88 0.014 85);
+  --accent-foreground: oklch(0.99 0.004 88);
+  --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.93 0.02 75) 0%, var(--secondary) 45%, var(--background) 100%);
 }

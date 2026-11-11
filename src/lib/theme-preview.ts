@@ -6,14 +6,14 @@
 export type SiteTheme = "ivory" | "white";
 
 export const THEMES: Record<SiteTheme, { option: "A" | "B"; label: string; note: string }> = {
-  ivory: { option: "A", label: "Existing Ivory", note: "Current approved theme — warm ivory and cream surfaces." },
-  white: { option: "B", label: "Pure White", note: "Experiment — #FFFFFF background with very light neutral grey surfaces." },
+  ivory: { option: "A", label: "Previous Ivory", note: "Retired — warm ivory and cream surfaces, kept for comparison only." },
+  white: { option: "B", label: "Clean White", note: "Approved public theme — #FFFFFF background with very light neutral grey surfaces." },
 };
 
 /** The theme every shopper sees. Change only after the client picks a final option. */
-export const APPROVED_THEME: SiteTheme = "ivory";
+export const APPROVED_THEME: SiteTheme = "white";
 /** Flip to true once the client has chosen the final theme (and APPROVED_THEME is set to it). */
-export const THEME_CHOICE_CONFIRMED = false;
+export const THEME_CHOICE_CONFIRMED = true;
 
 export const THEME_PREVIEW_KEY = "by-theme-preview";
 
@@ -31,7 +31,7 @@ export function resolveTheme(param: string | null, stored: string | null): { the
 }
 
 /** Runs before first paint (inline in <head>) so the preview never flashes the other theme. */
-export const themePreInitScript = `try{var k=${JSON.stringify(THEME_PREVIEW_KEY)},d=document.documentElement,q=new URLSearchParams(location.search).get('theme'),s=localStorage.getItem(k);if(q==='off'||q==='default'){localStorage.removeItem(k);s=null}else if(q==='white'||q==='ivory'){localStorage.setItem(k,q);s=q}if(s==='white'||s==='ivory'){d.setAttribute('data-theme-preview',s);if(s==='white')d.setAttribute('data-theme','white')}}catch(e){}`;
+export const themePreInitScript = `try{var k=${JSON.stringify(THEME_PREVIEW_KEY)},d=document.documentElement,q=new URLSearchParams(location.search).get('theme'),s=localStorage.getItem(k);if(q==='off'||q==='default'){localStorage.removeItem(k);s=null}else if(q==='white'||q==='ivory'){localStorage.setItem(k,q);s=q}if(s==='white'||s==='ivory'){d.setAttribute('data-theme-preview',s);if(s==='ivory')d.setAttribute('data-theme','ivory')}}catch(e){}`;
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -48,7 +48,8 @@ export function setPreview(theme: SiteTheme | null) {
   try { if (theme) localStorage.setItem(THEME_PREVIEW_KEY, theme); else localStorage.removeItem(THEME_PREVIEW_KEY); } catch { /* storage blocked */ }
   if (theme) d.setAttribute("data-theme-preview", theme); else d.removeAttribute("data-theme-preview");
   const shown = theme ?? APPROVED_THEME;
-  if (shown === "white") d.setAttribute("data-theme", "white"); else d.removeAttribute("data-theme");
+  // Clean White lives in :root; only the retired Ivory needs an override attribute.
+  if (shown === "ivory") d.setAttribute("data-theme", "ivory"); else d.removeAttribute("data-theme");
   listeners.forEach((l) => l());
 }
 

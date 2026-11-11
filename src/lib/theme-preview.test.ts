@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { APPROVED_THEME, resolveTheme } from "./theme-preview";
+import { APPROVED_THEME, THEME_CHOICE_CONFIRMED, resolveTheme } from "./theme-preview";
 
 describe("theme preview", () => {
-  it("keeps the existing Ivory theme as the public default", () => {
-    expect(APPROVED_THEME).toBe("ivory");
-    expect(resolveTheme(null, null)).toEqual({ theme: "ivory", previewing: false, store: null });
+  it("shows every shopper the client-approved Clean White theme by default", () => {
+    expect(APPROVED_THEME).toBe("white");
+    expect(THEME_CHOICE_CONFIRMED).toBe(true);
+    expect(resolveTheme(null, null)).toEqual({ theme: "white", previewing: false, store: null });
   });
-  it("shows Pure White only when a preview is requested, and remembers it", () => {
-    expect(resolveTheme("white", null)).toEqual({ theme: "white", previewing: true, store: "white" });
-    expect(resolveTheme(null, "white").theme).toBe("white");
+  it("shows the old Ivory only when a preview is requested, and remembers it", () => {
+    expect(resolveTheme("ivory", null)).toEqual({ theme: "ivory", previewing: true, store: "ivory" });
+    expect(resolveTheme(null, "ivory").theme).toBe("ivory");
   });
-  it("can switch back to Ivory or end the preview", () => {
-    expect(resolveTheme("ivory", "white").theme).toBe("ivory");
-    expect(resolveTheme("off", "white")).toEqual({ theme: "ivory", previewing: false, store: null });
+  it("ending the preview returns to Clean White", () => {
+    expect(resolveTheme("off", "ivory")).toEqual({ theme: "white", previewing: false, store: null });
   });
-  it("ignores unknown theme names", () => expect(resolveTheme("purple", "neon").theme).toBe("ivory"));
+  it("ignores unknown theme names", () => expect(resolveTheme("purple", "neon").theme).toBe("white"));
 });

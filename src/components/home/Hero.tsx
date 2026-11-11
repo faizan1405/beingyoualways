@@ -68,15 +68,16 @@ export function Hero() {
             <p className="hero-in mx-auto mt-3 hidden max-w-md text-[15px] leading-relaxed text-muted-foreground sm:block md:mx-0 md:mt-6" style={{ animationDelay: "800ms" }}>
               Nature-inspired beauty rituals for uneven skin tone, dark spots and everyday radiance.
             </p>
-            <div className="hero-in mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:mt-9 md:justify-start" style={{ animationDelay: "950ms" }}>
-              <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
-              <Button variant="luxOutline" size="xl" asChild><Link to="/explore-concerns">Explore by Concern <ArrowRight /></Link></Button>
-              <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
+            {/* One set of three: equal-width stack on phones/tablets, primary on top + pair below on small laptops, one row from xl */}
+            <div className="hero-in mx-auto mt-5 grid w-full max-w-[300px] gap-2 md:mx-0 md:mt-9 lg:max-w-[460px] lg:grid-cols-2 xl:flex xl:max-w-none xl:items-center xl:gap-2.5" style={{ animationDelay: "950ms" }}>
+              <Button variant="lux" size="xl" className="group h-11 w-full px-[1.1rem] sm:h-12 lg:col-span-2 xl:w-auto" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
+              <Button variant="luxOutline" size="xl" className="h-11 w-full px-[1.1rem] sm:h-12 xl:w-auto" asChild><Link to="/explore-concerns">Explore by Concern <ArrowRight /></Link></Button>
+              <Button variant="luxLight" size="xl" className="h-11 w-full px-[1.1rem] sm:h-12 xl:w-auto" asChild><Link to="/about">Our Story <ArrowRight /></Link></Button>
             </div>
           </div>
 
           <figure className="hero-in order-1 mx-auto w-full max-w-[min(100%,340px)] sm:max-w-[400px] md:order-2 md:max-w-none" style={{ animationDelay: "300ms" }}>
-            <div className="relative mx-auto aspect-[4/5] max-h-[54svh] md:max-h-[min(78vh,720px)]">
+            <div className="relative mx-auto aspect-[4/5] max-h-[46svh] md:max-h-[min(78vh,720px)]">
             <span aria-hidden className="pointer-events-none absolute -bottom-3 -right-3 hidden h-full w-full border border-primary/25 sm:block md:-bottom-4 md:-right-4" />
             <div className="relative h-full w-full overflow-hidden rounded-[3px] bg-secondary shadow-[var(--shadow-soft)]">
               {still ? (
