@@ -6,12 +6,23 @@ import { productConcerns, type ConcernSlug } from "@/lib/concerns";
 
 // Demo admin edits persist in localStorage; resetDemo() restores the imported catalogue.
 const KEY = "bya.products.v2";
+// Saved demo edits from before the High Demand flag existed keep the catalogue's starting picks.
+const withHighDemandDefaults = (list: Product[]): Product[] =>
+  list.map((p) => (p.bestSeller === undefined ? { ...p, bestSeller: seed.find((s) => s.id === p.id)?.bestSeller ?? false } : p));
 const load = (): Product[] => {
   if (typeof window === "undefined") return structuredClone(seed);
-  try { const v = JSON.parse(localStorage.getItem(KEY) ?? "null"); return Array.isArray(v) ? v : structuredClone(seed); } catch { return structuredClone(seed); }
+  try { const v = JSON.parse(localStorage.getItem(KEY) ?? "null"); return Array.isArray(v) ? withHighDemandDefaults(v) : structuredClone(seed); } catch { return structuredClone(seed); }
 };
 let store: Product[] = load();
 const persist = () => { if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(store)); };
+
+// Live updates: pages showing admin-controlled lists (e.g. homepage High Demand) re-read on change,
+// including edits made in another tab of this browser.
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach((fn) => fn());
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => { if (e.key === KEY) { store = load(); notify(); } });
+}
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "name";
@@ -43,6 +54,9 @@ export function filterProducts(list: Product[], query: ProductQuery): Product[] 
   return out;
 }
 
+/** Homepage High Demand: only active products the admin has marked, in catalogue order. Never filler. */
+export const selectHighDemand = (list: Product[]): Product[] => list.filter((p) => p.status === "active" && p.bestSeller === true);
+
 export const concernsOf = (p: Product): string[] => p.concerns ?? productConcerns[p.slug] ?? [];
 
 /** Recommendations based only on shared concern tags — never filler. */
@@ -61,6 +75,16 @@ export function recommendByConcern(list: Product[], p: Product, exclude: string[
 export const productService = {
   list: (query: ProductQuery = {}) => delay(filterProducts(store, query)),
   featured: () => delay(store.filter((p) => p.featured && p.status === "active")),
+  /** Products marked "High Demand" in admin (later: GET /products?high_demand=1). */
+  highDemand: () => delay(selectHighDemand(store)),
+  /** Mark / unmark High Demand without touching any other field. */
+  setHighDemand: (id: string, on: boolean) => {
+    const p = store.find((x) => x.id === id);
+    if (!p) return Promise.reject(new Error("Product not found"));
+    return productService.save({ ...p, bestSeller: on });
+  },
+  /** Re-run fn whenever demo product data changes. Returns an unsubscribe function. */
+  subscribe: (fn: () => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; },
   getBySlug: (slug: string) => delay(store.find((p) => p.slug === slug) ?? null),
   getById: (id: string) => delay(store.find((p) => p.id === id) ?? null),
   /** More from the same category. */
@@ -81,17 +105,20 @@ export const productService = {
       store = before;
       return Promise.reject(new Error("This browser's demo storage is full. Remove an uploaded photo or use Reset demo data, then try again."));
     }
+    notify();
     return delay(product);
   },
   remove: (id: string) => {
     store = store.filter((p) => p.id !== id);
     persist();
+    notify();
     return delay(true);
   },
   /** Restore the imported catalogue and discard demo edits. */
   resetDemo: () => {
     store = structuredClone(seed);
     if (typeof window !== "undefined") localStorage.removeItem(KEY);
+    notify();
     return delay(true);
   },
   /** Synchronous lookup used by the cart to render line items. */

@@ -57,6 +57,8 @@ export const products: Product[] = (catalogue as Raw[]).map((r) => ({
   tint: tints[r.category] ?? "oklch(0.86 0.05 140)",
   images: productImages(r.slug),
   featured: r.featured,
+  // High Demand starts from the products the client featured on beingyoualways.com; admin can change it.
+  bestSeller: r.featured,
   status: "active",
   isSample: false,
   sourceUrl: r.sourceUrl,

@@ -15,14 +15,14 @@ export function QtyStepper({ value, onChange, label, min = 1, max = MAX_QTY_PER_
 }) {
   const btn = size === "lg" ? "size-11" : "size-9";
   return (
-    <div className={cn("inline-flex shrink-0 items-center rounded-full border border-input bg-card", size === "lg" ? "h-11" : "h-9")} role="group" aria-label={`${label} quantity`}>
-      <button type="button" className={cn("press grid place-items-center rounded-full hover:bg-secondary disabled:opacity-40", btn)} aria-label={`Decrease ${label} quantity`} onClick={() => onChange(value - 1)} disabled={value <= min}><Minus className="size-3.5" /></button>
+    <div className={cn("inline-flex shrink-0 items-center rounded-btn border border-border bg-card", size === "lg" ? "h-12" : "h-9")} role="group" aria-label={`${label} quantity`}>
+      <button type="button" className={cn("btn-motion grid place-items-center rounded-[calc(var(--radius-btn)-2px)] hover:bg-secondary disabled:opacity-40", btn)} aria-label={`Decrease ${label} quantity`} onClick={() => onChange(value - 1)} disabled={value <= min}><Minus className="size-3.5" /></button>
       <span className="relative w-7 overflow-hidden text-center text-sm tabular-nums" aria-live="polite" aria-label={`Quantity ${value}`}>
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span key={value} className="block" initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -10, opacity: 0 }} transition={{ duration: 0.18 }}>{value}</motion.span>
         </AnimatePresence>
       </span>
-      <button type="button" className={cn("press grid place-items-center rounded-full hover:bg-secondary disabled:opacity-40", btn)} aria-label={`Increase ${label} quantity`} onClick={() => onChange(value + 1)} disabled={value >= max}><Plus className="size-3.5" /></button>
+      <button type="button" className={cn("btn-motion grid place-items-center rounded-[calc(var(--radius-btn)-2px)] hover:bg-secondary disabled:opacity-40", btn)} aria-label={`Increase ${label} quantity`} onClick={() => onChange(value + 1)} disabled={value >= max}><Plus className="size-3.5" /></button>
     </div>
   );
 }

@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 import { productImages } from "@/lib/product-images";
 
 type Stage = { k: string; title: string; copy: string; src: string | undefined; alt: string; bg: string; fg: string; muted: string; cta?: boolean };
@@ -82,7 +85,7 @@ export function ScrollStory() {
                   <h2 className="story-line mt-1 text-[1.75rem] leading-[1.08] md:mt-3 md:text-5xl lg:text-6xl" style={{ color: fg }}>{s.title}</h2>
                   <p className="story-line mt-2 max-w-md text-sm leading-relaxed md:mt-5 md:text-[15px]" style={{ color: muted }}>{s.copy}</p>
                   {s.cta && (
-                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className="story-line mt-4 inline-flex min-h-11 items-center gap-2 btn-motion btn-lift rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8">
+                    <Link to="/shop" tabIndex={n === active ? 0 : -1} className={cn(buttonVariants({ variant: "lux", size: "xl" }), "story-line mt-4 md:mt-8")}>
                       Explore the Collection <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}

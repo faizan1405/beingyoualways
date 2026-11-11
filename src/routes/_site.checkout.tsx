@@ -174,7 +174,7 @@ function Checkout() {
   );
 
   const edit = (s: CheckoutStep) => (
-    <button type="button" onClick={() => goTo(s)} className="press inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-primary hover:bg-primary/5"><Pencil className="size-3" /> Edit</button>
+    <button type="button" onClick={() => goTo(s)} className="btn-motion inline-flex h-9 items-center gap-1.5 rounded-btn border border-transparent px-3 text-xs font-medium text-primary hover:border-primary/30 hover:bg-primary/5"><Pencil className="size-3" /> Edit</button>
   );
 
   return (
@@ -263,7 +263,7 @@ function Checkout() {
                   <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Address type">
                     {ADDRESS_TYPES.map((t) => (
                       <button key={t.v} type="button" role="radio" aria-checked={f.addressType === t.v} onClick={() => setF((p) => ({ ...p, addressType: t.v }))}
-                        className={cn("press h-11 rounded-full border px-5 text-sm transition-colors", f.addressType === t.v ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary")}>{t.l}</button>
+                        className={cn("btn-motion h-11 rounded-btn border px-5 text-sm", f.addressType === t.v ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary")}>{t.l}</button>
                     ))}
                   </div>
                 </fieldset>
@@ -289,7 +289,7 @@ function Checkout() {
                   <p>{pay ? paymentLabel(pay) : "Not chosen"}</p>
                   <p className="text-xs text-muted-foreground">{pay === "cod" ? "COD availability and charges are pending client approval." : "Razorpay is not connected yet."}</p>
                 </ReviewBlock>
-                <ReviewBlock title={`Items (${summary.itemCount})`} action={<Link to="/cart" className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-primary hover:bg-primary/5"><Pencil className="size-3" /> Edit bag</Link>}>
+                <ReviewBlock title={`Items (${summary.itemCount})`} action={<Link to="/cart" className="btn-motion inline-flex h-9 items-center gap-1.5 rounded-btn border border-transparent px-3 text-xs font-medium text-primary hover:border-primary/30 hover:bg-primary/5"><Pencil className="size-3" /> Edit bag</Link>}>
                   {summaryList}
                 </ReviewBlock>
                 <div className="rounded-xl border border-border p-5">
@@ -305,7 +305,7 @@ function Checkout() {
 
           <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
             {idx > 0 ? (
-              <Button type="button" variant="ghost" className="h-12 rounded-full" onClick={() => goTo(CHECKOUT_STEPS[idx - 1]!.id)}><ArrowLeft /> Back</Button>
+              <Button type="button" variant="ghost" className="h-12" onClick={() => goTo(CHECKOUT_STEPS[idx - 1]!.id)}><ArrowLeft /> Back</Button>
             ) : <span />}
             <Button type="submit" variant="lux" size="xl" className="w-full sm:w-auto">
               {step === "contact" && <>Continue to delivery <ArrowRight /></>}

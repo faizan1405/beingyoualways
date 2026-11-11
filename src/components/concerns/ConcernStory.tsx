@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/ProductCard";
@@ -108,7 +110,7 @@ export function ConcernStory(p: ConcernStoryProps) {
               </div>
             ))}
           </div>
-          <Link to={p.ctaTo} tabIndex={cta ? 0 : -1} aria-hidden={!cta} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium btn-motion transition-[opacity,transform] duration-500 text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:mt-8"
+          <Link to={p.ctaTo} tabIndex={cta ? 0 : -1} aria-hidden={!cta} className={cn(buttonVariants({ variant: "lux", size: "xl" }), "mt-6 self-start md:mt-8")}
             style={{ opacity: cta ? 1 : 0, transform: cta ? "none" : "translateY(10px)", pointerEvents: cta ? "auto" : "none" }}>
             {p.ctaLabel} <ArrowRight className="h-4 w-4" />
           </Link>

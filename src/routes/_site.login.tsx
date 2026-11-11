@@ -3,7 +3,7 @@ import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { authService } from "@/services/authService";
 import { toast } from "sonner";
 
@@ -55,7 +55,7 @@ function Login() {
             if (!r.ok) setGoogleNote(true);
             toast("Google sign-in needs backend integration — you have not been signed in.");
           }}
-          className="press mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-full border border-input bg-card text-sm font-semibold shadow-soft transition-colors hover:border-primary"
+          className={buttonVariants({ variant: "outline", size: "xl", className: "mt-8 w-full gap-3 bg-card font-semibold" })}
         >
           <GoogleIcon /> {mode === "login" ? "Continue with Google" : "Sign up with Google"}
         </button>

@@ -35,7 +35,7 @@ export function CartDrawer() {
               <Button variant="lux" size="xl" className="w-full" asChild onClick={close}><Link to="/checkout">Proceed to checkout <ArrowRight /></Link></Button>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="luxOutline" size="lg" className="w-full" onClick={close}>Continue shopping</Button>
-                <Button variant="ghost" size="lg" className="w-full rounded-full text-xs uppercase tracking-[0.12em]" asChild onClick={close}><Link to="/cart">View full bag</Link></Button>
+                <Button variant="ghost" size="lg" className="w-full text-[11px] font-semibold uppercase tracking-[0.16em]" asChild onClick={close}><Link to="/cart">View full bag</Link></Button>
               </div>
             </div>
           </>

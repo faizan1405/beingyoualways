@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { FounderQuote, GlobalStandards, ShopByConcern, WhyChooseUs, collections } from "@/components/home/HomeSections";
 import { Testimonials } from "@/components/home/Testimonials";
 import { ScrollStory } from "@/components/home/ScrollStory";
@@ -7,7 +7,8 @@ import { VideoReviews } from "@/components/home/VideoReviews";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
-import { ProductCard } from "@/components/shop/ProductCard";
+import { ProductCard, ProductGridSkeleton } from "@/components/shop/ProductCard";
+import { useHighDemand } from "@/hooks/use-high-demand";
 import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Newsletter } from "@/components/site/SiteFooter";
 import { contactConfig } from "@/config/business";
@@ -27,17 +28,17 @@ export const Route = createFileRoute("/_site/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async () => ({ featured: await productService.featured() }),
+  loader: async () => ({ highDemand: await productService.highDemand() }),
   component: Home,
 });
 
 
-function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string; link?: { to: "/shop"; label: string } | undefined }) {
+function SectionHead({ id, eyebrow, title, link }: { id?: string | undefined; eyebrow: string; title: string; link?: { to: "/shop"; label: string } | undefined }) {
   return (
     <div className="mb-10 flex items-end justify-between gap-6">
       <div>
         <RevealOnScroll as="p" kind="fade" className="eyebrow">{eyebrow}</RevealOnScroll>
-        <TextReveal text={title} className="mt-3 text-4xl md:text-5xl" delay={80} />
+        <TextReveal id={id} text={title} className="mt-3 text-4xl md:text-5xl" delay={80} />
       </div>
       {link && <RevealOnScroll kind="fade" delay={250} className="hidden md:block"><Link to={link.to} className="group link-underline flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">{link.label} <ArrowRight className="arrow-nudge size-3.5" /></Link></RevealOnScroll>}
     </div>
@@ -45,18 +46,31 @@ function SectionHead({ eyebrow, title, link }: { eyebrow: string; title: string;
 }
 
 function Home() {
-  const { featured } = Route.useLoaderData();
+  const { highDemand: initialHighDemand } = Route.useLoaderData();
+  const highDemand = useHighDemand(initialHighDemand);
   return (
     <>
       <Hero />
 
       <ShopByConcern />
 
-      <section className="container-lux pb-20 md:pb-28">
-        <SectionHead eyebrow="High Demand · Sample products" title="High demand" link={{ to: "/shop", label: "Shop all" }} />
-        <StaggerContainer step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
-          {featured.slice(0, 8).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-        </StaggerContainer>
+      <section className="container-lux pb-20 md:pb-28" aria-labelledby="high-demand-h">
+        <SectionHead id="high-demand-h" eyebrow="Selected by our team" title="High demand" link={{ to: "/shop", label: "Shop all" }} />
+        {highDemand.list.length > 0 ? (
+          <StaggerContainer key={highDemand.list.map((p) => p.id).join()} step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
+            {highDemand.list.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          </StaggerContainer>
+        ) : !highDemand.ready ? (
+          <ProductGridSkeleton n={4} />
+        ) : (
+          <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center">
+            <Sparkles className="size-5 text-accent" strokeWidth={1.5} aria-hidden />
+            <p className="mt-4 font-serif text-2xl">Our High Demand picks are on their way.</p>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">In the meantime, explore the full collection of plant-based skin, hair and colour care.</p>
+            <Button variant="luxOutline" size="lg" className="mt-6" asChild><Link to="/shop">Shop the collection <ArrowRight /></Link></Button>
+            <p className="mt-5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Preview · mark products as High Demand in Admin → Products</p>
+          </div>
+        )}
       </section>
 
       <section className="bg-secondary">
@@ -122,7 +136,7 @@ function Home() {
         <RevealOnScroll as="p" kind="fade" className="eyebrow">We're here for you</RevealOnScroll>
         <TextReveal text="Questions about your routine?" className="mt-3 text-4xl md:text-5xl" />
         <p className="mt-4 text-sm text-muted-foreground">Call <a className="font-semibold text-foreground hover:underline" href={`tel:${contactConfig.phones[0].tel}`}>{contactConfig.phones[0].display}</a> or email <a className="font-semibold text-foreground hover:underline" href={`mailto:${contactConfig.email}`}>{contactConfig.email}</a></p>
-        <Button variant="luxOutline" size="xl" className="mt-6" asChild><Link to="/contact">Contact us</Link></Button>
+        <Button variant="luxOutline" size="xl" className="mt-6" asChild><Link to="/contact">Contact us <ArrowRight /></Link></Button>
       </section>
       <Newsletter />
     </>

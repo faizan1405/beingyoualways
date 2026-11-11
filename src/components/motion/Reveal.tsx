@@ -75,14 +75,14 @@ export function StaggerContainer({
  * (pass lines as an array). Screen readers get the plain text.
  */
 export function TextReveal({
-  text, as = "h2", by = "word", delay = 0, className,
-}: { text: string | ReactNode[]; as?: ElementType; by?: "word" | "line"; delay?: number; className?: string }) {
+  text, as = "h2", by = "word", delay = 0, className, id,
+}: { text: string | ReactNode[]; as?: ElementType; by?: "word" | "line"; delay?: number; className?: string; id?: string | undefined }) {
   const ref = useReveal<HTMLElement>();
   const parts: ReactNode[] = typeof text === "string" ? (by === "word" ? text.split(" ") : [text]) : text;
   const label = typeof text === "string" ? text : undefined;
   return createElement(
     as,
-    { ref, "data-reveal": "text", className, style: { "--reveal-delay": `${delay}ms` }, "aria-label": label },
+    { ref, id, "data-reveal": "text", className, style: { "--reveal-delay": `${delay}ms` }, "aria-label": label },
     parts.map((p, i) => (
       <span key={i} aria-hidden={label ? true : undefined}>
         <span className="text-mask"><span style={{ "--i": i } as CSSProperties}>{p}</span></span>

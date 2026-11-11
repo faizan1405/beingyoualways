@@ -23,7 +23,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   const cat = categories.find((c) => c.slug === product.category)?.name;
   const mrp = choose ? null : mrpOf(only);
   const kind = variantKindLabel(product);
-  const quickCls = "absolute inset-x-3 bottom-3 flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold uppercase tracking-[0.12em] btn-motion text-primary-foreground shadow-lift hover:bg-[color-mix(in_oklab,var(--primary)_86%,var(--foreground))] md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100";
+  const quickCls = "btn-motion btn-fill absolute inset-x-3 bottom-3 flex h-11 items-center justify-center gap-1.5 rounded-btn border border-primary bg-primary text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-foreground shadow-soft [--btn-fill:color-mix(in_oklab,var(--primary)_78%,var(--foreground))] md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100";
 
   const quickAdd = () => {
     if (busy.current || !only) return;
@@ -47,7 +47,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           onClick={() => { toggleWish(product.id); setPop((n) => n + 1); }}
           aria-pressed={wished}
           aria-label={wished ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
-          className="press absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-card/90 shadow-soft backdrop-blur transition hover:scale-110"
+          className="press absolute right-3 top-3 grid size-10 place-items-center rounded-full border border-border/60 bg-card/90 shadow-soft backdrop-blur transition-colors duration-200 hover:border-accent"
         >
           <Heart key={pop} className={cn("size-4 transition-colors", pop > 0 && "heart-pop", wished ? "fill-accent text-accent" : "text-foreground")} />
         </button>

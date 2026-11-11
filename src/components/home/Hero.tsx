@@ -70,7 +70,7 @@ export function Hero() {
             </p>
             <div className="hero-in mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:mt-9 md:justify-start" style={{ animationDelay: "950ms" }}>
               <Button variant="lux" size="xl" className="group" asChild><Link to="/shop">Shop Collection <ArrowRight className="arrow-nudge" /></Link></Button>
-              <Button variant="outline" size="xl" asChild className="rounded-full border-primary/40 bg-transparent"><Link to="/explore-concerns">Explore by Concern</Link></Button>
+              <Button variant="luxOutline" size="xl" asChild><Link to="/explore-concerns">Explore by Concern <ArrowRight /></Link></Button>
               <Button variant="link" asChild className="group uppercase tracking-[0.14em] text-xs"><Link to="/about">Our story <ArrowRight className="arrow-nudge" /></Link></Button>
             </div>
           </div>

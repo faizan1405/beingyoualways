@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Leaf } from "lucide-react";
 
 import { StaggerContainer, TextReveal } from "@/components/motion/Reveal";
-import { Button } from "@/components/ui/button";
+import { Button, chipVariants } from "@/components/ui/button";
 import { concerns } from "@/lib/concerns";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "./ProductCard";
@@ -22,7 +22,7 @@ export function CollectionView({ eyebrow, title, intro, products, activeConcern 
         <nav aria-label="Concerns" className="container-lux -mb-2 flex gap-2 overflow-x-auto pt-8 pb-1">
           {concerns.map((c) => (
             <Link key={c.slug} to="/concern/$slug" params={{ slug: c.slug }}
-              className={`press shrink-0 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${c.slug === activeConcern ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary"}`}>
+              className={chipVariants({ active: c.slug === activeConcern })}>
               {c.name}
             </Link>
           ))}

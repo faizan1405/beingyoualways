@@ -187,7 +187,7 @@ function ProductPage() {
                       onClick={() => pick(x.id)}
                       aria-label={`${x.label}${unavailable ? " — currently unavailable" : ""}${prices.size > 1 ? `, ${inr(x.price)}` : ""}`}
                       className={cn(
-                        "press flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all duration-200",
+                        "btn-motion flex min-h-11 items-center gap-2 rounded-btn border px-4 py-2 text-sm",
                         on ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:border-primary",
                         error && !v && "border-destructive/60",
                         unavailable && "cursor-not-allowed opacity-45 line-through",
@@ -233,7 +233,7 @@ function ProductPage() {
                 </AnimatePresence>
               </Button>
               <button type="button" onClick={() => { toggleWish(p.id); setPop((n) => n + 1); }} aria-pressed={wished} aria-label={wished ? "Remove from wishlist" : "Save to wishlist"}
-                className="press grid size-12 shrink-0 place-items-center rounded-full border border-input transition-colors hover:border-accent">
+                className="btn-motion btn-rise grid size-12 shrink-0 place-items-center rounded-btn border border-border hover:border-accent">
                 <Heart key={pop} className={cn("size-5", pop > 0 && "heart-pop", wished && "fill-accent text-accent")} />
               </button>
             </div>

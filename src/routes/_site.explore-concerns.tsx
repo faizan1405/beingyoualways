@@ -62,7 +62,7 @@ function ExploreConcerns() {
             <nav aria-label="Jump to concern" className="mt-7 grid grid-cols-3 gap-2 sm:gap-2.5 md:mt-9">
               {chapters.map(({ id, label }, i) => (
                 <RevealOnScroll key={id} kind="fade-up" delay={420 + i * 90}>
-                  <a href={`#${id}`} className="btn-motion group relative flex min-h-14 flex-col justify-center gap-0.5 rounded-2xl border border-primary/15 bg-card/80 px-3 py-3 backdrop-blur hover:border-primary/50 hover:bg-card hover:shadow-[var(--shadow-soft)] lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-4">
+                  <a href={`#${id}`} className="btn-motion btn-rise btn-fill group relative flex min-h-14 flex-col justify-center gap-0.5 rounded-xl border border-primary/20 bg-card/80 px-3 py-3 backdrop-blur hover:border-primary/60 [--btn-fill:color-mix(in_oklab,var(--primary)_6%,transparent)] lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-4">
                     <span className="flex flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-2.5">
                       <span className="font-serif text-sm italic text-accent">0{i + 1}</span>
                       <span className="text-sm font-medium text-foreground">{label}</span>

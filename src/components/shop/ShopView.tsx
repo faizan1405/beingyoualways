@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { chipVariants } from "@/components/ui/button";
 import { SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -45,8 +46,7 @@ export function ShopView({
                   key={c.name}
                   onClick={() => setCat(c.slug as CategorySlug | undefined)}
                   aria-pressed={cat === c.slug}
-                  className={cn("press h-9 shrink-0 rounded-full border px-4 text-xs font-semibold uppercase tracking-wider transition-all duration-200",
-                    cat === c.slug ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary")}
+                  className={chipVariants({ active: cat === c.slug })}
                 >{c.name}</button>
               ))}
             </div>

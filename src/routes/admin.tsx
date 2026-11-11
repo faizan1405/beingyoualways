@@ -42,7 +42,7 @@ function AdminLayout() {
     </nav>
   );
   return (
-    <div className="min-h-screen bg-secondary/50 lg:grid lg:grid-cols-[250px_1fr]">
+    <div data-admin className="min-h-screen bg-secondary/50 lg:grid lg:grid-cols-[250px_1fr]">
       <aside className="hidden bg-sidebar lg:sticky lg:top-0 lg:block lg:h-screen">
         <div className="border-b border-sidebar-border px-6 py-6 text-sidebar-foreground">
           <p className="font-serif text-2xl">Being You</p>

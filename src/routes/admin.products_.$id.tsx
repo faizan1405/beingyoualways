@@ -79,8 +79,10 @@ function EditProduct() {
                 <p className={hint}>Separate with commas or new lines. Leave blank until the client confirms — blank sections stay hidden on the shop.</p></div>
               <div className="sm:col-span-2"><label htmlFor="pdir" className={adminLabel}>How to use</label><textarea id="pdir" rows={3} className={`${adminInput} h-auto py-2`} value={isUnconfirmed(p.directions) ? "" : p.directions} placeholder="Awaiting usage instructions from the client" onChange={(e) => up({ directions: e.target.value })} />
                 <p className={hint}>Shown on the product page only once filled in.</p></div>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={p.featured} onChange={(e) => up({ featured: e.target.checked })} /> Featured on homepage</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestSeller} onChange={(e) => up({ bestSeller: e.target.checked })} /> High demand</label>
+              <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestSeller} onChange={(e) => up({ bestSeller: e.target.checked })} /> High Demand</label>
+                <p className={hint}>Shows this product in the homepage High Demand section (when visible in shop).</p></div>
+              <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={p.featured} onChange={(e) => up({ featured: e.target.checked })} /> Featured</label>
+                <p className={hint}>Listed first when the shop is sorted by “Featured”.</p></div>
             </div>
           </Panel>
           <Panel title="Shop by concern">

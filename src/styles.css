@@ -20,6 +20,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --radius-btn: 0.625rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -283,30 +284,54 @@ body { overflow-x: clip; }
 /* Horizontal carousels: keep native scrolling, hide the bar */
 @utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
 
-/* ───────────── Luxury button motion ─────────────
- * Shared by every <Button> variant (see ui/button.tsx) and the few hand-built CTAs.
- * btn-motion: premium easing, arrow glide, gentle press. btn-lift: primary hover lift.
- * btn-underline: text links. Hover effects only apply on hover-capable pointers; taps get
- * the press state. Reduced-motion users keep colour changes but no movement.
+/* ───────────── Premium button system ─────────────
+ * Shared by every <Button> variant (see ui/button.tsx), chipVariants and the few hand-built CTAs.
+ * btn-motion: 260ms easing, arrow glide, refined press. btn-fill: background sweeps in from the
+ * left using --btn-fill. btn-lift: primary hover lift + soft shadow. btn-rise: 1px lift for bordered
+ * buttons. btn-underline: text links. Hover effects only on hover-capable pointers; taps get the
+ * press state. Reduced motion keeps colour/border changes but no movement. Admin ([data-admin])
+ * keeps colour feedback only — no lift or sweep.
  */
 @utility btn-motion {
   transition:
-    color 380ms var(--ease-lux), background-color 380ms var(--ease-lux), border-color 380ms var(--ease-lux),
-    box-shadow 480ms var(--ease-lux), transform 380ms var(--ease-lux), opacity 380ms var(--ease-lux), background-size 520ms var(--ease-lux);
+    color 260ms var(--ease-lux), background-color 260ms var(--ease-lux), border-color 260ms var(--ease-lux),
+    box-shadow 300ms var(--ease-lux), transform 260ms var(--ease-lux), opacity 260ms var(--ease-lux), background-size 300ms var(--ease-lux);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  & svg.lucide-arrow-right, & svg.lucide-chevron-right, & svg.lucide-arrow-up-right { transition: transform 420ms var(--ease-lux); }
+  & svg.lucide-arrow-right, & svg.lucide-chevron-right, & svg.lucide-arrow-up-right { transition: transform 280ms var(--ease-lux); }
   @media (hover: hover) {
     &:hover svg.lucide-arrow-right, &:hover svg.lucide-chevron-right { transform: translateX(4px); }
     &:hover svg.lucide-arrow-up-right { transform: translate(2px, -2px); }
   }
   &:focus-visible svg.lucide-arrow-right, &:focus-visible svg.lucide-chevron-right { transform: translateX(4px); }
-  &:active { transform: translateY(0) scale(0.98); transition-duration: 140ms; }
+  &:active { transform: translateY(0) scale(0.985); transition-duration: 120ms; }
+}
+@utility btn-fill {
+  isolation: isolate;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--btn-fill, transparent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 300ms var(--ease-lux), opacity 260ms var(--ease-lux);
+    pointer-events: none;
+  }
+  @media (hover: hover) { &:hover::before { transform: scaleX(1); } }
+  &:focus-visible::before { transform: scaleX(1); }
 }
 @utility btn-lift {
-  @media (hover: hover) { &:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift-value); } }
-  &:focus-visible { box-shadow: var(--shadow-lift-value); }
-  &:active { transform: translateY(0) scale(0.98); box-shadow: var(--shadow-soft-value); }
+  @media (hover: hover) { &:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft-value); } }
+  &:focus-visible { box-shadow: var(--shadow-soft-value); }
+  &:active { transform: translateY(0) scale(0.985); box-shadow: none; }
+}
+@utility btn-rise {
+  @media (hover: hover) { &:hover { transform: translateY(-1px); } }
+  &:active { transform: translateY(0) scale(0.985); }
 }
 @utility btn-underline {
   background-image: linear-gradient(var(--accent), var(--accent));
@@ -318,14 +343,19 @@ body { overflow-x: clip; }
   @media (hover: hover) { &:hover { background-size: 100% 1px; } }
   &:focus-visible { background-size: 100% 1px; }
 }
+/* Admin workflows: keep colour feedback, drop decorative lift/sweep */
+[data-admin] .btn-lift, [data-admin] .btn-rise { transform: none !important; box-shadow: none !important; }
+[data-admin] .btn-fill::before { display: none; }
 /* Scroll cue: a soft bead travelling down a hairline */
 @keyframes scroll-cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(260%); } }
 .scroll-cue::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: var(--primary); animation: scroll-cue 2.2s var(--ease-soft) infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue::after { animation: none; }
-  .btn-motion, .btn-motion:hover, .btn-motion:active, .btn-lift:hover, .btn-lift:active { transform: none !important; }
+  .btn-motion, .btn-motion:hover, .btn-motion:active, .btn-lift:hover, .btn-lift:active, .btn-rise:hover, .btn-rise:active { transform: none !important; }
   .btn-motion svg { transform: none !important; }
+  .btn-fill::before { transform: none !important; opacity: 0; }
+  .btn-fill:hover::before, .btn-fill:focus-visible::before { opacity: 1; }
 }
 
 /* ───────────── Option B · Pure White theme (internal preview only) ─────────────
