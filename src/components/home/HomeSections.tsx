@@ -68,7 +68,7 @@ const standIcons = [FlaskConical, Sprout, Rabbit];
 /** Original "What We Stand For" content from beingyoualways.com (claims pending client confirmation — see /admin/approvals). */
 export function WhyChooseUs() {
   return (
-    <section aria-label={standForContent.heading} className="relative overflow-hidden bg-secondary">
+    <section aria-label={standForContent.heading} className="relative overflow-hidden border-t border-border/60 bg-page">
       <div className="container-lux relative py-20 md:py-28">
         <RevealOnScroll as="p" kind="fade" className="eyebrow text-center">Our promise</RevealOnScroll>
         <TextReveal text={standForContent.heading} className="mx-auto mt-3 max-w-3xl text-center text-4xl leading-tight md:text-6xl" delay={80} />

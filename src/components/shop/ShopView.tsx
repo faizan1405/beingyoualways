@@ -29,7 +29,7 @@ export function ShopView({
 
   return (
     <div>
-      <section className="bg-secondary py-14 text-center md:py-20">
+      <section className="border-b border-border/60 bg-page py-14 text-center md:py-20">
         <div className="container-lux">
           <p className="eyebrow hero-in">Collection</p>
           <TextReveal as="h1" text={title} className="mt-3 text-5xl md:text-7xl" />

@@ -22,6 +22,7 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --radius-btn: 0.625rem;
   --color-background: var(--background);
+  --color-page: var(--surface-page);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -66,6 +67,8 @@
   --radius: 0.5rem;
   /* Clean White #FFFFFF (client-approved, Nov 2026) */
   --background: oklch(1 0 0);
+  /* Shared page surface: the header and every main page section use this exact colour */
+  --surface-page: var(--background);
   /* Rich Charcoal #252722 */
   --foreground: oklch(0.262 0.008 120);
   --card: oklch(1 0 0);

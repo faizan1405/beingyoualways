@@ -73,11 +73,11 @@ function Home() {
         )}
       </section>
 
-      <section className="bg-secondary">
+      <section className="border-t border-border/60 bg-page">
         <div className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
           <div className="relative mx-auto w-full max-w-lg pb-16 pr-10 md:pb-20 md:pr-16">
             <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("toner")[0]} alt="Being You toner among fresh fennel flowers" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
-            <Parallax speed={0.08} className="absolute bottom-0 right-0 w-[48%]"><ImageReveal from="left" delay={200} className="overflow-hidden rounded-2xl border-[6px] border-secondary shadow-lift"><img src={productImages("aloe-vera-gel")[0]} alt="Being You aloe vera gel with fresh aloe leaves" loading="lazy" decoding="async" className="aspect-square w-full object-cover" /></ImageReveal></Parallax>
+            <Parallax speed={0.08} className="absolute bottom-0 right-0 w-[48%]"><ImageReveal from="left" delay={200} className="overflow-hidden rounded-2xl border-[6px] border-page shadow-lift"><img src={productImages("aloe-vera-gel")[0]} alt="Being You aloe vera gel with fresh aloe leaves" loading="lazy" decoding="async" className="aspect-square w-full object-cover" /></ImageReveal></Parallax>
           </div>
           <div>
             <RevealOnScroll as="p" kind="fade" className="eyebrow">Our story</RevealOnScroll>

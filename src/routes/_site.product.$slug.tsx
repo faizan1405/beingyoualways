@@ -257,7 +257,7 @@ function ProductPage() {
       </div>
 
       {/* Product information */}
-      <section aria-labelledby="info-heading" className="border-t border-border bg-secondary/40">
+      <section aria-labelledby="info-heading" className="border-t border-border bg-page">
         <div className="container-lux grid gap-8 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16 md:py-20">
           <div>
             <p className="eyebrow">About this product</p>

@@ -52,7 +52,7 @@ export function SiteHeader() {
   return (
     <>
       <div className="bg-primary py-2 text-center text-[11px] font-medium tracking-[0.14em] text-primary-foreground">{ANNOUNCEMENT}</div>
-      <header className={`sticky top-0 z-40 border-b backdrop-blur-md transition-[background-color,box-shadow,border-color] duration-500 ${scrolled ? "border-border/70 bg-background/95 shadow-soft" : "border-transparent bg-background/70"}`}>
+      <header className={`sticky top-0 z-40 border-b transition-[background-color,box-shadow,border-color] duration-500 ${scrolled ? "border-border/70 bg-page shadow-soft" : "border-transparent bg-page"}`}>
         <div className={`container-lux flex items-center gap-4 transition-[height] duration-500 ${scrolled ? "h-14 md:h-16" : "h-16 md:h-20"}`}>
           <button className={`${iconBtn} -ml-2 lg:hidden`} aria-label="Open menu" onClick={() => setMenu(true)}>
             <Menu className="size-5" />

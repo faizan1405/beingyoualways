@@ -34,7 +34,7 @@ function About() {
   const [lead, ...rest] = aboutContent.story;
   return (
     <>
-      <section className="bg-secondary py-24 text-center md:py-32">
+      <section className="bg-page py-24 text-center md:py-32">
         <div className="container-lux max-w-4xl">
           <p className="eyebrow hero-in">Our story</p>
           <TextReveal as="h1" by="line" text={["Beauty begins", <><em>with being you.</em></>]} className="mt-4 text-5xl leading-[1.05] md:text-8xl" delay={120} />
@@ -52,7 +52,7 @@ function About() {
         </RevealOnScroll>
       </section>
 
-      <section className="border-y border-border bg-card">
+      <section className="border-y border-border bg-page">
         <div className="container-lux grid gap-0 md:grid-cols-2">
           {[["Our Mission", aboutContent.mission], ["Our Vision", aboutContent.vision]].map(([t, d], i) => (
             <RevealOnScroll key={t} delay={i * 120} className={`px-2 py-16 md:px-12 md:py-24 ${i === 0 ? "md:border-r md:border-border" : "border-t border-border md:border-t-0"}`}>
@@ -91,7 +91,7 @@ function About() {
         <p className="mt-6 text-center text-xs text-muted-foreground">Product-specific claims (such as vegan or paraben-free) appear on each product only once confirmed.</p>
       </section>
 
-      <section className="bg-secondary py-20 text-center md:py-24">
+      <section className="border-t border-border/60 bg-page py-20 text-center md:py-24">
         <div className="container-lux max-w-2xl">
           <TextReveal text="Find your everyday ritual" className="text-4xl md:text-5xl" />
           <Button variant="lux" size="xl" className="group mt-8" asChild><Link to="/shop">Shop the collection <ArrowRight className="arrow-nudge" /></Link></Button>

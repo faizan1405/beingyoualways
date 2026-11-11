@@ -20,7 +20,7 @@ export function Testimonials({ id }: { id?: string } = {}) {
   const [playing, setPlaying] = useState<(typeof list)[number] | null>(null);
 
   return (
-    <section id={id} className="bg-secondary" aria-label="Customer stories">
+    <section id={id} className="border-t border-border/60 bg-page" aria-label="Customer stories">
       <div className="container-lux py-20 md:py-28">
         <div className="text-center">
           <RevealOnScroll as="p" kind="fade" className="eyebrow">Customer stories</RevealOnScroll>

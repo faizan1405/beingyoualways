@@ -9,7 +9,7 @@ import { brandConfig, contactConfig, mapsUrl, navigationConfig, policyLinks } fr
 export function Newsletter() {
   const [email, setEmail] = useState("");
   return (
-    <section className="bg-secondary py-20">
+    <section className="border-t border-border/60 bg-page py-20">
       <div className="container-lux max-w-2xl text-center">
         <RevealOnScroll as="p" kind="fade" className="eyebrow">The Letter</RevealOnScroll>
         <TextReveal text="Slow rituals, in your inbox" className="mt-3 text-4xl md:text-5xl" />

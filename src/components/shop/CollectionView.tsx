@@ -11,7 +11,7 @@ import { ProductCard } from "./ProductCard";
 export function CollectionView({ eyebrow, title, intro, products, activeConcern }: { eyebrow: string; title: string; intro: string; products: Product[]; activeConcern?: string | undefined }) {
   return (
     <div>
-      <section className="bg-secondary py-14 text-center md:py-20">
+      <section className="border-b border-border/60 bg-page py-14 text-center md:py-20">
         <div className="container-lux">
           <p className="eyebrow hero-in">{eyebrow}</p>
           <TextReveal as="h1" text={title} className="mt-3 text-5xl md:text-7xl" />

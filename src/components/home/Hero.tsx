@@ -51,7 +51,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section ref={ref} className={`bg-hero relative ${still ? "" : "h-[150svh] md:h-[170vh]"}`} aria-label="Introduction">
+    <section ref={ref} className={`bg-page relative ${still ? "" : "h-[150svh] md:h-[170vh]"}`} aria-label="Introduction">
       <div className={`${still ? "" : "sticky top-14 md:top-16"} flex h-[calc(100svh-3.5rem)] items-center md:h-[calc(100vh-4rem)]`}>
         <div className="container-lux grid w-full items-center gap-5 md:grid-cols-[1fr_1.05fr] md:gap-12">
           <div className="order-2 text-center md:order-1 md:text-left">

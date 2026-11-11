@@ -36,7 +36,7 @@ function Contact() {
   const [attempted, setAttempted] = useState(false);
   return (
     <>
-      <section className="bg-secondary py-20 text-center md:py-28">
+      <section className="bg-page py-20 text-center md:py-28">
         <div className="container-lux max-w-3xl">
           <p className="eyebrow hero-in">Contact us</p>
           <TextReveal as="h1" text="We're Here for You." className="mt-4 text-5xl leading-tight md:text-7xl" delay={120} />
