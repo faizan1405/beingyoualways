@@ -3,6 +3,7 @@
 // only turns "Confirmed" when the underlying fact has actually been supplied.
 import { BRAND_CLAIMS_CONFIRMED, COD_RULES_CONFIRMED, INVENTORY_CONNECTED, SHIPPING_RATES_CONFIRMED, contactConfig } from "@/config/business";
 import { policyReview } from "@/content/policies";
+import { PRODUCT_SHEET_CLAIMS_CONFIRMED, flaggedPoints, pendingPhotos } from "@/content/product-sheet";
 import { APPROVED_THEME, THEMES, THEME_CHOICE_CONFIRMED } from "@/lib/theme-preview";
 import { isUnconfirmed } from "@/lib/variants";
 import type { Product } from "@/lib/types";
@@ -33,6 +34,7 @@ interface Inputs {
   whatsappNumber?: string | null;
   claimsConfirmed?: boolean;
   themeConfirmed?: boolean;
+  sheetClaimsConfirmed?: boolean;
 }
 
 const productStatus = (missing: number, total: number): ApprovalStatus =>
@@ -47,6 +49,7 @@ export function buildApprovalChecklist({
   whatsappNumber = contactConfig.whatsappNumber,
   claimsConfirmed = BRAND_CLAIMS_CONFIRMED,
   themeConfirmed = THEME_CHOICE_CONFIRMED,
+  sheetClaimsConfirmed = PRODUCT_SHEET_CLAIMS_CONFIRMED,
 }: Inputs): ApprovalItem[] {
   const live = products.filter((p) => p.status === "active");
   const n = live.length;
@@ -55,6 +58,12 @@ export function buildApprovalChecklist({
   const noUse = live.filter((p) => isUnconfirmed(p.directions));
   const policiesOk = policyReview.refund.legallyApproved && policyReview.privacy.legallyApproved;
   const names = (l: Product[]) => l.map((p) => p.name);
+  // A supplied photo counts as resolved once the admin has added it to that product's gallery.
+  const openPhotos = pendingPhotos.filter((ph) => !products.find((p) => p.slug === ph.slug)?.images?.includes(ph.src));
+  const unpricedDrafts = products.filter((p) => p.status === "draft" && !p.isSample && p.variants.every((v) => v.price <= 0));
+  const awaiting = [...openPhotos.map((ph) => ph.label), ...unpricedDrafts.map((p) => `${p.name} — price, size and photo`)];
+  const flagged = flaggedPoints();
+  const fdaCount = flagged.filter((f) => f.flag === "certification").length;
 
   return [
     {
@@ -119,7 +128,23 @@ export function buildApprovalChecklist({
       needed: "Written confirmation that each claim is true for every product, plus which ingredients come from India, South Korea, Spain, Brazil, Germany and the United States. Supporting documents if any certification is to be mentioned.",
       affects: "Homepage \"What We Stand For\" and \"Global Standards\" sections.",
     },
-      {
+    {
+      id: "sheet-claims", title: "Product sheet claims", status: sheetClaimsConfirmed ? "confirmed" : "waiting",
+      current: sheetClaimsConfirmed
+        ? "Client has supplied proof for the flagged product-sheet statements."
+        : `${flagged.length} statements in the client's product sheet are recorded but not published — including "FDA approved" (${fdaCount} product groups), "available in Dubai", anti-aging / pigmentation / hair-growth results, "waterproof" and "suitable for all skin types".`,
+      needed: "Proof for each statement before it can appear on the shop: FDA registration or certificate, where products are sold outside India, test results for SPF, waterproof and result claims.",
+      affects: "Product descriptions and any future claim badges.", adminLink: "/admin/products",
+    },
+    {
+      id: "product-review", title: "Supplied photos & draft products", status: awaiting.length === 0 ? "confirmed" : "waiting",
+      current: awaiting.length
+        ? `${openPhotos.length} supplied photo(s) could not be matched with certainty and are kept off the shop; ${unpricedDrafts.length} product(s) are hidden drafts with no price.`
+        : "Every supplied photo is matched and no draft is waiting for a price.",
+      needed: "Confirm whether each photo is the same product (and its size and price), and send Magic Drop's price, size and photo.",
+      affects: "Product galleries, sizes and which products shoppers can buy.", missing: awaiting, adminLink: "/admin/products",
+    },
+    {
       id: "theme", title: "Website theme (Clean White)", status: themeConfirmed ? "confirmed" : "waiting",
       current: themeConfirmed
         ? `Client chose ${THEMES[APPROVED_THEME].label}.`

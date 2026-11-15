@@ -1,5 +1,6 @@
 import catalogue from "./catalogue.json";
 import { productImages } from "./product-images";
+import { addedProducts, applyPatch } from "./catalogue-revision";
 // SAMPLE DATA — temporary placeholder content until the client supplies real
 // products, prices and orders. Only the mock services may import this file.
 import type {
@@ -39,7 +40,9 @@ export const categories: Category[] = [
 type Raw = (typeof catalogue)[number];
 const tints: Record<string, string> = { skincare: "oklch(0.86 0.05 140)", haircare: "oklch(0.78 0.06 90)", "colour-cosmetics": "oklch(0.6 0.12 20)" };
 
-export const products: Product[] = (catalogue as Raw[]).map((r) => ({
+// Verified packaging/product-sheet facts are layered on in catalogue-revision.ts; drafts the
+// client named but hasn't priced (e.g. Magic Drop) are appended hidden.
+const imported: Product[] = (catalogue as Raw[]).map((r) => ({
   id: r.id,
   slug: r.slug,
   name: r.name,
@@ -63,6 +66,8 @@ export const products: Product[] = (catalogue as Raw[]).map((r) => ({
   isSample: false,
   sourceUrl: r.sourceUrl,
 }));
+
+export const products: Product[] = [...imported.map(applyPatch), ...addedProducts.map((p) => structuredClone(p))];
 
 const addr = (name: string, city: string, state: string, pincode: string) => ({
   id: `a-${name.split(" ")[0]!.toLowerCase()}`,

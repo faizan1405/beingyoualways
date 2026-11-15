@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Upload, X } from "lucide-react";
+import { AlertTriangle, ExternalLink, Plus, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { productService } from "@/services/productService";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
 import { withExtraImage, withMainImage } from "@/lib/product-images";
 import { isUnconfirmed } from "@/lib/variants";
+import { PRODUCT_SHEET_SOURCE, claimFlagLabels, pendingPhotos, sheetFor } from "@/content/product-sheet";
 
 const hint = "mt-1 text-[11px] text-muted-foreground";
 const splitList = (s: string) => s.split(/[,\n]/).map((x) => x.trim()).filter(Boolean);
@@ -38,7 +39,8 @@ function EditProduct() {
   const [preview, setPreview] = useState<string | null>(null);
   // Raw text so commas/new lines can be typed; parsed into a list on save.
   const [ingText, setIngText] = useState("");
-  useEffect(() => { if (data) { setP(data); setIngText(data.ingredients.join(", ")); } }, [data]);
+  const [keyText, setKeyText] = useState("");
+  useEffect(() => { if (data) { setP(data); setIngText(data.ingredients.join(", ")); setKeyText((data.keyIngredients ?? []).join(", ")); } }, [data]);
 
   const save = useMutation({
     mutationFn: (x: Product) => productService.save(x),
@@ -49,6 +51,8 @@ function EditProduct() {
   if (isLoading || !p) return isLoading ? <div className="h-96 animate-pulse rounded-xl bg-card" /> : <p>Product not found.</p>;
 
   const up = (patch: Partial<Product>) => setP({ ...p, ...patch });
+  const sheet = sheetFor(p.slug);
+  const pending = pendingPhotos.filter((x) => x.slug === p.slug);
   const upV = (i: number, patch: Partial<ProductVariant>) => up({ variants: p.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
 
   return (
@@ -61,7 +65,7 @@ function EditProduct() {
           if (p.variants.some((v) => !v.label.trim() || v.price <= 0)) { toast.error("Each size or shade needs a label and a selling price"); return; }
           if (p.variants.some((v) => v.compareAtPrice != null && v.compareAtPrice <= v.price)) { toast.error("MRP must be higher than the selling price — or leave it blank"); return; }
           if (p.variants.some((v) => v.stock < 0 || !Number.isFinite(v.stock))) { toast.error("Stock can't be negative"); return; }
-          save.mutate({ ...p, ingredients: splitList(ingText), slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") });
+          save.mutate({ ...p, ingredients: splitList(ingText), keyIngredients: splitList(keyText), slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") });
         }}
       >
         <div className="space-y-4">
@@ -75,7 +79,9 @@ function EditProduct() {
                 <p className={hint}>{p.status === "active" ? "Shoppers can find and buy this product." : "Hidden from the shop, search and recommendations."}</p></div>
               <div className="sm:col-span-2"><label htmlFor="psd" className={adminLabel}>Short description</label><input id="psd" className={adminInput} value={p.shortDescription} onChange={(e) => up({ shortDescription: e.target.value })} /></div>
               <div className="sm:col-span-2"><label htmlFor="pd" className={adminLabel}>Description</label><textarea id="pd" rows={4} className={`${adminInput} h-auto py-2`} value={p.description} onChange={(e) => up({ description: e.target.value })} /></div>
-              <div className="sm:col-span-2"><label htmlFor="pi" className={adminLabel}>Ingredients</label><textarea id="pi" rows={2} className={`${adminInput} h-auto py-2`} value={ingText} placeholder="Only as printed on the pack — e.g. Aloe vera, Rose water" onChange={(e) => setIngText(e.target.value)} />
+              <div className="sm:col-span-2"><label htmlFor="pk" className={adminLabel}>Key ingredients</label><input id="pk" className={adminInput} value={keyText} placeholder="e.g. Mulberry Extract, Niacinamide 3%" onChange={(e) => setKeyText(e.target.value)} />
+                <p className={hint}>The hero ingredients the brand names (product sheet or pack front). Not a full list.</p></div>
+              <div className="sm:col-span-2"><label htmlFor="pi" className={adminLabel}>Full ingredients</label><textarea id="pi" rows={2} className={`${adminInput} h-auto py-2`} value={ingText} placeholder="Only as printed on the pack — e.g. Aloe vera, Rose water" onChange={(e) => setIngText(e.target.value)} />
                 <p className={hint}>Separate with commas or new lines. Leave blank until the client confirms — blank sections stay hidden on the shop.</p></div>
               <div className="sm:col-span-2"><label htmlFor="pdir" className={adminLabel}>How to use</label><textarea id="pdir" rows={3} className={`${adminInput} h-auto py-2`} value={isUnconfirmed(p.directions) ? "" : p.directions} placeholder="Awaiting usage instructions from the client" onChange={(e) => up({ directions: e.target.value })} />
                 <p className={hint}>Shown on the product page only once filled in.</p></div>
@@ -108,7 +114,7 @@ function EditProduct() {
                       <input id={`vc${i}`} type="color" className="h-8 w-12 cursor-pointer rounded border border-input bg-card" value={/^#[0-9a-f]{6}$/i.test(v.swatch ?? "") ? v.swatch : "#c78e78"} onChange={(e) => upV(i, { swatch: e.target.value })} />
                       <span className="text-[11px] text-muted-foreground">{v.swatch ? "Shown as the shade chip" : "No chip colour set"}</span></div>
                   )}
-                  <div className="col-span-2 sm:col-span-5"><label className={adminLabel} htmlFor={`vl${i}`}>{v.kind === "shade" ? "Shade name" : "Size"}</label><input id={`vl${i}`} className={adminInput} value={v.label} onChange={(e) => upV(i, { label: e.target.value })} /></div>
+                  <div className="col-span-2 sm:col-span-5"><label className={adminLabel} htmlFor={`vl${i}`}>{v.kind === "shade" ? "Shade name" : "Size"} <span className="ml-1 font-mono text-[10px] normal-case tracking-normal text-muted-foreground/80">ID {v.id}</span></label><input id={`vl${i}`} className={adminInput} value={v.label} onChange={(e) => upV(i, { label: e.target.value })} /></div>
                   <div><label className={adminLabel} htmlFor={`vk${i}`}>Type</label><select id={`vk${i}`} className={adminInput} value={v.kind} onChange={(e) => upV(i, { kind: e.target.value as "size" })}><option value="size">Size</option><option value="shade">Shade</option></select></div>
                   <div><label className={adminLabel} htmlFor={`vp${i}`}>Selling ₹</label><input id={`vp${i}`} type="number" min={0} className={adminInput} value={v.price} onChange={(e) => upV(i, { price: Number(e.target.value) })} /></div>
                   <div><label className={adminLabel} htmlFor={`vm${i}`}>MRP ₹</label><input id={`vm${i}`} type="number" min={0} className={adminInput} value={v.compareAtPrice ?? ""} onChange={(e) => upV(i, { compareAtPrice: e.target.value ? Number(e.target.value) : undefined })} /></div>
@@ -118,6 +124,25 @@ function EditProduct() {
               ))}
             </div>
           </Panel>
+          {sheet.length > 0 && (
+            <Panel title="Client product sheet (reference)">
+              <p className="mb-3 text-xs text-muted-foreground">From {PRODUCT_SHEET_SOURCE}. Shown here only — key ingredients and usage were copied to the product; flagged statements stay off the shop until the client sends proof.</p>
+              {sheet.map((e) => (
+                <div key={e.group} className="mb-3 last:mb-0">
+                  <p className="text-sm font-semibold">{e.group}</p>
+                  <ul className="mt-1.5 space-y-1 text-sm">
+                    {e.points.map((pt) => (
+                      <li key={pt.text} className="flex flex-wrap items-baseline gap-x-2">
+                        <span>{pt.text}</span>
+                        {pt.flag && <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent-foreground"><AlertTriangle className="size-3" aria-hidden />{claimFlagLabels[pt.flag]}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                  {e.note && <p className="mt-2 rounded-md bg-secondary/60 p-2 text-xs text-muted-foreground">{e.note}</p>}
+                </div>
+              ))}
+            </Panel>
+          )}
         </div>
         <div className="space-y-4">
           <Panel title="Images">
@@ -158,6 +183,29 @@ function EditProduct() {
             )}
             <p className="mt-2 text-xs text-muted-foreground">Demo: photos are saved in this browser only, until storage is connected. Replacing photos never changes the product ID, prices or sizes.</p>
           </Panel>
+          {pending.length > 0 && (
+            <Panel title="Supplied photos awaiting confirmation">
+              <p className="mb-3 text-xs text-muted-foreground">The client sent these, but they may be a different size or formula. They stay off the shop unless you add them here and save.</p>
+              <div className="space-y-4">
+                {pending.map((ph) => {
+                  const used = p.images?.includes(ph.src);
+                  return (
+                    <figure key={ph.id} className="rounded-md border border-border p-3">
+                      <img src={ph.src} alt={ph.label} className="aspect-[4/5] w-full rounded object-cover" loading="lazy" />
+                      <figcaption className="mt-2 text-xs"><span className="block font-medium text-foreground">{ph.label}</span><span className="text-muted-foreground">{ph.reason}</span></figcaption>
+                      <a href={ph.originalUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[11px] text-primary hover:underline">Full-size original <ExternalLink className="size-3" /></a>
+                      {used ? <p className="mt-2 text-[11px] font-medium text-primary">In this product's gallery — press Save changes to keep it.</p> : (
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <Button type="button" size="sm" variant="outline" onClick={() => up({ images: withExtraImage(p.images, ph.src) })}>Add as extra</Button>
+                          <Button type="button" size="sm" variant="outline" onClick={() => up({ images: [ph.src, ...(p.images ?? []).filter((x) => x !== ph.src)] })}>Use as main</Button>
+                        </div>
+                      )}
+                    </figure>
+                  );
+                })}
+              </div>
+            </Panel>
+          )}
           <Button variant="lux" size="xl" className="w-full" type="submit" disabled={save.isPending}>{isNew ? "Create product" : "Save changes"}</Button>
           <Button variant="ghost" className="w-full" type="button" onClick={() => navigate({ to: "/admin/products" })}>Cancel</Button>
         </div>

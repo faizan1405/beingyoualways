@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { cartService } from "@/services/cartService";
 import { productService } from "@/services/productService";
 import { clampQty, lineTotal, qtyLimitText, roomLeft, summarize } from "@/lib/pricing";
+import { isPurchasable } from "@/lib/variants";
 import type { CartItem, OrderSummary, Product, ProductVariant } from "@/lib/types";
 
 export interface CartLine extends CartItem {
@@ -69,9 +70,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   );
 
   const add = useCallback((productId: string, variantId: string, qty = 1, opts: { openDrawer?: boolean } = {}): AddResult => {
-    const variant = productService.peekAll().find((p) => p.id === productId)?.variants.find((v) => v.id === variantId);
-    if (!variant) return { ok: false, reason: "unknown" };
-    if (variant.stock <= 0) return { ok: false, reason: "unavailable" };
+    const product = productService.peekAll().find((p) => p.id === productId);
+    const variant = product?.variants.find((v) => v.id === variantId);
+    if (!product || !variant) return { ok: false, reason: "unknown" };
+    // Hidden drafts and unpriced (₹0) sizes can never go in the bag.
+    if (product.status !== "active" || !isPurchasable(variant)) return { ok: false, reason: "unavailable" };
     const current = itemsRef.current.find((i) => i.productId === productId && i.variantId === variantId)?.quantity ?? 0;
     const wanted = clampQty(qty);
     const added = Math.min(wanted, roomLeft(current));

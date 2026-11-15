@@ -10,13 +10,17 @@ import type { CategorySlug, Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { filterProducts, type SortKey } from "@/services/productService";
 import { ProductCard } from "./ProductCard";
+import { useLiveProducts } from "@/hooks/use-live-products";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 
 const MAX = 1600;
 
+const allActive = (all: Product[]) => filterProducts(all, {});
+
 export function ShopView({
-  products, title, intro, category, initialQuery = "",
+  products: initialProducts, title, intro, category, initialQuery = "",
 }: { products: Product[]; title: string; intro: string; category?: CategorySlug | undefined; initialQuery?: string | undefined}) {
+  const products = useLiveProducts(initialProducts, allActive);
   const [q, setQ] = useState(initialQuery);
   const [cat, setCat] = useState<CategorySlug | undefined>(category);
   const [max, setMax] = useState(MAX);

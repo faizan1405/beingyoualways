@@ -6,7 +6,7 @@ import { products } from "@/lib/mock-data";
 const bySlug = (s: string) => products.find((p) => p.slug === s)!;
 
 describe("real catalogue", () => {
-  it("imports all 20 products from the original site", () => expect(products).toHaveLength(20));
+  it("imports all 20 products from the original site", () => expect(products.filter((p) => p.sourceUrl)).toHaveLength(20));
   it("has no sample products left", () => expect(products.every((p) => !p.isSample)).toBe(true));
   it("keeps Tomato Face Wash at the listed ₹380 (MRP ₹390)", () => {
     const v = bySlug("tomato-face-wash").variants[0]!;

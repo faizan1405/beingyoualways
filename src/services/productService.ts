@@ -3,15 +3,27 @@
 import { categories, products as seed } from "@/lib/mock-data";
 import type { CategorySlug, Product } from "@/lib/types";
 import { productConcerns, type ConcernSlug } from "@/lib/concerns";
+import { CATALOGUE_REVISION, reviseStored } from "@/lib/catalogue-revision";
 
 // Demo admin edits persist in localStorage; resetDemo() restores the imported catalogue.
 const KEY = "bya.products.v2";
 // Saved demo edits from before the High Demand flag existed keep the catalogue's starting picks.
 const withHighDemandDefaults = (list: Product[]): Product[] =>
   list.map((p) => (p.bestSeller === undefined ? { ...p, bestSeller: seed.find((s) => s.id === p.id)?.bestSeller ?? false } : p));
+// Saved demo data from before a catalogue revision is upgraded once (admin edits kept).
+const REV_KEY = "bya.products.rev";
 const load = (): Product[] => {
   if (typeof window === "undefined") return structuredClone(seed);
-  try { const v = JSON.parse(localStorage.getItem(KEY) ?? "null"); return Array.isArray(v) ? withHighDemandDefaults(v) : structuredClone(seed); } catch { return structuredClone(seed); }
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY) ?? "null");
+    if (!Array.isArray(v)) return structuredClone(seed);
+    let list = withHighDemandDefaults(v);
+    if (localStorage.getItem(REV_KEY) !== CATALOGUE_REVISION) {
+      list = reviseStored(list, seed);
+      try { localStorage.setItem(KEY, JSON.stringify(list)); localStorage.setItem(REV_KEY, CATALOGUE_REVISION); } catch { /* storage full: use upgraded copy for this visit */ }
+    }
+    return list;
+  } catch { return structuredClone(seed); }
 };
 let store: Product[] = load();
 const persist = () => { if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(store)); };
@@ -85,7 +97,8 @@ export const productService = {
   },
   /** Re-run fn whenever demo product data changes. Returns an unsubscribe function. */
   subscribe: (fn: () => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; },
-  getBySlug: (slug: string) => delay(store.find((p) => p.slug === slug) ?? null),
+  /** Storefront lookup: hidden drafts/archived products are not reachable by URL. */
+  getBySlug: (slug: string) => delay(store.find((p) => p.slug === slug && p.status === "active") ?? null),
   getById: (id: string) => delay(store.find((p) => p.id === id) ?? null),
   /** More from the same category. */
   related: (p: Product) => delay(store.filter((x) => x.category === p.category && x.id !== p.id && x.status === "active").slice(0, 4)),
@@ -117,7 +130,7 @@ export const productService = {
   /** Restore the imported catalogue and discard demo edits. */
   resetDemo: () => {
     store = structuredClone(seed);
-    if (typeof window !== "undefined") localStorage.removeItem(KEY);
+    if (typeof window !== "undefined") { localStorage.removeItem(KEY); localStorage.setItem(REV_KEY, CATALOGUE_REVISION); }
     notify();
     return delay(true);
   },

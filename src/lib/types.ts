@@ -31,7 +31,10 @@ export interface Product {
   collection?: string | undefined;
   shortDescription: string;
   description: string;
+  /** Full ingredient list, only as printed on the pack. */
   ingredients: string[];
+  /** Hero ingredients named by the brand (product sheet / pack front) — not a full list. */
+  keyIngredients?: string[] | undefined;
   directions: string;
   details: { label: string; value: string }[];
   variants: ProductVariant[];

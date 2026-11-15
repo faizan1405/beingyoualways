@@ -19,6 +19,7 @@ import {
 } from "@/lib/variants";
 import { productService } from "@/services/productService";
 import { StaggerContainer, TextReveal } from "@/components/motion/Reveal";
+import { useLiveProduct, useLiveProducts } from "@/hooks/use-live-products";
 
 export const Route = createFileRoute("/_site/product/$slug")({
   loader: async ({ params }) => {
@@ -52,7 +53,10 @@ export const Route = createFileRoute("/_site/product/$slug")({
 });
 
 function ProductPage() {
-  const { product: p, related, alsoLike } = Route.useLoaderData();
+  const { product: loaded, related: loadedRelated, alsoLike: loadedAlsoLike } = Route.useLoaderData();
+  const p = useLiveProduct(loaded);
+  const related = useLiveProducts(loadedRelated);
+  const alsoLike = useLiveProducts(loadedAlsoLike);
   const { add, toggleWish, isWished, qtyInBag, items } = useShop();
   const navigate = useNavigate();
   const [variantId, setVariantId] = useState<string | null>(() => initialVariantId(p));
@@ -262,12 +266,19 @@ function ProductPage() {
           <div>
             <p className="eyebrow">About this product</p>
             <h2 id="info-heading" className="mt-3 text-3xl md:text-4xl">The details</h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Information here comes from Being You's original product listing. Anything not yet confirmed by the brand is left out rather than guessed.</p>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Information here comes from Being You's original listing, product packaging and product notes. Anything not yet confirmed by the brand is left out rather than guessed.</p>
           </div>
           <Accordion type="multiple" defaultValue={["desc"]} className="min-w-0">
             {info.description && (
               <AccordionItem value="desc"><AccordionTrigger className="font-serif text-xl font-normal">Description</AccordionTrigger>
                 <AccordionContent className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{info.description}</AccordionContent></AccordionItem>
+            )}
+            {info.keyIngredients.length > 0 && (
+              <AccordionItem value="key"><AccordionTrigger className="font-serif text-xl font-normal">Key ingredients</AccordionTrigger>
+                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                  <ul className="flex flex-wrap gap-2">{info.keyIngredients.map((k) => <li key={k} className="rounded-full border border-border px-3 py-1 text-foreground">{k}</li>)}</ul>
+                  {info.ingredients.length === 0 && <p className="mt-3 text-xs">Highlighted by Being You. The full ingredient list is printed on the pack.</p>}
+                </AccordionContent></AccordionItem>
             )}
             {info.ingredients.length > 0 && (
               <AccordionItem value="ing"><AccordionTrigger className="font-serif text-xl font-normal">Ingredients</AccordionTrigger>

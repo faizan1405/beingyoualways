@@ -6,9 +6,11 @@ import { Button, chipVariants } from "@/components/ui/button";
 import { concerns } from "@/lib/concerns";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "./ProductCard";
+import { useLiveProducts } from "@/hooks/use-live-products";
 
 /** Header + product grid for curated collections and concerns, with a polished empty state. */
-export function CollectionView({ eyebrow, title, intro, products, activeConcern }: { eyebrow: string; title: string; intro: string; products: Product[]; activeConcern?: string | undefined }) {
+export function CollectionView({ eyebrow, title, intro, products: initialProducts, activeConcern }: { eyebrow: string; title: string; intro: string; products: Product[]; activeConcern?: string | undefined }) {
+  const products = useLiveProducts(initialProducts);
   return (
     <div>
       <section className="border-b border-border/60 bg-page py-14 text-center md:py-20">

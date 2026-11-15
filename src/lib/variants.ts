@@ -4,6 +4,9 @@ import type { Product, ProductVariant } from "@/lib/types";
 /** Labels/text imported as "to be confirmed" are not verified facts and are never shown as real values. */
 export const isUnconfirmed = (s: string | undefined | null) => !s || !s.trim() || /to be confirmed/i.test(s);
 
+/** Only priced, in-stock variants can be bought — a ₹0 draft price is never purchasable. */
+export const isPurchasable = (v: ProductVariant) => v.price > 0 && v.stock > 0;
+
 /** A shopper must actively pick a variant when the product has more than one. */
 export const requiresChoice = (p: Product) => p.variants.length > 1;
 
@@ -26,7 +29,7 @@ export function checkVariant(p: Product, variantId: string | null): VariantCheck
   if (!variantId) return { ok: false, error: `Please choose a ${kind} before adding to your bag.` };
   const v = p.variants.find((x) => x.id === variantId);
   if (!v) return { ok: false, error: `That ${kind} isn't available for this product.` };
-  if (v.stock <= 0) return { ok: false, error: `This ${kind} is currently unavailable.` };
+  if (!isPurchasable(v)) return { ok: false, error: `This ${kind} is currently unavailable.` };
   return { ok: true, variant: v };
 }
 
@@ -35,7 +38,7 @@ export function checkVariant(p: Product, variantId: string | null): VariantCheck
  * counts like "Only 3 left" — only whether the item can be ordered.
  */
 export const availabilityOf = (v: ProductVariant | undefined | null) =>
-  !v ? null : v.stock > 0 ? ({ ok: true, label: "Available to order" } as const) : ({ ok: false, label: "Currently unavailable" } as const);
+  !v ? null : isPurchasable(v) ? ({ ok: true, label: "Available to order" } as const) : ({ ok: false, label: "Currently unavailable" } as const);
 
 /** Verified MRP: only shown when the original site listed a higher regular price. */
 export const mrpOf = (v: ProductVariant | undefined | null) =>
@@ -48,6 +51,7 @@ const INTERNAL_DETAIL_LABELS = new Set(["Original site tags"]);
 export function productInfoSections(p: Product) {
   return {
     description: isUnconfirmed(p.description) ? null : p.description,
+    keyIngredients: (p.keyIngredients ?? []).filter((i) => !isUnconfirmed(i)),
     ingredients: p.ingredients.filter((i) => !isUnconfirmed(i)),
     directions: isUnconfirmed(p.directions) ? null : p.directions,
     details: p.details.filter((d) => !isUnconfirmed(d.value) && !INTERNAL_DETAIL_LABELS.has(d.label)),
