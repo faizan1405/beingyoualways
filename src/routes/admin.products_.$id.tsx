@@ -12,7 +12,8 @@ import { concerns as concernList, productConcerns } from "@/lib/concerns";
 import type { Product, ProductVariant } from "@/lib/types";
 import { productService } from "@/services/productService";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
-import { galleryImages, originalImages, withExtraImage, withMainImage } from "@/lib/product-images";
+import { galleryImages, infographicImages, originalImages, withExtraImage, withMainImage } from "@/lib/product-images";
+import { infographicFor } from "@/content/infographics";
 import { isUnconfirmed } from "@/lib/variants";
 import { PRODUCT_SHEET_SOURCE, claimFlagLabels, pendingPhotos, sheetFor } from "@/content/product-sheet";
 
@@ -55,6 +56,8 @@ function EditProduct() {
   const pending = pendingPhotos.filter((x) => x.slug === p.slug);
   const originals = originalImages(p.slug);
   const fourSet = galleryImages(p.slug);
+  const slides = infographicImages(p.slug);
+  const info = infographicFor(p.slug);
   const upV = (i: number, patch: Partial<ProductVariant>) => up({ variants: p.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
 
   return (
@@ -208,6 +211,33 @@ function EditProduct() {
               </div>
             </Panel>
           )}
+          {info && slides.length === 4 && (
+            <Panel title="Product infographics (4 slides)">
+              <p className={`mb-3 rounded-md px-2.5 py-1.5 text-xs font-medium ${info.status === "ready" ? "bg-primary/10 text-primary" : "bg-accent/15 text-accent-foreground"}`}>
+                {info.status === "ready" ? "Live — shoppers see these four slides." : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {slides.map((src, i) => (
+                  <a key={src} href={src} target="_blank" rel="noreferrer" className="overflow-hidden rounded border border-border hover:border-primary" title="Open full size">
+                    <img src={src} alt={`Slide ${i + 1} of 4`} loading="lazy" className="aspect-square w-full object-cover" />
+                  </a>
+                ))}
+              </div>
+              {info.missing.length > 0 && (
+                <div className="mt-3"><p className="text-xs font-semibold">Missing before it can go live</p>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">{info.missing.map((m) => <li key={m}>{m}</li>)}</ul></div>
+              )}
+              {info.uncertain.length > 0 && (
+                <div className="mt-3"><p className="text-xs font-semibold">Left off / to confirm</p>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">{info.uncertain.map((m) => <li key={m}>{m}</li>)}</ul></div>
+              )}
+              <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer font-semibold text-foreground">Where the wording comes from</summary>
+                <p className="mt-1">Who is it for: {info.sources.who}</p><p className="mt-1">What's inside: {info.sources.inside}</p><p className="mt-1">How to use: {info.sources.how}</p></details>
+              {info.status === "ready" && !slides.every((x, i) => p.images?.[i] === x) && (
+                <Button type="button" size="sm" variant="outline" className="mt-3 w-full" onClick={() => { up({ images: [...slides] }); toast("Infographic slides restored — press Save changes to keep them"); }}>Use the four infographic slides</Button>
+              )}
+            </Panel>
+          )}
           {originals.length > 0 && (
             <Panel title="Original photos (backup)">
               <p className="mb-3 text-xs text-muted-foreground">The earlier photos from beingyoualways.com are kept here. Add any back, or switch the whole gallery, then press Save changes.</p>
@@ -224,7 +254,7 @@ function EditProduct() {
               </div>
               <div className="mt-3 grid gap-2">
                 <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: [...originals] }); toast("Original photos restored — press Save changes to keep them"); }}>Use original photos only</Button>
-                {fourSet.length === 4 && <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: [...fourSet] }); toast("Four-image gallery restored — press Save changes to keep it"); }}>Use the four-image gallery</Button>}
+                {fourSet.length === 4 && <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: [...fourSet] }); toast("Previous four-photo gallery restored — press Save changes to keep it"); }}>Use the previous four-photo gallery</Button>}
               </div>
             </Panel>
           )}

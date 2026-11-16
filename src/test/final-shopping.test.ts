@@ -46,8 +46,9 @@ describe("checkout draft privacy", () => {
 describe("client approval checklist", () => {
   const items = buildApprovalChecklist({ products, publicReviewCount: 0 });
   const status = (id: string) => items.find((i) => i.id === id)?.status;
-  it("lists all thirteen required items", () =>
-    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "sheet-claims", "product-review", "theme"]));
+  it("lists all fourteen required items", () =>
+    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "sheet-claims", "product-review", "infographics", "theme"]));
+  it("shows infographic sets as partly done while some are drafts", () => expect(status("infographics")).toBe("partial"));
   it("keeps unconfirmed facts waiting on the client", () => {
     for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "sheet-claims", "product-review"]) expect(status(id)).toBe("waiting");
   });

@@ -6,7 +6,7 @@ import { isUnconfirmed } from "@/lib/variants";
 import { galleryImages } from "@/lib/product-images";
 
 /** Bump when the patches below change, so saved demo data picks them up once. */
-export const CATALOGUE_REVISION = "2026-11-gallery-4";
+export const CATALOGUE_REVISION = "2026-11-infographics-1";
 
 export interface ProductPatch {
   /** New name, applied only while the product still has the imported name `replacesName`. */

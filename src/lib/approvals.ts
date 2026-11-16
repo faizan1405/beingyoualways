@@ -4,6 +4,7 @@
 import { BRAND_CLAIMS_CONFIRMED, COD_RULES_CONFIRMED, INVENTORY_CONNECTED, SHIPPING_RATES_CONFIRMED, contactConfig } from "@/config/business";
 import { policyReview } from "@/content/policies";
 import { PRODUCT_SHEET_CLAIMS_CONFIRMED, flaggedPoints, pendingPhotos } from "@/content/product-sheet";
+import { infographicFor } from "@/content/infographics";
 import { APPROVED_THEME, THEMES, THEME_CHOICE_CONFIRMED } from "@/lib/theme-preview";
 import { isUnconfirmed } from "@/lib/variants";
 import type { Product } from "@/lib/types";
@@ -64,6 +65,7 @@ export function buildApprovalChecklist({
   const awaiting = [...openPhotos.map((ph) => ph.label), ...unpricedDrafts.map((p) => `${p.name} — price, size and photo`)];
   const flagged = flaggedPoints();
   const fdaCount = flagged.filter((f) => f.flag === "certification").length;
+  const draftInfo = live.filter((p) => infographicFor(p.slug)?.status !== "ready");
 
   return [
     {
@@ -143,6 +145,14 @@ export function buildApprovalChecklist({
         : "Every supplied photo is matched and no draft is waiting for a price.",
       needed: "Confirm whether each photo is the same product (and its size and price), and send Magic Drop's price, size and photo.",
       affects: "Product galleries, sizes and which products shoppers can buy.", missing: awaiting, adminLink: "/admin/products",
+    },
+    {
+      id: "infographics", title: "Product infographic slides", status: productStatus(draftInfo.length, n),
+      current: draftInfo.length
+        ? `${n - draftInfo.length} of ${n} live products show the approved four-slide infographics. ${draftInfo.length} sets are drafts (admin only) — those products keep their previous photos.`
+        : `All ${n} live products show the approved four-slide infographics.`,
+      needed: "For each draft: client-approved \"How to use\" steps, and confirmation of the flagged ingredients or sizes (listed on each product's edit page).",
+      affects: "Product page galleries (Who is it for?, What's inside?, How to use).", missing: names(draftInfo), adminLink: "/admin/products",
     },
     {
       id: "theme", title: "Website theme (Clean White)", status: themeConfirmed ? "confirmed" : "waiting",

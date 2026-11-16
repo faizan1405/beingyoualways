@@ -1,7 +1,10 @@
-# Roadmap — Informational gallery slides (Nov 16 2026 brief)
+# Roadmap — approved infographic gallery roll-out (all 20 products)
 
-- [x] 1. Prototype Mulberry Face Serum: 01 Product · 02 Who is it for? · 03 What's inside? · 04 How to use (HTML/CSS source, 1600×1600 WebP)
-- [x] 2. Contact sheet + mobile-size readability check + source/accuracy notes
-- [ ] 3. WAIT for client approval of the design direction (brief: do not proceed before approval)
-- [ ] 4. After approval: build remaining 19 products, swap visible galleries, keep the 80 studio photos as backup
-- [ ] Waiting on client: serum directions for slide 04, shampoo formula, hair-mask key ingredient + red jar, aloe tube size/price, Magic Drop details
+- [ ] 1. Shared master template (generator) from the approved Face Serum slides; per-product content file with sources.
+- [ ] 2. Supporting images (small ingredient photos, application photos) — used only inside slides.
+- [ ] 3. Build + render 4 slides for all 20 products (01 = existing clean product photo).
+- [ ] 4. Face Serum: remove Aloe Vera / Hyaluronic Acid and unconfirmed skin types; directions stay draft.
+- [ ] 5. Website: fully verified products show exactly the 4 infographic slides; incomplete sets stay draft (admin) and keep the previous public gallery; nothing deleted.
+- [ ] 6. Admin: infographic set panel with status + missing information.
+- [ ] 7. Tests, typecheck, build; manual check skincare / haircare / colour cosmetics on desktop + mobile.
+- [ ] 8. Report + contact sheets.
