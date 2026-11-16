@@ -12,7 +12,7 @@ import { concerns as concernList, productConcerns } from "@/lib/concerns";
 import type { Product, ProductVariant } from "@/lib/types";
 import { productService } from "@/services/productService";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
-import { withExtraImage, withMainImage } from "@/lib/product-images";
+import { galleryImages, originalImages, withExtraImage, withMainImage } from "@/lib/product-images";
 import { isUnconfirmed } from "@/lib/variants";
 import { PRODUCT_SHEET_SOURCE, claimFlagLabels, pendingPhotos, sheetFor } from "@/content/product-sheet";
 
@@ -53,6 +53,8 @@ function EditProduct() {
   const up = (patch: Partial<Product>) => setP({ ...p, ...patch });
   const sheet = sheetFor(p.slug);
   const pending = pendingPhotos.filter((x) => x.slug === p.slug);
+  const originals = originalImages(p.slug);
+  const fourSet = galleryImages(p.slug);
   const upV = (i: number, patch: Partial<ProductVariant>) => up({ variants: p.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
 
   return (
@@ -203,6 +205,26 @@ function EditProduct() {
                     </figure>
                   );
                 })}
+              </div>
+            </Panel>
+          )}
+          {originals.length > 0 && (
+            <Panel title="Original photos (backup)">
+              <p className="mb-3 text-xs text-muted-foreground">The earlier photos from beingyoualways.com are kept here. Add any back, or switch the whole gallery, then press Save changes.</p>
+              <div className="grid grid-cols-4 gap-2">
+                {originals.map((src, i) => {
+                  const used = p.images?.includes(src);
+                  return (
+                    <button key={src} type="button" disabled={used} title={used ? "Already in the gallery" : "Add to the gallery"} onClick={() => up({ images: withExtraImage(p.images, src) })}
+                      className={`relative overflow-hidden rounded border ${used ? "border-primary opacity-50" : "border-border hover:border-primary"}`}>
+                      <img src={src} alt={`Original photo ${i + 1}`} loading="lazy" className="aspect-square w-full object-cover" />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 grid gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: [...originals] }); toast("Original photos restored — press Save changes to keep them"); }}>Use original photos only</Button>
+                {fourSet.length === 4 && <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: [...fourSet] }); toast("Four-image gallery restored — press Save changes to keep it"); }}>Use the four-image gallery</Button>}
               </div>
             </Panel>
           )}

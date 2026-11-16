@@ -1,5 +1,5 @@
 import catalogue from "./catalogue.json";
-import { productImages } from "./product-images";
+import { catalogueImages } from "./product-images";
 import { addedProducts, applyPatch } from "./catalogue-revision";
 // SAMPLE DATA — temporary placeholder content until the client supplies real
 // products, prices and orders. Only the mock services may import this file.
@@ -58,7 +58,7 @@ const imported: Product[] = (catalogue as Raw[]).map((r) => ({
   variants: r.variants.map((v) => ({ ...v, kind: v.kind as "size" | "shade" })),
   shape: r.shape as Product["shape"],
   tint: tints[r.category] ?? "oklch(0.86 0.05 140)",
-  images: productImages(r.slug),
+  images: catalogueImages(r.slug),
   featured: r.featured,
   // High Demand starts from the products the client featured on beingyoualways.com; admin can change it.
   bestSeller: r.featured,

@@ -39,7 +39,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
         <Link to="/product/$slug" params={{ slug: product.slug }} aria-label={product.name}>
           <ProductVisual
             src={product.images?.[0]} shape={product.shape} tint={product.tint} label={product.name} variant={index}
-            className="transition-transform duration-[1100ms] ease-[var(--ease-lux)] group-hover:scale-[1.06]"
+            className="aspect-square transition-transform duration-[1100ms] ease-[var(--ease-lux)] group-hover:scale-[1.06]"
           />
         </Link>
         <button
@@ -94,7 +94,7 @@ export function ProductGridSkeleton({ n = 8 }: { n?: number | undefined }) {
     <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: n }).map((_, i) => (
         <div key={i}>
-          <div className="skeleton-shimmer aspect-[4/5] rounded-lg" />
+          <div className="skeleton-shimmer aspect-square rounded-lg" />
           <div className="skeleton-shimmer mt-4 h-3 w-16 rounded" />
           <div className="skeleton-shimmer mt-2 h-5 w-3/4 rounded" />
         </div>

@@ -1,10 +1,12 @@
-# Roadmap — Product catalogue audit & genuine packshots
+# Roadmap — Four-image studio galleries (Nov 2026 brief)
 
-- [x] 1. Audit: matched the 15 product groups in the client's product sheet + 8 photos to the 20 existing products (no duplicates)
-- [x] 2. Processed the 8 photos (trimmed whitespace, 4:5 WebP, originals kept on CDN); 5 confirmed matches now lead their galleries
-- [x] 3. Verified facts applied: pack sizes, key ingredients, client "How to use"; prices unchanged; 3 uncertain photos flagged for admin review
-- [x] 4. Magic Drop created as a hidden draft; ₹0 never purchasable; drafts not reachable on the shop
-- [x] 5. Product-sheet claims recorded + flagged (FDA, Dubai, anti-aging, etc.), not published
-- [x] 6. Admin: key ingredients, client sheet, photos awaiting confirmation; saved demo data upgraded without reset; admin edits now show on shop pages
-- [x] 7. Tests, browser checks, report
-- [ ] Waiting on client: confirm Shampoo 100 ml, Hair Mask red jar (100 g?) and Aloe Vera Gel tube (100 g + 20 g) — same product? size + price; Magic Drop price, size, photo; proof for product-sheet claims; brand claims + ingredient sourcing countries; Safari/iPhone video check; confirm starting High Demand picks
+- [x] 1. Audit 20 products, match each to its genuine packshot + verified key ingredient
+- [x] 2. Cut out genuine packaging (locked layer) for all 20 products
+- [x] 3. 01 Hero: real packaging on white, soft shadow (composited, 1600×1600)
+- [x] 4. 02 Ingredient scenes generated without packaging, real pack composited in
+- [x] 5. 03 Texture / application (no packaging; neutral when texture unknown)
+- [x] 6. 04 Lifestyle / routine scenes, real pack composited in
+- [x] 7. QC every image; reject/redo failures
+- [x] 8. Website: galleries 01–04 first in order; original photos kept as backup (admin can restore); saved demo data upgraded
+- [x] 9. Tests, browser check, audit report
+- [ ] Waiting on client: shampoo formula, hair-mask key ingredient + red jar, aloe tube size/price, real texture/shade references, approval of AI backgrounds, Magic Drop details

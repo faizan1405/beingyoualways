@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Mous
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import type { ProductShape } from "@/lib/types";
+import { galleryAlt } from "@/lib/product-images";
 import { cn } from "@/lib/utils";
 import { ProductVisual } from "./ProductVisual";
 
@@ -31,7 +32,7 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
   const dragged = useRef(false);
   const markLoaded = useCallback((i: number) => setLoaded((l) => (l[i] ? l : { ...l, [i]: true })), []);
   const go = useCallback((d: number) => setIdx((i) => (i + d + n) % n), [n]);
-  const alt = (i: number) => `${name} — photo ${i + 1} of ${n}`;
+  const alt = (i: number) => galleryAlt(name, images[i] ?? "", i, n);
 
   if (n === 0) return <ProductVisual shape={shape} tint={tint} label={name} eager className="rounded-xl" />;
 
@@ -49,7 +50,7 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
   return (
     <div onKeyDown={onKey}>
       <div
-        className={cn("group relative aspect-[4/5] overflow-hidden rounded-xl bg-secondary hero-in", canZoom && "cursor-zoom-in")}
+        className={cn("group relative aspect-square overflow-hidden rounded-xl bg-secondary hero-in", canZoom && "cursor-zoom-in")}
         onMouseMove={onMove}
         onMouseLeave={() => setZoom(null)}
         onClick={() => { if (!dragged.current) setFull(true); }}
@@ -118,7 +119,7 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
               onClick={() => setIdx(i)}
               aria-label={`Show photo ${i + 1} of ${n}`}
               aria-current={idx === i}
-              className={cn("press relative aspect-[4/5] w-[4.5rem] shrink-0 overflow-hidden rounded-md border-2 bg-secondary transition-all duration-300 sm:w-20", idx === i ? "border-primary shadow-soft" : "border-transparent opacity-60 hover:opacity-100")}
+              className={cn("press relative aspect-square w-[4.5rem] shrink-0 overflow-hidden rounded-md border-2 bg-secondary transition-all duration-300 sm:w-20", idx === i ? "border-primary shadow-soft" : "border-transparent opacity-60 hover:opacity-100")}
             >
               <img src={src} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             </button>
@@ -164,7 +165,7 @@ export function ProductGallery({ images, name, shape, tint }: { images: string[]
             <div className="flex justify-center gap-2 overflow-x-auto border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {images.map((src, i) => (
                 <button key={src} type="button" onClick={() => setIdx(i)} aria-label={`Show photo ${i + 1} of ${n}`} aria-current={idx === i}
-                  className={cn("press relative aspect-[4/5] w-14 shrink-0 overflow-hidden rounded border-2", idx === i ? "border-primary" : "border-transparent opacity-60")}>
+                  className={cn("press relative aspect-square w-14 shrink-0 overflow-hidden rounded border-2", idx === i ? "border-primary" : "border-transparent opacity-60")}>
                   <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
                 </button>
               ))}

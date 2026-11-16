@@ -3,9 +3,10 @@
 // (src/content/product-sheet.ts). Prices, ids and slugs are never changed here.
 import type { Product } from "@/lib/types";
 import { isUnconfirmed } from "@/lib/variants";
+import { galleryImages } from "@/lib/product-images";
 
 /** Bump when the patches below change, so saved demo data picks them up once. */
-export const CATALOGUE_REVISION = "2026-11-product-sheet-1";
+export const CATALOGUE_REVISION = "2026-11-gallery-4";
 
 export interface ProductPatch {
   /** New name, applied only while the product still has the imported name `replacesName`. */
@@ -48,8 +49,10 @@ export const productPatches: Record<string, ProductPatch> = {
   "bright-banana-powder": { keyIngredients: VITAMIN_E },
 };
 
-/** Products whose gallery gained a genuine packshot in this revision (main photo first). */
+/** Products whose gallery gained a genuine packshot in an earlier revision (main photo first). */
 export const rephotographed = ["tomato-face-wash", "sunscreen", "hair-mask", "face-serum", "aloe-vera-gel"];
+/** Saved galleries are refreshed once when the product has a new photo set (four-image gallery or packshot). */
+const refreshesGallery = (slug: string) => rephotographed.includes(slug) || galleryImages(slug).length > 0;
 
 export function applyPatch(p: Product): Product {
   const x = productPatches[p.slug];
@@ -102,9 +105,9 @@ const hasUpload = (p: Product) => (p.images ?? []).some((src) => src.startsWith(
 export function reviseStored(stored: Product[], seed: Product[]): Product[] {
   const out = stored.map((p) => {
     const s = seed.find((x) => x.id === p.id);
-    if (!s || !(p.slug in productPatches || rephotographed.includes(p.slug))) return p;
+    if (!s || !(p.slug in productPatches || refreshesGallery(p.slug))) return p;
     const next = applyPatch(p);
-    return rephotographed.includes(p.slug) && !hasUpload(p) ? { ...next, images: s.images } : next;
+    return refreshesGallery(p.slug) && !hasUpload(p) ? { ...next, images: s.images } : next;
   });
   for (const a of addedProducts) if (!out.some((p) => p.id === a.id || p.slug === a.slug)) out.push(structuredClone(a));
   return out;
