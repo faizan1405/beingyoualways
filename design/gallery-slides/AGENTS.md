@@ -1,1 +1,2 @@
-- Product gallery infographic slides are built from editable HTML/CSS in `design/gallery-slides/<slug>/` (shared styles in `shared/slide.css`) and exported to 1600² WebP; text is never AI-rendered and packaging is the real photo cut-out — keeps copy correct and editable.
+- Product gallery infographic slides are built by `build.py` from `src/content/infographics.json` with the shared template here (`shared/slide.css`) and exported to `src/assets/products/infographics/<slug>/` as 1600² WebP; text is never AI-rendered and packaging is the real photo — keeps copy correct and editable.
+- Only sets with `status: "ready"` reach shoppers (`catalogueImages`); drafts stay admin-only and the product keeps its previous gallery — never publish unverified directions.

@@ -213,7 +213,7 @@ function EditProduct() {
           )}
           {info && slides.length === 4 && (
             <Panel title="Product infographics (4 slides)">
-              <p className={`mb-3 rounded-md px-2.5 py-1.5 text-xs font-medium ${info.status === "ready" ? "bg-primary/10 text-primary" : "bg-accent/15 text-accent-foreground"}`}>
+              <p className={`mb-3 rounded-md px-2.5 py-1.5 text-xs font-medium ${info.status === "ready" ? "bg-primary/10 text-primary" : "border border-accent/40 bg-accent/10 text-foreground"}`}>
                 {info.status === "ready" ? "Live — shoppers see these four slides." : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
               </p>
               <div className="grid grid-cols-2 gap-2">
