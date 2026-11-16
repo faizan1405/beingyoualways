@@ -1,4 +1,4 @@
-import { productImages } from "@/lib/product-images";
+import { galleryImages, productImages } from "@/lib/product-images";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Droplets, Eye, Feather, FlaskConical, Leaf, Rabbit, Sparkles, Sprout, Sun, Waves, Wind } from "lucide-react";
 
@@ -13,17 +13,18 @@ const icons: Record<ConcernSlug, typeof Sparkles> = {
   "sun-protection": Sun, "hair-fall": Wind, dandruff: Feather, "tan-removal": Leaf,
 };
 
-/** Real catalogue photos per concern — chosen to match each concern without implying results. */
-const concernArt: Record<ConcernSlug, { src: string | undefined; pos: string; tone: string }> = {
-  pigmentation: { src: productImages("face-serum")[1], pos: "50% 45%", tone: "oklch(0.3 0.05 45)" },
-  "acne-prone-skin": { src: productImages("face-wash")[1], pos: "50% 50%", tone: "var(--primary)" },
-  "dull-dry-skin": { src: productImages("aloe-vera-gel")[0], pos: "50% 50%", tone: "oklch(0.32 0.05 140)" },
-  "dark-circles": { src: productImages("toner")[1], pos: "50% 40%", tone: "oklch(0.27 0.03 260)" },
-  "sun-protection": { src: productImages("sunscreen")[0], pos: "50% 50%", tone: "oklch(0.38 0.08 60)" },
-  "hair-fall": { src: productImages("hair-oil")[0], pos: "50% 50%", tone: "oklch(0.28 0.04 100)" },
-  dandruff: { src: productImages("hair-mask")[0], pos: "50% 50%", tone: "oklch(0.3 0.03 180)" },
-  "tan-removal": { src: productImages("volcanic-scrub")[0], pos: "50% 50%", tone: "oklch(0.34 0.07 30)" },
+/** Real packshots per concern (clean product photo, slide 01) — chosen to match each concern without implying results. */
+const concernArt: Record<ConcernSlug, { slug: string; tone: string }> = {
+  pigmentation: { slug: "face-serum", tone: "oklch(0.36 0.05 45)" },
+  "acne-prone-skin": { slug: "face-wash", tone: "var(--primary)" },
+  "dull-dry-skin": { slug: "aloe-vera-gel", tone: "oklch(0.36 0.05 140)" },
+  "dark-circles": { slug: "toner", tone: "oklch(0.33 0.03 260)" },
+  "sun-protection": { slug: "sunscreen", tone: "oklch(0.42 0.08 50)" },
+  "hair-fall": { slug: "hair-oil", tone: "oklch(0.34 0.04 100)" },
+  dandruff: { slug: "hair-mask", tone: "oklch(0.34 0.03 180)" },
+  "tan-removal": { slug: "volcanic-scrub", tone: "oklch(0.4 0.07 30)" },
 };
+const concernPhoto = (slug: string) => galleryImages(slug)[0] ?? productImages(slug)[0];
 
 export function ShopByConcern() {
   return (
@@ -41,12 +42,15 @@ export function ShopByConcern() {
       </div>
       <StaggerContainer step={60} className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
         {concerns.map(({ slug, name: t }) => { const I = icons[slug]; const a = concernArt[slug]; return (
-          <Link key={slug} to="/concern/$slug" params={{ slug }} className="group relative isolate flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl p-4 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:aspect-[4/5] md:p-6">
-            {a.src && <img src={a.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: a.pos }} className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.07]" />}
-            <div aria-hidden className="absolute inset-0 -z-10" style={{ background: `linear-gradient(to top, color-mix(in oklab, ${a.tone} 90%, transparent) 0%, color-mix(in oklab, ${a.tone} 45%, transparent) 42%, transparent 72%)` }} />
-            <span className="absolute left-4 top-4 grid size-9 place-items-center rounded-full bg-background/85 text-primary backdrop-blur md:size-10"><I className="size-4" strokeWidth={1.5} /></span>
-            <span className="font-serif text-xl leading-tight md:text-2xl">{t}</span>
-            <span className="mt-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] opacity-90">Shop <ArrowRight className="arrow-nudge size-3" /></span>
+          <Link key={slug} to="/concern/$slug" params={{ slug }} className="group relative isolate flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-border bg-page text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:aspect-[4/5]">
+            <div className="relative min-h-0 flex-1">
+              {concernPhoto(a.slug) && <img src={concernPhoto(a.slug)} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain p-1 scale-110 transition-transform duration-[1200ms] ease-out group-hover:scale-[1.16] md:p-2" />}
+              <span className="absolute left-3 top-3 grid size-9 place-items-center rounded-full border border-border bg-background text-primary md:left-4 md:top-4 md:size-10"><I className="size-4" strokeWidth={1.5} /></span>
+            </div>
+            <div className="px-4 pb-4 pt-3 md:px-6 md:pb-5 md:pt-4" style={{ background: a.tone }}>
+              <span className="block font-serif text-xl leading-tight md:text-2xl">{t}</span>
+              <span className="mt-1.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] opacity-90">Shop <ArrowRight className="arrow-nudge size-3" /></span>
+            </div>
           </Link>
         ); })}
       </StaggerContainer>
