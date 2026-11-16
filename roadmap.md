@@ -1,12 +1,7 @@
-# Roadmap — Four-image studio galleries (Nov 2026 brief)
+# Roadmap — Informational gallery slides (Nov 16 2026 brief)
 
-- [x] 1. Audit 20 products, match each to its genuine packshot + verified key ingredient
-- [x] 2. Cut out genuine packaging (locked layer) for all 20 products
-- [x] 3. 01 Hero: real packaging on white, soft shadow (composited, 1600×1600)
-- [x] 4. 02 Ingredient scenes generated without packaging, real pack composited in
-- [x] 5. 03 Texture / application (no packaging; neutral when texture unknown)
-- [x] 6. 04 Lifestyle / routine scenes, real pack composited in
-- [x] 7. QC every image; reject/redo failures
-- [x] 8. Website: galleries 01–04 first in order; original photos kept as backup (admin can restore); saved demo data upgraded
-- [x] 9. Tests, browser check, audit report
-- [ ] Waiting on client: shampoo formula, hair-mask key ingredient + red jar, aloe tube size/price, real texture/shade references, approval of AI backgrounds, Magic Drop details
+- [x] 1. Prototype Mulberry Face Serum: 01 Product · 02 Who is it for? · 03 What's inside? · 04 How to use (HTML/CSS source, 1600×1600 WebP)
+- [x] 2. Contact sheet + mobile-size readability check + source/accuracy notes
+- [ ] 3. WAIT for client approval of the design direction (brief: do not proceed before approval)
+- [ ] 4. After approval: build remaining 19 products, swap visible galleries, keep the 80 studio photos as backup
+- [ ] Waiting on client: serum directions for slide 04, shampoo formula, hair-mask key ingredient + red jar, aloe tube size/price, Magic Drop details
