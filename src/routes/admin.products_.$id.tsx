@@ -214,8 +214,15 @@ function EditProduct() {
           {info && slides.length === 4 && (
             <Panel title="Product infographics (4 slides)">
               <p className={`mb-3 rounded-md px-2.5 py-1.5 text-xs font-medium ${info.status === "ready" ? "bg-primary/10 text-primary" : "border border-accent/40 bg-accent/10 text-foreground"}`}>
-                {info.status === "ready" ? "Live — shoppers see these four slides." : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
+                {info.status === "ready" ? "Live — shoppers see these four slides." : info.status === "preview" ? "Shown in the shop preview — How to use is a general guide." : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
               </p>
+              {info.guide === "general" && (
+                <div className="mb-3 rounded-md border border-dashed border-accent px-2.5 py-2 text-xs">
+                  <p className="font-semibold">General guide — pending client approval</p>
+                  <p className="mt-1 text-muted-foreground">These How to use steps are common for this kind of product, not the manufacturer's directions. They are not client-approved.</p>
+                  <ol className="mt-1.5 list-decimal space-y-0.5 pl-4 text-muted-foreground">{info.steps.map((s) => <li key={s.title}><span className="font-medium text-foreground">{s.title}:</span> {s.text}</li>)}</ol>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 {slides.map((src, i) => (
                   <a key={src} href={src} target="_blank" rel="noreferrer" className="overflow-hidden rounded border border-border hover:border-primary" title="Open full size">
@@ -224,7 +231,7 @@ function EditProduct() {
                 ))}
               </div>
               {info.missing.length > 0 && (
-                <div className="mt-3"><p className="text-xs font-semibold">Missing before it can go live</p>
+                <div className="mt-3"><p className="text-xs font-semibold">{info.status === "preview" ? "Needed before it counts as approved" : "Missing before it can go live"}</p>
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">{info.missing.map((m) => <li key={m}>{m}</li>)}</ul></div>
               )}
               {info.uncertain.length > 0 && (
@@ -233,7 +240,7 @@ function EditProduct() {
               )}
               <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer font-semibold text-foreground">Where the wording comes from</summary>
                 <p className="mt-1">Who is it for: {info.sources.who}</p><p className="mt-1">What's inside: {info.sources.inside}</p><p className="mt-1">How to use: {info.sources.how}</p></details>
-              {info.status === "ready" && !slides.every((x, i) => p.images?.[i] === x) && (
+              {info.status !== "draft" && !slides.every((x, i) => p.images?.[i] === x) && (
                 <Button type="button" size="sm" variant="outline" className="mt-3 w-full" onClick={() => { up({ images: [...slides] }); toast("Infographic slides restored — press Save changes to keep them"); }}>Use the four infographic slides</Button>
               )}
             </Panel>

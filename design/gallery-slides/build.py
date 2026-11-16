@@ -41,10 +41,14 @@ def pack_cls(p) -> str:
 
 
 def page(p, n, body, css=""):
-    draft = '<div class="draft">Draft · not live</div>' if p["status"] != "ready" else ""
+    draft = '<div class="draft">Draft · not live</div>' if p["status"] == "draft" else ""
     return (f'<!doctype html><html><head><meta charset="utf-8">{FONTS}<link rel="stylesheet" href="../shared/slide.css">'
             f'<style>{css}</style></head><body><div class="slide{" is-draft" if draft else ""}">{draft}{body}'
             f'<div class="brand">Being You<small>Always</small></div><div class="pg">0{n} / 04</div></div></body></html>')
+
+
+# Slide 04 of a "preview" set uses a general, category-common guide (not manufacturer directions).
+GUIDE_NOTE = '<div class="guide">General guide · follow your pack</div>'
 
 
 def img(path, slug, pos=None, zoom=None, cls=""):
@@ -114,7 +118,8 @@ def slide_how(p):
     cards = []
     for k, s in enumerate(h["steps"], 1):
         if s.get("tile"):
-            visual = f'<div class="ph tile"><b>{e(s["tile"])}</b><small>{e(s.get("tileSub", ""))}</small><span class="n">{k}</span></div>'
+            long = ' class="long"' if len(s["tile"]) > 3 else ""
+            visual = f'<div class="ph tile"><b{long}>{e(s["tile"])}</b><small>{e(s.get("tileSub", ""))}</small><span class="n">{k}</span></div>'
         elif s["img"] == "pack":
             visual = f'<div class="ph packph"><img class="mul" src="{e(pack_src(p))}" alt=""><span class="n">{k}</span></div>'
         else:
@@ -124,8 +129,9 @@ def slide_how(p):
     if h.get("finish"):
         finish = (f'<div class="tip"><img class="{pack_cls(p)}" src="{e(pack_src(p))}" alt=""><div><div class="label">{e(h["finish"]["label"])}</div>'
                   f'<p>{e(h["finish"]["text"])}</p></div></div>')
+    note = GUIDE_NOTE if h.get("guide") == "general" else ""
     body = (f'<div class="eyebrow">Application guide</div><h1>How to use</h1>'
-            f'<div class="steps c{n}">{"".join(cards)}</div>{finish}')
+            f'<div class="steps c{n}">{"".join(cards)}</div>{finish}{note}')
     return page(p, 4, body, HOW_CSS)
 
 
@@ -182,6 +188,7 @@ HOW_CSS = """
 .st .packph img{object-fit:contain;padding:36px;mix-blend-mode:multiply}
 .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#eef1ec !important}
 .tile b{font-family:'Cormorant Garamond',serif;font-size:190px;line-height:1;font-variant-numeric:lining-nums;color:var(--green)}
+.tile b.long{font-size:150px;letter-spacing:-.02em}
 .tile small{margin-top:6px;font-size:38px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 .n{position:absolute;left:24px;top:24px;width:96px;height:96px;border-radius:50%;background:var(--green);color:#fff;font-size:42px;font-weight:800;display:grid;place-items:center}
 .st h3{margin-top:34px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:72px;line-height:1;color:var(--green)}
@@ -191,6 +198,7 @@ HOW_CSS = """
 .tip img{height:180px;max-width:220px;object-fit:contain;flex:none}
 .tip .label{margin-bottom:10px}
 .tip p{font-size:44px;font-weight:600;line-height:1.25}
+.guide{position:absolute;top:100px;left:640px;padding:12px 24px;border:2px solid var(--line);border-radius:999px;font-size:24px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:#fff}
 .known{margin-top:70px;padding:36px 0;border-top:2px solid var(--line);width:880px}
 .known .label{margin-bottom:18px}
 .ticks{list-style:none;display:flex;flex-direction:column;gap:14px}
@@ -217,6 +225,8 @@ CHECK_JS = """() => {
   }
   const band = document.querySelector('.band, .tip');
   if (band) { const b = R(band); for (const t of document.querySelectorAll('.rows *, .steps *, .formula *')) { const r = R(t); if (r.height && r.bottom > b.top + 4 && !t.closest('.band')) { out.push('band overlap: ' + (t.textContent || t.tagName).slice(0, 40)); break; } } }
+  const g = document.querySelector('.guide');
+  if (g) { const r = R(g); for (const o of document.querySelectorAll('.brand,.pg,.tip')) { const q = R(o); if (r.right > q.left && r.left < q.right && r.bottom > q.top && r.top < q.bottom) out.push('guide overlap: ' + o.className); } }
   const imgs = [...document.images].filter((i) => !i.complete || !i.naturalWidth).map((i) => 'img missing: ' + i.src);
   return [...new Set(out.concat(imgs))];
 }"""

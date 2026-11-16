@@ -1,5 +1,5 @@
 {
-  "_about": "Four-slide product infographics (01 product photo, 02 Who is it for?, 03 What's inside?, 04 How to use). Text comes only from the genuine pack, the client's product sheet (Product details.docx) or the original beingyoualways.com listing. status 'ready' = every slide verified, shown to shoppers; 'draft' = admin only, previous gallery stays public. Source layouts: design/gallery-slides (run build.py).",
+  "_about": "Four-slide product infographics (01 product photo, 02 Who is it for?, 03 What's inside?, 04 How to use). Text comes only from the genuine pack, the client's product sheet (Product details.docx), the original beingyoualways.com listing, or — for how.guide 'general' — conservative category-common steps. status 'ready' = every slide verified by the client; 'preview' = slides 02–03 verified, slide 04 is a general guide pending client approval (shown in the storefront preview, flagged in admin); 'draft' = admin only, previous gallery stays public. Source layouts: design/gallery-slides (run build.py).",
   "products": [
     {
       "slug": "true-base-liquid-foundation",
@@ -73,7 +73,8 @@
         "finish": {
           "label": "You'll need",
           "text": "True Base Liquid Foundation and your fingertips or a makeup sponge."
-        }
+        },
+        "guide": "verified"
       },
       "missing": [],
       "uncertain": [
@@ -155,7 +156,8 @@
         "finish": {
           "label": "You'll need",
           "text": "Eyebrow Definer, plus a spoolie if desired."
-        }
+        },
+        "guide": "verified"
       },
       "missing": [],
       "uncertain": [
@@ -241,7 +243,8 @@
         "finish": {
           "label": "You'll need",
           "text": "Liquid Eyeliner with its fine-tip brush."
-        }
+        },
+        "guide": "verified"
       },
       "missing": [],
       "uncertain": [
@@ -321,7 +324,8 @@
         "finish": {
           "label": "Caution",
           "text": "Store in a cool and dry place."
-        }
+        },
+        "guide": "verified"
       },
       "missing": [],
       "uncertain": [
@@ -336,7 +340,7 @@
     },
     {
       "slug": "face-serum",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Face Serum · 30 ml",
       "pack": "shared/packs/face-serum-bottle.png",
       "badge": "Plant based",
@@ -384,11 +388,40 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Cleanse",
+            "text": "Cleanse your face and pat it dry.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "50% 40%"
+          },
+          {
+            "title": "Apply",
+            "text": "Take a small amount.",
+            "img": "shared/img/app-serum-drops.jpg",
+            "pos": "50% 45%"
+          },
+          {
+            "title": "Spread",
+            "text": "Spread gently over the face.",
+            "img": "shared/img/app-serum-pat.jpg",
+            "pos": "55% 40%"
+          },
+          {
+            "title": "Moisturise",
+            "text": "Follow with your moisturiser.",
+            "img": "shared/img/app-moisturiser.jpg",
+            "pos": "40% 45%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Face Serum and your usual moisturiser."
+        }
       },
       "missing": [
-        "How to use: client-approved steps (amount, morning/night)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Skin types (dull/dry, acne-prone) came from old website tags — removed until confirmed.",
@@ -398,12 +431,12 @@
       "sources": {
         "who": "Pack label (Even Skin Tone, Pigmentation, Brightening, Dark Circle; Plant Based) + client sheet (glow, overnight hydration)",
         "inside": "New silver-collar pack (Mulberry Extract, Alpha Arbutin 2%, Niacinamide 3%)",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "tomato-face-wash",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Tomato Face Wash · 100 ml",
       "who": [
         {
@@ -440,11 +473,34 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Wet",
+            "text": "Wet your face with water.",
+            "img": "shared/img/app-wet-hands.jpg",
+            "pos": "55% 55%"
+          },
+          {
+            "title": "Massage",
+            "text": "Gently massage the cleanser over your face.",
+            "img": "shared/img/app-face-lather.jpg",
+            "pos": "55% 45%"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse thoroughly with water.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "45% 45%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Tomato Face Wash and water."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Not described in the client product sheet."
@@ -452,12 +508,12 @@
       "sources": {
         "who": "Pack (Skin Brightening) + listing",
         "inside": "Pack (Infused with Fruit AHA) + listing",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "face-wash",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Daisy Face Wash · Provitamin B5",
       "badge": "Sulphate free",
       "who": [
@@ -493,23 +549,46 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Wet",
+            "text": "Wet your face with water.",
+            "img": "shared/img/app-wet-hands.jpg",
+            "pos": "55% 55%"
+          },
+          {
+            "title": "Massage",
+            "text": "Gently massage the cleanser over your face.",
+            "img": "gallery:face-wash/03-texture",
+            "pos": "50% 50%"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse thoroughly with water.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "45% 45%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Daisy Face Wash and water."
+        }
       },
       "missing": [
-        "How to use: client-approved steps.",
+        "Client approval of the general How to Use guide, or the exact manufacturer directions.",
         "Size: pack prints 100 ML, the shop still says \"to be confirmed\"."
       ],
       "uncertain": [],
       "sources": {
         "who": "Client sheet + pack (Deeply Hydrating and Sulphate Free)",
         "inside": "Pack (Daisy Flower Extract, with Provitamin B5) + listing",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "toner",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Fennel Toner · Niacinamide",
       "badge": "Sulphate free",
       "who": [
@@ -546,11 +625,34 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Cleanse",
+            "text": "Start with a freshly cleansed face.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "45% 45%"
+          },
+          {
+            "title": "Apply",
+            "text": "Apply the toner gently to the face.",
+            "img": "shared/img/app-toner-cotton.jpg",
+            "pos": "45% 45%"
+          },
+          {
+            "title": "Absorb",
+            "text": "Let it absorb into the skin.",
+            "img": "shared/img/app-serum-pat.jpg",
+            "pos": "55% 40%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Fennel Toner, plus a cotton pad if you like."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "The old listing also names Aloe Vera; the sheet and pack do not — left off until confirmed."
@@ -558,12 +660,12 @@
       "sources": {
         "who": "Client sheet",
         "inside": "Pack (Fennel Toner with Niacinamide) + client sheet",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "face-mask",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Face Mask · Mexican Cactus",
       "who": [
         {
@@ -600,26 +702,48 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": [
-          "Leave on: 10 minutes for women, 15–20 minutes for men."
-        ]
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply evenly to clean skin, avoiding the eyes.",
+            "img": "shared/img/app-mask-brush.jpg",
+            "pos": "55% 45%"
+          },
+          {
+            "title": "Wait",
+            "text": "Leave on 10 min for women, 15–20 min for men.",
+            "tile": "10–20",
+            "tileSub": "minutes"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse off gently with water.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "45% 45%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Face Mask, a brush if you like, and water."
+        }
       },
       "missing": [
-        "How to apply and remove the mask (client-approved steps)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
-        "\"No peeling required – gentle on the skin\" is a safety claim that needs evidence."
+        "\"No peeling required – gentle on the skin\" is a safety claim that needs evidence.",
+        "Rinse-off removal is assumed (the sheet says no peeling is needed) — confirm."
       ],
       "sources": {
         "who": "Client sheet + listing",
         "inside": "Pack (with Mexican Cactus Extract) + listing",
-        "how": "Client sheet (application time only)"
+        "how": "General guide (category-common) + client sheet (leave-on time)"
       }
     },
     {
       "slug": "volcanic-scrub",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Volcanic Scrub · 200 g",
       "who": [
         {
@@ -663,20 +787,40 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": [
-          "Use twice a week.",
-          "For both face and body."
-        ]
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply to damp skin.",
+            "img": "gallery:volcanic-scrub/03-texture",
+            "pos": "50% 50%"
+          },
+          {
+            "title": "Massage",
+            "text": "Massage gently, without harsh rubbing.",
+            "img": "shared/img/app-scrub-massage.jpg",
+            "pos": "55% 55%"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse off with water.",
+            "img": "shared/img/app-serum-cleanse.jpg",
+            "pos": "45% 45%"
+          }
+        ],
+        "finish": {
+          "label": "Good to know",
+          "text": "Use twice a week, on face or body."
+        }
       },
       "missing": [
-        "How to apply and rinse (client-approved steps)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [],
       "sources": {
         "who": "Client sheet + pack (Skin Brightening & Tan Removal)",
         "inside": "Client sheet + pack (Korean Technology)",
-        "how": "Client sheet (frequency only)"
+        "how": "General guide (category-common) + client sheet (twice a week, face and body)"
       }
     },
     {
@@ -830,7 +974,7 @@
     },
     {
       "slug": "hair-oil",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Moringa Hair Oil · 110 ml",
       "who": [
         {
@@ -877,13 +1021,34 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": [
-          "No hair wash required after application."
-        ]
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply to the scalp or hair.",
+            "img": "shared/img/app-oil-scalp.jpg",
+            "pos": "50% 35%"
+          },
+          {
+            "title": "Massage",
+            "text": "Massage gently into the scalp.",
+            "img": "shared/img/app-scalp-massage.jpg",
+            "pos": "50% 30%"
+          },
+          {
+            "title": "Leave in",
+            "text": "No hair wash needed after applying.",
+            "img": "gallery:hair-oil/03-texture",
+            "pos": "50% 50%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Moringa Hair Oil and your fingertips."
+        }
       },
       "missing": [
-        "How to apply (amount, scalp or lengths, how often)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Hair fall / hair growth claims (printed on the box) need evidence — left off.",
@@ -892,12 +1057,12 @@
       "sources": {
         "who": "Client sheet + listing",
         "inside": "Client sheet (Moringa, Pumpkin Seed, Olive) + listing (Jojoba, Almond, Wheatgrass)",
-        "how": "Client sheet (no wash needed only)"
+        "how": "General guide (category-common) + client sheet (no hair wash needed)"
       }
     },
     {
       "slug": "hair-mask",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Hair Mask · 200 g",
       "who": [
         {
@@ -944,11 +1109,34 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply to clean, damp hair.",
+            "img": "shared/img/app-hairmask-apply.jpg",
+            "pos": "60% 55%"
+          },
+          {
+            "title": "Leave on",
+            "text": "Leave on for the time stated on the pack.",
+            "img": "gallery:hair-mask/03-texture",
+            "pos": "50% 50%"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse out thoroughly with water.",
+            "img": "shared/img/app-wet-hands.jpg",
+            "pos": "55% 55%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Hair Mask and freshly washed, damp hair."
+        }
       },
       "missing": [
-        "How to use: client-approved steps (amount, leave-on time, rinse)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Sheet says Vegetable Carotene, the red 100 g jar prints Vegetable Keratin — confirm the 200 g formula."
@@ -956,12 +1144,12 @@
       "sources": {
         "who": "Client sheet + listing",
         "inside": "Client sheet (to be confirmed)",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "shampoo",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Shampoo",
       "who": [
         {
@@ -996,11 +1184,34 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Wet",
+            "text": "Wet your hair with water.",
+            "img": "shared/img/app-wet-hands.jpg",
+            "pos": "55% 55%"
+          },
+          {
+            "title": "Massage",
+            "text": "Apply shampoo and gently massage the scalp.",
+            "img": "shared/img/app-scalp-massage.jpg",
+            "pos": "50% 30%"
+          },
+          {
+            "title": "Rinse",
+            "text": "Rinse thoroughly with water.",
+            "img": "gallery:shampoo/03-texture",
+            "pos": "50% 50%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Shampoo and water."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Formula conflict: sheet says Canadian Maple Tree Extract, the old listing and the new 100 ml photo say AHA + Provitamin B5. Confirm which formula is sold."
@@ -1008,12 +1219,12 @@
       "sources": {
         "who": "Client sheet + listing",
         "inside": "Client sheet (uncertain)",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "sunscreen",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Moisturizer & Sunscreen · 50 g",
       "who": [
         {
@@ -1043,11 +1254,28 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply evenly to exposed skin before sun exposure.",
+            "img": "shared/img/app-sunscreen-face.jpg",
+            "pos": "50% 40%"
+          },
+          {
+            "title": "Reapply",
+            "text": "Reapply as directed on the pack, especially when outdoors.",
+            "img": "shared/img/app-sun-outdoors.jpg",
+            "pos": "50% 45%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Moisturizer & Sunscreen — keep it with you when outdoors."
+        }
       },
       "missing": [
-        "How to use: client-approved steps (amount, when to reapply)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "SPF 50+ / PA+++, water resistance and pollution protection need test evidence — left off."
@@ -1055,12 +1283,12 @@
       "sources": {
         "who": "Client sheet + listing",
         "inside": "Pack (Red Algae Extract) + client sheet",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "kajal",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Kajal · Vitamin E",
       "who": [
         {
@@ -1102,11 +1330,28 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply carefully along the lash line.",
+            "img": "shared/img/app-kajal.jpg",
+            "pos": "45% 45%"
+          },
+          {
+            "title": "Take care",
+            "text": "Avoid direct contact with the eyes.",
+            "img": "gallery:kajal/03-texture",
+            "pos": "50% 50%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Kajal and a mirror."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Smudge-proof / waterproof need evidence — left off. Size not confirmed."
@@ -1114,12 +1359,12 @@
       "sources": {
         "who": "Listing + client sheet",
         "inside": "Client sheet + listing",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "mascara",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Mascara · Vitamin E",
       "who": [
         {
@@ -1167,11 +1412,28 @@
         ]
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Brush",
+            "text": "Brush gently from the lash roots toward the tips.",
+            "img": "shared/img/app-mascara.jpg",
+            "pos": "50% 45%"
+          },
+          {
+            "title": "Dry",
+            "text": "Allow to dry.",
+            "img": "gallery:mascara/03-texture",
+            "pos": "50% 50%"
+          }
+        ],
+        "finish": {
+          "label": "Caution",
+          "text": "Avoid direct contact with the eyes."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "The listing calls it a \"Mascara & Eyeliner Combo\" but the product is a single mascara — confirm.",
@@ -1180,12 +1442,12 @@
       "sources": {
         "who": "Original listing",
         "inside": "Original listing \"Key Ingredients\"",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "liquid-matte-lipstick",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Liquid Matte Lipstick · Vitamin E",
       "who": [
         {
@@ -1233,11 +1495,34 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": []
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply to clean, dry lips.",
+            "img": "shared/img/app-lipstick-apply.jpg",
+            "pos": "45% 45%"
+          },
+          {
+            "title": "Spread",
+            "text": "Spread the colour evenly.",
+            "img": "gallery:liquid-matte-lipstick/03-texture",
+            "pos": "50% 50%"
+          },
+          {
+            "title": "Set",
+            "text": "Allow it to set.",
+            "img": "shared/img/app-lips-finished.jpg",
+            "pos": "55% 35%"
+          }
+        ],
+        "finish": {
+          "label": "You'll need",
+          "text": "Liquid Matte Lipstick in your chosen shade."
+        }
       },
       "missing": [
-        "How to use: client-approved steps."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [
         "Shade name is spelled \"Clasic Cherry Red\" in the shop — the slide uses \"Classic\"; please confirm the spelling.",
@@ -1246,12 +1531,12 @@
       "sources": {
         "who": "Listing; shades = product variants",
         "inside": "Client sheet + listing",
-        "how": "None supplied"
+        "how": "General guide (category-common steps) — pending client approval"
       }
     },
     {
       "slug": "bright-banana-powder",
-      "status": "draft",
+      "status": "preview",
       "eyebrow": "Bright Banana Powder · 30 g",
       "who": [
         {
@@ -1295,19 +1580,34 @@
         }
       },
       "how": {
-        "steps": [],
-        "known": [
-          "Tip from the listing: use under the eyes to brighten and prevent creasing."
-        ]
+        "guide": "general",
+        "steps": [
+          {
+            "title": "Apply",
+            "text": "Apply lightly over makeup.",
+            "img": "shared/img/app-powder-puff.jpg",
+            "pos": "40% 40%"
+          },
+          {
+            "title": "Blend",
+            "text": "Blend to set and reduce shine.",
+            "img": "gallery:bright-banana-powder/03-texture",
+            "pos": "50% 50%"
+          }
+        ],
+        "finish": {
+          "label": "Tip",
+          "text": "Use under the eyes to brighten and prevent creasing."
+        }
       },
       "missing": [
-        "How to apply (tool, amount)."
+        "Client approval of the general How to Use guide, or the exact manufacturer directions."
       ],
       "uncertain": [],
       "sources": {
         "who": "Listing (ideal for oily/combination skin) + client sheet",
         "inside": "Client sheet + listing",
-        "how": "Listing (pro tip only)"
+        "how": "General guide (category-common) + original listing (under-eye tip)"
       }
     }
   ]

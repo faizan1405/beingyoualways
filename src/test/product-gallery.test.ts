@@ -11,7 +11,8 @@ type Raw = { id: string; slug: string; variants: { id: string; price: number; co
 const raw = imported as unknown as Raw[];
 const bySlug = (s: string) => products.find((p) => p.slug === s)!;
 const ready = raw.filter((r) => infographicFor(r.slug)?.status === "ready");
-const drafts = raw.filter((r) => infographicFor(r.slug)?.status !== "ready");
+const shown = raw.filter((r) => ["ready", "preview"].includes(infographicFor(r.slug)?.status ?? ""));
+const drafts = raw.filter((r) => infographicFor(r.slug)?.status === "draft");
 
 describe("product infographic galleries", () => {
   it("has a four-slide infographic set for all 20 catalogue products", () => {
@@ -19,9 +20,9 @@ describe("product infographic galleries", () => {
     for (const r of raw) expect(infographicImages(r.slug)).toHaveLength(4);
   });
 
-  it("verified products show exactly the four slides: product photo, who, inside, how", () => {
-    expect(ready.length).toBeGreaterThan(0);
-    for (const r of ready) {
+  it("ready and preview products show exactly the four slides: product photo, who, inside, how", () => {
+    expect(shown).toHaveLength(18);
+    for (const r of shown) {
       const imgs = bySlug(r.slug).images ?? [];
       expect(imgs).toHaveLength(4);
       expect(imgs.map(galleryView)).toEqual([...INFOGRAPHIC_VIEWS]);
@@ -40,14 +41,42 @@ describe("product infographic galleries", () => {
     }
   });
 
-  it("a set goes live only when marked ready", () => {
+  it("a set reaches shoppers only when it is ready or in preview", () => {
     expect(catalogueImages("face-serum", () => true)).toEqual(infographicImages("face-serum"));
     expect(catalogueImages("face-serum", () => false)).toEqual(galleryImages("face-serum"));
   });
 
-  it("the Face Serum set is held as a draft until its directions are approved", () => {
-    expect(infographicFor("face-serum")?.status).toBe("draft");
-    expect(infographicFor("face-serum")?.missing.join(" ")).toMatch(/How to use/);
+  it("keeps the four client-verified sets ready with their own directions", () => {
+    expect(ready.map((r) => r.slug).sort()).toEqual(["aloe-vera-gel", "eyebrow-definer", "liquid-eyeliner", "true-base-liquid-foundation"]);
+    for (const r of ready) expect(infographicFor(r.slug)?.guide).toBe("verified");
+    expect(infographicFor("aloe-vera-gel")?.steps.map((x) => x.text)).toEqual(["Dispense onto the palm of your hand.", "Apply liberally to the skin or hair."]);
+  });
+
+  it("general How to use guides are flagged as pending client approval, never approved", () => {
+    const general = infographics.filter((x) => x.guide === "general");
+    expect(general).toHaveLength(14);
+    for (const g of general) {
+      expect(g.status).toBe("preview");
+      expect(g.missing.join(" ")).toMatch(/approval/i);
+    }
+  });
+
+  it("general guides invent no amounts or timings (only the face mask uses the client sheet's times)", () => {
+    for (const g of infographics.filter((x) => x.guide === "general" && x.slug !== "face-mask")) {
+      for (const st of g.steps) expect(st.text).not.toMatch(/\d/);
+    }
+    expect(infographicFor("face-mask")?.steps.map((x) => x.text).join(" ")).toMatch(/10 min for women, 15–20 min for men/);
+  });
+
+  it("the face serum guide follows the brief: cleanse, small amount, spread, moisturiser", () => {
+    expect(infographicFor("face-serum")?.steps.map((x) => x.title)).toEqual(["Cleanse", "Apply", "Spread", "Moisturise"]);
+  });
+
+  it("wax powder sets stay drafts while the preparation method is unknown", () => {
+    for (const slug of ["herbal-wax-powder", "wax-powder-aloe-vera-gel-combo"]) {
+      expect(infographicFor(slug)?.status).toBe("draft");
+      expect(infographicFor(slug)?.missing.join(" ")).toMatch(/prepare/i);
+    }
   });
 
   it("keeps the previous four photos and the originals as backup, not deleted", () => {

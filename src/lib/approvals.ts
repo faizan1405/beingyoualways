@@ -66,6 +66,8 @@ export function buildApprovalChecklist({
   const flagged = flaggedPoints();
   const fdaCount = flagged.filter((f) => f.flag === "certification").length;
   const draftInfo = live.filter((p) => infographicFor(p.slug)?.status !== "ready");
+  const generalInfo = live.filter((p) => infographicFor(p.slug)?.status === "preview");
+  const heldInfo = live.filter((p) => { const s = infographicFor(p.slug)?.status; return s !== "ready" && s !== "preview"; });
 
   return [
     {
@@ -149,9 +151,9 @@ export function buildApprovalChecklist({
     {
       id: "infographics", title: "Product infographic slides", status: productStatus(draftInfo.length, n),
       current: draftInfo.length
-        ? `${n - draftInfo.length} of ${n} live products show the approved four-slide infographics. ${draftInfo.length} sets are drafts (admin only) — those products keep their previous photos.`
+        ? `${n - draftInfo.length} of ${n} live products have client-verified infographics. ${generalInfo.length} show a general How to use guide (pending client approval). ${heldInfo.length} sets are drafts (admin only) — those products keep their previous photos.`
         : `All ${n} live products show the approved four-slide infographics.`,
-      needed: "For each draft: client-approved \"How to use\" steps, and confirmation of the flagged ingredients or sizes (listed on each product's edit page).",
+      needed: "Approve or correct each general How to use guide (or send the manufacturer's directions), give the wax powder preparation steps, and confirm the flagged ingredients or sizes (listed on each product's edit page).",
       affects: "Product page galleries (Who is it for?, What's inside?, How to use).", missing: names(draftInfo), adminLink: "/admin/products",
     },
     {

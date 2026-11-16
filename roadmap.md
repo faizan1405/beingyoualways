@@ -1,11 +1,8 @@
-# Roadmap — approved infographic gallery roll-out (all 20 products)
+# Roadmap — complete all 20 product infographics (general How to Use guides)
 
-- [x] 1. Shared master template (generator) from the approved Face Serum slides; per-product content file with sources.
-- [x] 2. Supporting images (small ingredient photos, application photos) — used only inside slides.
-- [x] 3. Build + render 4 slides for all 20 products (01 = existing clean product photo).
-- [x] 4. Face Serum: Aloe Vera / Hyaluronic Acid and unconfirmed skin types removed; directions stay draft.
-- [x] 5. Website: 4 fully verified products show the infographic slides; 16 drafts stay admin-only and keep the previous gallery; nothing deleted.
-- [x] 6. Admin: infographic panel with status + missing information; checklist item.
-- [x] 7. Tests, typecheck, build; desktop + mobile checks.
-- [x] 8. Report + contact sheets.
-- [ ] 9. Waiting on client: "How to use" steps for 16 products and the ingredient/size confirmations listed in the report.
+- [ ] 1. Write conservative general How to Use steps for the 16 draft products (client sheet details where they exist); wax powder + wax combo stay draft (preparation method unknown).
+- [ ] 2. New status "preview": general-guide sets show in the storefront preview; flagged "General guide — pending client approval" in admin; never marked client-approved.
+- [ ] 3. Application photos for the new steps (no packaging, no text) + rebuild slide 04 with the approved design.
+- [ ] 4. Wire shop/admin/checklist; tests; desktop + mobile checks (zoom, swipe, prices, cart unchanged).
+- [ ] 5. Report: which products have 4 complete slides, which still need exact manufacturer directions.
+- [ ] 6. Waiting on client: approve the general guides; wax preparation steps; earlier ingredient/size confirmations.

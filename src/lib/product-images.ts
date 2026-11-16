@@ -5,9 +5,9 @@
 //   (1600×1600). The genuine packaging is composited as a locked cut-out — labels are
 //   never regenerated. Texture shots show no packaging. Kept as backup.
 // - Infographic set: 01-hero (above) + src/assets/products/infographics/<slug>/02-who,
-//   03-inside, 04-how .webp, rendered from design/gallery-slides. Shoppers see it only when
-//   the set is "ready" in src/content/infographics.json.
-import { isInfographicReady } from "@/content/infographics";
+//   03-inside, 04-how .webp, rendered from design/gallery-slides. Shoppers see it when the set
+//   is "ready" or "preview" (general How to use guide) in src/content/infographics.json.
+import { isInfographicShown } from "@/content/infographics";
 
 const files = import.meta.glob<string>("../assets/products/*.webp", { eager: true, import: "default" });
 const galleryFiles = import.meta.glob<string>("../assets/products/gallery/*/*.webp", { eager: true, import: "default" });
@@ -70,10 +70,10 @@ export function infographicImages(slug: string): string[] {
 }
 
 /**
- * Photos a catalogue product starts with: the approved infographic set when its information is
- * fully verified; otherwise the previous four-image gallery, else the originals.
+ * Photos a catalogue product starts with: the infographic set when it is ready or in preview;
+ * otherwise (drafts) the previous four-image gallery, else the originals.
  */
-export function catalogueImages(slug: string, ready: (slug: string) => boolean = isInfographicReady): string[] {
+export function catalogueImages(slug: string, ready: (slug: string) => boolean = isInfographicShown): string[] {
   const i = infographicImages(slug);
   if (i.length === 4 && ready(slug)) return i;
   const g = galleryImages(slug);
