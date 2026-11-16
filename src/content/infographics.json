@@ -1,1614 +1,1809 @@
 {
-  "_about": "Four-slide product infographics (01 product photo, 02 Who is it for?, 03 What's inside?, 04 How to use). Text comes only from the genuine pack, the client's product sheet (Product details.docx), the original beingyoualways.com listing, or — for how.guide 'general' — conservative category-common steps. status 'ready' = every slide verified by the client; 'preview' = slides 02–03 verified, slide 04 is a general guide pending client approval (shown in the storefront preview, flagged in admin); 'draft' = admin only, previous gallery stays public. Source layouts: design/gallery-slides (run build.py).",
-  "products": [
+ "_about": "Four-slide product galleries (01 product photo, 02 Who is it for?, 03 What's inside?, 04 How to use). Text comes, in order, from the genuine pack photos, the client's product sheet, the original beingyoualways.com listing, then (how.guide 'general') a common category guide the client allowed where exact directions are missing. status 'ready' = shown to shoppers; 'draft' = admin only. 'photos' records which client photos were used. Source layouts: design/gallery-slides (run build.py).",
+ "products": [
+  {
+   "slug": "true-base-liquid-foundation",
+   "status": "ready",
+   "eyebrow": "Liquid Foundation · Vitamin E",
+   "who": [
     {
-      "slug": "true-base-liquid-foundation",
-      "status": "ready",
-      "eyebrow": "Liquid Foundation · Vitamin E",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "An even-toned look",
-            "Natural to full-glam coverage"
-          ]
-        },
-        {
-          "label": "Shades",
-          "chips": [
-            "Peanut",
-            "Walnut",
-            "Almond",
-            "Cashew"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Buildable coverage",
-            "Lightweight, breathable texture",
-            "No cracking or patchiness"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "The key ingredient in this formula.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Enriched with Vitamin E for skin nourishment."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Lightweight & breathable",
-            "Radiant matte-glow finish",
-            "Blends evenly"
-          ]
-        }
-      },
-      "how": {
-        "steps": [
-          {
-            "title": "Take",
-            "text": "Take 1–2 pumps on your fingertips or a makeup sponge.",
-            "img": "shared/img/app-foundation-fingertips.jpg",
-            "pos": "60% 40%"
-          },
-          {
-            "title": "Blend",
-            "text": "Dab and blend evenly across face and neck.",
-            "img": "shared/img/app-foundation-blend.jpg",
-            "pos": "40% 45%"
-          },
-          {
-            "title": "Build",
-            "text": "Build coverage as desired, natural or full glam.",
-            "img": "gallery:true-base-liquid-foundation/03-texture",
-            "pos": "55% 50%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "True Base Liquid Foundation and your fingertips or a makeup sponge."
-        },
-        "guide": "verified"
-      },
-      "missing": [],
-      "uncertain": [
-        "Waterproof and \"all skin types\" are on the listing but need evidence, so they are left off."
-      ],
-      "sources": {
-        "who": "Original listing (Key Benefits, Why Choose) + client sheet; shades = product variants",
-        "inside": "Client sheet (Vitamin E) + listing",
-        "how": "Original listing \"How to Apply\" (all three steps)"
-      }
+     "label": "Made for",
+     "chips": [
+      "An even-toned look",
+      "Natural to full-glam coverage"
+     ]
     },
     {
-      "slug": "eyebrow-definer",
-      "status": "ready",
-      "eyebrow": "Eyebrow Definer · Vitamin E",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Natural, hair-like strokes",
-            "Bold definition"
-          ]
-        },
-        {
-          "label": "Wear it for",
-          "chips": [
-            "Everyday looks",
-            "Glam looks"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Precision tip shapes and defines",
-            "Glides on without tugging",
-            "Natural-looking finish"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "The key ingredient in this formula.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Infused with Vitamin E for added nourishment."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Smooth glide formula",
-            "Ultra-precise tip",
-            "Natural-looking finish"
-          ]
-        }
-      },
-      "how": {
-        "steps": [
-          {
-            "title": "Stroke",
-            "text": "Use short, light strokes to mimic natural brow hairs.",
-            "img": "shared/img/app-brow-strokes.jpg",
-            "pos": "55% 30%"
-          },
-          {
-            "title": "Fill",
-            "text": "Fill in sparse areas and shape the arch.",
-            "img": "gallery:eyebrow-definer/03-texture",
-            "pos": "50% 45%"
-          },
-          {
-            "title": "Blend",
-            "text": "Blend gently with a spoolie, if desired, for a softer look.",
-            "img": "shared/img/app-brow-spoolie.jpg",
-            "pos": "45% 35%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Eyebrow Definer, plus a spoolie if desired."
-        },
-        "guide": "verified"
-      },
-      "missing": [],
-      "uncertain": [
-        "Size is not confirmed, so no size is shown. Smudge-proof / long-lasting need evidence and are left off."
-      ],
-      "sources": {
-        "who": "Original listing (Why You'll Love It)",
-        "inside": "Client sheet (Vitamin E) + listing",
-        "how": "Original listing \"How to Use\" (all three steps)"
-      }
+     "label": "Shades",
+     "chips": [
+      "Peanut",
+      "Walnut",
+      "Almond",
+      "Cashew"
+     ]
     },
     {
-      "slug": "liquid-eyeliner",
-      "status": "ready",
-      "eyebrow": "Liquid Eyeliner · 6 ml",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Sharp wings",
-            "Soft flicks",
-            "Thin to thick lines"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Bold black finish in one swipe",
-            "Quick drying",
-            "Precision tip brush"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "Ingredient highlights from the product listing.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Gentle on your lids, nourishing for your skin."
-          },
-          {
-            "name": "Film-forming Agents",
-            "img": "gallery:liquid-eyeliner/03-texture",
-            "pos": "45% 45%",
-            "zoom": 1.6,
-            "desc": "Help the line stay in place."
-          },
-          {
-            "name": "Natural Waxes",
-            "img": "shared/img/ing-wax.jpg",
-            "desc": "For a smooth, glide-on texture."
-          }
-        ]
-      },
-      "how": {
-        "steps": [
-          {
-            "title": "Shake",
-            "text": "Shake well before use.",
-            "img": "pack",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Apply",
-            "text": "Apply along the lash line using the fine-tip brush.",
-            "img": "shared/img/app-liner-lashline.jpg",
-            "pos": "35% 50%"
-          },
-          {
-            "title": "Dry",
-            "text": "Let it dry for a few seconds.",
-            "img": "shared/img/app-liner-finished.jpg",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Layer",
-            "text": "For a bolder look, layer once more.",
-            "img": "gallery:liquid-eyeliner/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Liquid Eyeliner with its fine-tip brush."
-        },
-        "guide": "verified"
-      },
-      "missing": [],
-      "uncertain": [
-        "Not in the client product sheet; all facts are from the original listing. Waterproof, 12-hour wear and \"dermatologically tested\" need evidence and are left off."
-      ],
-      "sources": {
-        "who": "Original listing (Why You'll Love It); 6 ml from listing + variant",
-        "inside": "Original listing \"Ingredients Highlight\"",
-        "how": "Original listing \"How to Use\" (all four steps)"
-      }
-    },
-    {
-      "slug": "aloe-vera-gel",
-      "status": "ready",
-      "eyebrow": "Aloe Vera Gel · 200 g",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Skin",
-            "Hair",
-            "Everyday use"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Soothes and nourishes",
-            "Hydrates and refreshes",
-            "Gentle on skin and hair"
-          ]
-        },
-        {
-          "label": "Free from",
-          "chips": [
-            "Parabens",
-            "Sulphates",
-            "Silicones",
-            "Mineral oil"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As printed on the 200 g jar.",
-        "rows": [
-          {
-            "name": "Aloe Vera",
-            "img": "shared/img/ing-aloe.jpg",
-            "desc": "Aloe Barbadensis Leaf Extract, the base of the gel."
-          },
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Enriched with Vitamin E, as the label states."
-          }
-        ],
-        "list": {
-          "label": "Full ingredients",
-          "text": "Aqua, Aloe Barbadensis Leaf Extract, Vitamin E, Glycerin, Carbomer, Sodium Benzoate."
-        }
-      },
-      "how": {
-        "steps": [
-          {
-            "title": "Dispense",
-            "text": "Dispense onto the palm of your hand.",
-            "img": "shared/img/app-gel-palm.jpg",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Apply",
-            "text": "Apply liberally to the skin or hair.",
-            "img": "gallery:wax-powder-aloe-vera-gel-combo/03-texture",
-            "pos": "45% 50%"
-          }
-        ],
-        "finish": {
-          "label": "Caution",
-          "text": "Store in a cool and dry place."
-        },
-        "guide": "verified"
-      },
-      "missing": [],
-      "uncertain": [
-        "The front says \"with Tea Tree\" but Tea Tree Oil is not in the printed ingredient list, so it is left off the slide until the client confirms.",
-        "The ingredient list prints \"Vitamin E, E\" (twice); shown once."
-      ],
-      "sources": {
-        "who": "200 g jar label (Gentle on skin & hair for everyday use; Soothes, Nourishes, Hydrates & Refreshes; No Parabens, Sulphates, Silicones, Mineral Oil)",
-        "inside": "200 g jar ingredient list",
-        "how": "200 g jar \"Directions to use\" + \"Caution\""
-      }
-    },
-    {
-      "slug": "face-serum",
-      "status": "preview",
-      "eyebrow": "Face Serum · 30 ml",
-      "pack": "shared/packs/face-serum-bottle.png",
-      "badge": "Plant based",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Pigmentation & spots",
-            "Uneven skin tone",
-            "Dark circles"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Evens the look of skin tone",
-            "Brightens for a natural glow",
-            "Overnight hydration"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "Three hero actives, as printed on the pack.",
-        "rows": [
-          {
-            "name": "Mulberry Extract",
-            "img": "shared/img/ing-mulberry.jpg",
-            "desc": "Plant extract for the look of dark spots and uneven tone."
-          },
-          {
-            "name": "Alpha Arbutin",
-            "pct": "2%",
-            "img": "shared/img/ing-actives.jpg",
-            "pos": "35% 40%",
-            "zoom": 1.5,
-            "desc": "Helps reduce the look of dark spots and pigmentation."
-          },
-          {
-            "name": "Niacinamide",
-            "pct": "3%",
-            "img": "shared/img/ing-actives.jpg",
-            "pos": "70% 70%",
-            "desc": "Vitamin B3. Helps even tone and supports the moisture barrier."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Cleanse",
-            "text": "Cleanse your face and pat it dry.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "50% 40%"
-          },
-          {
-            "title": "Apply",
-            "text": "Take a small amount.",
-            "img": "shared/img/app-serum-drops.jpg",
-            "pos": "50% 45%"
-          },
-          {
-            "title": "Spread",
-            "text": "Spread gently over the face.",
-            "img": "shared/img/app-serum-pat.jpg",
-            "pos": "55% 40%"
-          },
-          {
-            "title": "Moisturise",
-            "text": "Follow with your moisturiser.",
-            "img": "shared/img/app-moisturiser.jpg",
-            "pos": "40% 45%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Face Serum and your usual moisturiser."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Skin types (dull/dry, acne-prone) came from old website tags — removed until confirmed.",
-        "Aloe Vera and Hyaluronic Acid are on the old listing but not on the new pack — removed until confirmed.",
-        "Anti-aging is printed on the pack but needs evidence — left off."
-      ],
-      "sources": {
-        "who": "Pack label (Even Skin Tone, Pigmentation, Brightening, Dark Circle; Plant Based) + client sheet (glow, overnight hydration)",
-        "inside": "New silver-collar pack (Mulberry Extract, Alpha Arbutin 2%, Niacinamide 3%)",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "tomato-face-wash",
-      "status": "preview",
-      "eyebrow": "Tomato Face Wash · 100 ml",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "De-tan care",
-            "Skin brightening"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Removes dirt and excess oil",
-            "Helps brighten skin",
-            "Leaves a fresh, clean feel"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As named on the pack and listing.",
-        "rows": [
-          {
-            "name": "Tomato",
-            "img": "shared/img/ing-tomato.jpg",
-            "desc": "The natural goodness of tomatoes."
-          },
-          {
-            "name": "Fruit AHA",
-            "img": "shared/img/ing-tomato.jpg",
-            "pos": "75% 55%",
-            "zoom": 1.8,
-            "desc": "Fruit-derived acids, printed on the pack."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Wet",
-            "text": "Wet your face with water.",
-            "img": "shared/img/app-wet-hands.jpg",
-            "pos": "55% 55%"
-          },
-          {
-            "title": "Massage",
-            "text": "Gently massage the cleanser over your face.",
-            "img": "shared/img/app-face-lather.jpg",
-            "pos": "55% 45%"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse thoroughly with water.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "45% 45%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Tomato Face Wash and water."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Not described in the client product sheet."
-      ],
-      "sources": {
-        "who": "Pack (Skin Brightening) + listing",
-        "inside": "Pack (Infused with Fruit AHA) + listing",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "face-wash",
-      "status": "preview",
-      "eyebrow": "Daisy Face Wash · Provitamin B5",
-      "badge": "Sulphate free",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Deep cleansing",
-            "A brighter complexion"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Deeply cleanses facial skin",
-            "Brightens complexion",
-            "Provides hydration"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As printed on the pack.",
-        "rows": [
-          {
-            "name": "Daisy Flower Extract",
-            "img": "shared/img/ing-daisy.jpg",
-            "desc": "Rich in antioxidants; helps even out skin tone."
-          },
-          {
-            "name": "Provitamin B5",
-            "img": "shared/img/ing-clear-gel.jpg",
-            "desc": "Helps keep skin soft and hydrated."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Wet",
-            "text": "Wet your face with water.",
-            "img": "shared/img/app-wet-hands.jpg",
-            "pos": "55% 55%"
-          },
-          {
-            "title": "Massage",
-            "text": "Gently massage the cleanser over your face.",
-            "img": "gallery:face-wash/03-texture",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse thoroughly with water.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "45% 45%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Daisy Face Wash and water."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions.",
-        "Size: pack prints 100 ML, the shop still says \"to be confirmed\"."
-      ],
-      "uncertain": [],
-      "sources": {
-        "who": "Client sheet + pack (Deeply Hydrating and Sulphate Free)",
-        "inside": "Pack (Daisy Flower Extract, with Provitamin B5) + listing",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "toner",
-      "status": "preview",
-      "eyebrow": "Fennel Toner · Niacinamide",
-      "badge": "Sulphate free",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Visible pores",
-            "Skin texture"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Minimises the look of pores",
-            "Refreshes and hydrates",
-            "Adds a natural glow"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As named on the pack and client sheet.",
-        "rows": [
-          {
-            "name": "Fennel Extract",
-            "img": "shared/img/ing-fennel.jpg",
-            "desc": "Plant extract with a calming aroma."
-          },
-          {
-            "name": "Niacinamide",
-            "img": "shared/img/ing-actives.jpg",
-            "pos": "70% 70%",
-            "desc": "Vitamin B3, for a refined-looking skin texture."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Cleanse",
-            "text": "Start with a freshly cleansed face.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "45% 45%"
-          },
-          {
-            "title": "Apply",
-            "text": "Apply the toner gently to the face.",
-            "img": "shared/img/app-toner-cotton.jpg",
-            "pos": "45% 45%"
-          },
-          {
-            "title": "Absorb",
-            "text": "Let it absorb into the skin.",
-            "img": "shared/img/app-serum-pat.jpg",
-            "pos": "55% 40%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Fennel Toner, plus a cotton pad if you like."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "The old listing also names Aloe Vera; the sheet and pack do not — left off until confirmed."
-      ],
-      "sources": {
-        "who": "Client sheet",
-        "inside": "Pack (Fennel Toner with Niacinamide) + client sheet",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "face-mask",
-      "status": "preview",
-      "eyebrow": "Face Mask · Mexican Cactus",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "De-tan",
-            "Skin brightening"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Deeply hydrates",
-            "Brightens for a healthy glow",
-            "Smoother-feeling skin"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As printed on the pack.",
-        "rows": [
-          {
-            "name": "Mexican Cactus Extract",
-            "img": "shared/img/ing-cactus.jpg",
-            "desc": "Rich in moisture and antioxidants."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Cream mask",
-            "No peeling"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply evenly to clean skin, avoiding the eyes.",
-            "img": "shared/img/app-mask-brush.jpg",
-            "pos": "55% 45%"
-          },
-          {
-            "title": "Wait",
-            "text": "Leave on 10 min for women, 15–20 min for men.",
-            "tile": "10–20",
-            "tileSub": "minutes"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse off gently with water.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "45% 45%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Face Mask, a brush if you like, and water."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "\"No peeling required – gentle on the skin\" is a safety claim that needs evidence.",
-        "Rinse-off removal is assumed (the sheet says no peeling is needed) — confirm."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Pack (with Mexican Cactus Extract) + listing",
-        "how": "General guide (category-common) + client sheet (leave-on time)"
-      }
-    },
-    {
-      "slug": "volcanic-scrub",
-      "status": "preview",
-      "eyebrow": "Volcanic Scrub · 200 g",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Tan removal",
-            "Skin brightening"
-          ]
-        },
-        {
-          "label": "Use on",
-          "chips": [
-            "Face",
-            "Body"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Gentle exfoliation with fine particles",
-            "Deeply cleanses",
-            "Helps detan and brighten"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As named on the pack and client sheet.",
-        "rows": [
-          {
-            "name": "Korean Volcanic Sand",
-            "img": "shared/img/ing-volcanic-sand.jpg",
-            "desc": "Fine volcanic particles for gentle exfoliation."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Fine scrub particles",
-            "Korean technology"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply to damp skin.",
-            "img": "gallery:volcanic-scrub/03-texture",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Massage",
-            "text": "Massage gently, without harsh rubbing.",
-            "img": "shared/img/app-scrub-massage.jpg",
-            "pos": "55% 55%"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse off with water.",
-            "img": "shared/img/app-serum-cleanse.jpg",
-            "pos": "45% 45%"
-          }
-        ],
-        "finish": {
-          "label": "Good to know",
-          "text": "Use twice a week, on face or body."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [],
-      "sources": {
-        "who": "Client sheet + pack (Skin Brightening & Tan Removal)",
-        "inside": "Client sheet + pack (Korean Technology)",
-        "how": "General guide (category-common) + client sheet (twice a week, face and body)"
-      }
-    },
-    {
-      "slug": "herbal-wax-powder",
-      "status": "draft",
-      "eyebrow": "Herbal Body Wax Powder",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Hair removal at home"
-          ]
-        },
-        {
-          "label": "Use on",
-          "chips": [
-            "Legs",
-            "Arms"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Removes unwanted hair and dead skin",
-            "Removes hair at the root",
-            "Leaves skin smooth and soft"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As named on the pack and client sheet.",
-        "rows": [
-          {
-            "name": "Green Apple Extract",
-            "img": "shared/img/ing-green-apple.jpg",
-            "desc": "The base of this herbal formula."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Herbal powder",
-            "For use at home"
-          ]
-        }
-      },
-      "how": {
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply against the direction of hair growth.",
-            "img": "shared/img/app-wax-apply.jpg",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Wait",
-            "text": "Leave it on for 15 minutes.",
-            "tile": "15",
-            "tileSub": "minutes"
-          },
-          {
-            "title": "Remove",
-            "text": "Wipe with a wet cloth, then rinse.",
-            "img": "shared/img/app-wax-wipe.jpg",
-            "pos": "45% 50%"
-          }
-        ],
-        "finish": {
-          "label": "Before you start",
-          "text": "A patch test is recommended before use."
-        }
-      },
-      "missing": [
-        "How to prepare the powder before applying (for example mixing with water and how much)."
-      ],
-      "uncertain": [
-        "\"Painless and irritation-free\" needs evidence — left off.",
-        "Size not confirmed."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Pack (with green apple) + client sheet",
-        "how": "Client sheet + listing (patch test)"
-      }
-    },
-    {
-      "slug": "wax-powder-aloe-vera-gel-combo",
-      "status": "draft",
-      "eyebrow": "Wax Powder + Aloe Vera Gel",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Hair removal at home"
-          ]
-        },
-        {
-          "label": "In the set",
-          "chips": [
-            "Herbal Wax Powder",
-            "Aloe Vera Gel"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Removes unwanted hair and dead skin",
-            "Gel soothes and hydrates skin"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "Key ingredients of each product in the set.",
-        "rows": [
-          {
-            "name": "Green Apple Extract",
-            "img": "shared/img/ing-green-apple.jpg",
-            "desc": "Herbal Wax Powder: the base of the formula."
-          },
-          {
-            "name": "Aloe Vera",
-            "img": "shared/img/ing-aloe.jpg",
-            "desc": "Aloe Vera Gel: Aloe Barbadensis Leaf Extract."
-          },
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Aloe Vera Gel: enriched with Vitamin E."
-          }
-        ]
-      },
-      "how": {
-        "steps": [],
-        "known": [
-          "Wax: apply against hair growth, wait 15 minutes, wipe with a wet cloth, then rinse.",
-          "Gel: dispense onto the palm of your hand and apply liberally to the skin."
-        ]
-      },
-      "missing": [
-        "How to prepare the wax powder.",
-        "Confirm the order of use (wax first, then gel)."
-      ],
-      "uncertain": [
-        "Set size not confirmed."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Wax pack + client sheet; gel jar label",
-        "how": "Client sheet (wax) + jar label (gel)"
-      }
-    },
-    {
-      "slug": "hair-oil",
-      "status": "preview",
-      "eyebrow": "Moringa Hair Oil · 110 ml",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Hair and scalp care"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Nourishes hair and scalp",
-            "Non-sticky texture",
-            "No hair wash needed after use"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "A blend of plant oils.",
-        "rows": [
-          {
-            "name": "Organic Moringa Oil",
-            "img": "shared/img/ing-moringa.jpg",
-            "desc": "Packed with vitamins and essential fatty acids."
-          },
-          {
-            "name": "Pumpkin Seed Oil",
-            "img": "shared/img/ing-pumpkin-seeds.jpg",
-            "desc": "High in zinc and essential fatty acids."
-          },
-          {
-            "name": "Olive Oil",
-            "img": "shared/img/ing-olive.jpg",
-            "desc": "Deep-conditioning; keeps hair soft."
-          }
-        ],
-        "also": {
-          "label": "Also with",
-          "items": [
-            "Jojoba Oil",
-            "Almond Oil",
-            "Wheatgrass Oil"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply to the scalp or hair.",
-            "img": "shared/img/app-oil-scalp.jpg",
-            "pos": "50% 35%"
-          },
-          {
-            "title": "Massage",
-            "text": "Massage gently into the scalp.",
-            "img": "shared/img/app-scalp-massage.jpg",
-            "pos": "50% 30%"
-          },
-          {
-            "title": "Leave in",
-            "text": "No hair wash needed after applying.",
-            "img": "gallery:hair-oil/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Moringa Hair Oil and your fingertips."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Hair fall / hair growth claims (printed on the box) need evidence — left off.",
-        "Size: pack prints 110 mL; shop still says \"to be confirmed\"."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Client sheet (Moringa, Pumpkin Seed, Olive) + listing (Jojoba, Almond, Wheatgrass)",
-        "how": "General guide (category-common) + client sheet (no hair wash needed)"
-      }
-    },
-    {
-      "slug": "hair-mask",
-      "status": "preview",
-      "eyebrow": "Hair Mask · 200 g",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Dry, brittle hair",
-            "Frizz"
-          ]
-        },
-        {
-          "label": "Hair types",
-          "chips": [
-            "Dry, damaged hair",
-            "Colour-treated hair"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Nourishes and smoothens",
-            "Tames frizz",
-            "Deeply hydrates"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As listed in the client product sheet.",
-        "rows": [
-          {
-            "name": "Rice",
-            "img": "shared/img/ing-rice.jpg",
-            "desc": "Part of the nourishing blend."
-          },
-          {
-            "name": "Flaxseed",
-            "img": "shared/img/ing-flaxseed.jpg",
-            "desc": "Seeds rich in natural oils."
-          },
-          {
-            "name": "Vegetable Carotene",
-            "img": "shared/img/ing-carotene.jpg",
-            "desc": "Plant-based pigment and nutrient."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply to clean, damp hair.",
-            "img": "shared/img/app-hairmask-apply.jpg",
-            "pos": "60% 55%"
-          },
-          {
-            "title": "Leave on",
-            "text": "Leave on for the time stated on the pack.",
-            "img": "gallery:hair-mask/03-texture",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse out thoroughly with water.",
-            "img": "shared/img/app-wet-hands.jpg",
-            "pos": "55% 55%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Hair Mask and freshly washed, damp hair."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Sheet says Vegetable Carotene, the red 100 g jar prints Vegetable Keratin — confirm the 200 g formula."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Client sheet (to be confirmed)",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "shampoo",
-      "status": "preview",
-      "eyebrow": "Shampoo",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Smoother hair"
-          ]
-        },
-        {
-          "label": "Free from",
-          "chips": [
-            "Sulphates",
-            "Parabens"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Smoothens hair texture",
-            "Moisturises hair"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As listed in the client product sheet.",
-        "rows": [
-          {
-            "name": "Canadian Maple Tree Extract",
-            "img": "shared/img/ing-maple.jpg",
-            "desc": "Named in the client product sheet."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Wet",
-            "text": "Wet your hair with water.",
-            "img": "shared/img/app-wet-hands.jpg",
-            "pos": "55% 55%"
-          },
-          {
-            "title": "Massage",
-            "text": "Apply shampoo and gently massage the scalp.",
-            "img": "shared/img/app-scalp-massage.jpg",
-            "pos": "50% 30%"
-          },
-          {
-            "title": "Rinse",
-            "text": "Rinse thoroughly with water.",
-            "img": "gallery:shampoo/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Shampoo and water."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Formula conflict: sheet says Canadian Maple Tree Extract, the old listing and the new 100 ml photo say AHA + Provitamin B5. Confirm which formula is sold."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Client sheet (uncertain)",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "sunscreen",
-      "status": "preview",
-      "eyebrow": "Moisturizer & Sunscreen · 50 g",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Everyday moisture",
-            "Daily routine"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Provides lasting moisture",
-            "All-day hydration",
-            "Lightweight lotion"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "As printed on the pack.",
-        "rows": [
-          {
-            "name": "Red Algae Extract",
-            "img": "shared/img/ing-red-algae.jpg",
-            "desc": "Mexican Ocean Red Algae Extract, a marine plant extract."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply evenly to exposed skin before sun exposure.",
-            "img": "shared/img/app-sunscreen-face.jpg",
-            "pos": "50% 40%"
-          },
-          {
-            "title": "Reapply",
-            "text": "Reapply as directed on the pack, especially when outdoors.",
-            "img": "shared/img/app-sun-outdoors.jpg",
-            "pos": "50% 45%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Moisturizer & Sunscreen — keep it with you when outdoors."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "SPF 50+ / PA+++, water resistance and pollution protection need test evidence — left off."
-      ],
-      "sources": {
-        "who": "Client sheet + listing",
-        "inside": "Pack (Red Algae Extract) + client sheet",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "kajal",
-      "status": "preview",
-      "eyebrow": "Kajal · Vitamin E",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Bold, defined eyes"
-          ]
-        },
-        {
-          "label": "Wear it for",
-          "chips": [
-            "Everyday wear",
-            "Bold glam looks"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Intense jet-black colour",
-            "Smooth application, no tugging"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "The key ingredient in this formula.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Enriched with Vitamin E for nourishment and comfort."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Intense pigment",
-            "Smooth, easy glide"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply carefully along the lash line.",
-            "img": "shared/img/app-kajal.jpg",
-            "pos": "45% 45%"
-          },
-          {
-            "title": "Take care",
-            "text": "Avoid direct contact with the eyes.",
-            "img": "gallery:kajal/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Kajal and a mirror."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Smudge-proof / waterproof need evidence — left off. Size not confirmed."
-      ],
-      "sources": {
-        "who": "Listing + client sheet",
-        "inside": "Client sheet + listing",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "mascara",
-      "status": "preview",
-      "eyebrow": "Mascara · Vitamin E",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Bold, defined lashes"
-          ]
-        },
-        {
-          "label": "Wear it for",
-          "chips": [
-            "Everyday wear",
-            "Party glam"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Jet-black finish",
-            "No clumping or flaking",
-            "Easy to apply and remove"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "Key ingredients from the product listing.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Nourishes and protects lashes."
-          },
-          {
-            "name": "Natural Wax Blend",
-            "img": "shared/img/ing-wax.jpg",
-            "desc": "For smooth application and definition."
-          },
-          {
-            "name": "Polymers",
-            "img": "gallery:mascara/03-texture",
-            "pos": "45% 40%",
-            "zoom": 1.4,
-            "desc": "For long-lasting wear."
-          }
-        ]
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Brush",
-            "text": "Brush gently from the lash roots toward the tips.",
-            "img": "shared/img/app-mascara.jpg",
-            "pos": "50% 45%"
-          },
-          {
-            "title": "Dry",
-            "text": "Allow to dry.",
-            "img": "gallery:mascara/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "Caution",
-          "text": "Avoid direct contact with the eyes."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "The listing calls it a \"Mascara & Eyeliner Combo\" but the product is a single mascara — confirm.",
-        "Size not confirmed."
-      ],
-      "sources": {
-        "who": "Original listing",
-        "inside": "Original listing \"Key Ingredients\"",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "liquid-matte-lipstick",
-      "status": "preview",
-      "eyebrow": "Liquid Matte Lipstick · Vitamin E",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "High-impact colour",
-            "Meetings to nights out"
-          ]
-        },
-        {
-          "label": "Shades",
-          "chips": [
-            "Blush Bloom",
-            "Classic Cherry Red",
-            "Dusty Rose",
-            "Everyday Muse",
-            "Love Stain",
-            "Rust Desire"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Glides on smoothly",
-            "Dries to a velvety matte"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "The key ingredient in this formula.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Infused with Vitamin E for added nourishment."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Velvety matte finish",
-            "Feather-light feel",
-            "Paraben-free"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply to clean, dry lips.",
-            "img": "shared/img/app-lipstick-apply.jpg",
-            "pos": "45% 45%"
-          },
-          {
-            "title": "Spread",
-            "text": "Spread the colour evenly.",
-            "img": "gallery:liquid-matte-lipstick/03-texture",
-            "pos": "50% 50%"
-          },
-          {
-            "title": "Set",
-            "text": "Allow it to set.",
-            "img": "shared/img/app-lips-finished.jpg",
-            "pos": "55% 35%"
-          }
-        ],
-        "finish": {
-          "label": "You'll need",
-          "text": "Liquid Matte Lipstick in your chosen shade."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [
-        "Shade name is spelled \"Clasic Cherry Red\" in the shop — the slide uses \"Classic\"; please confirm the spelling.",
-        "Waterproof / smudge-proof need evidence — left off."
-      ],
-      "sources": {
-        "who": "Listing; shades = product variants",
-        "inside": "Client sheet + listing",
-        "how": "General guide (category-common steps) — pending client approval"
-      }
-    },
-    {
-      "slug": "bright-banana-powder",
-      "status": "preview",
-      "eyebrow": "Bright Banana Powder · 30 g",
-      "who": [
-        {
-          "label": "Made for",
-          "chips": [
-            "Setting makeup",
-            "Oil and shine control"
-          ]
-        },
-        {
-          "label": "Skin types",
-          "chips": [
-            "Oily skin",
-            "Combination skin"
-          ]
-        },
-        {
-          "label": "What it does",
-          "ticks": [
-            "Sets foundation and concealer",
-            "Smooth, matte finish",
-            "Lightweight, finely milled"
-          ]
-        }
-      ],
-      "inside": {
-        "sub": "The key ingredient in this formula.",
-        "rows": [
-          {
-            "name": "Vitamin E",
-            "img": "shared/img/ing-vitamin-e.jpg",
-            "desc": "Vitamin E-enriched formula for skin nourishment."
-          }
-        ],
-        "formula": {
-          "label": "The formula",
-          "ticks": [
-            "Finely milled powder",
-            "Matte, shine-free finish"
-          ]
-        }
-      },
-      "how": {
-        "guide": "general",
-        "steps": [
-          {
-            "title": "Apply",
-            "text": "Apply lightly over makeup.",
-            "img": "shared/img/app-powder-puff.jpg",
-            "pos": "40% 40%"
-          },
-          {
-            "title": "Blend",
-            "text": "Blend to set and reduce shine.",
-            "img": "gallery:bright-banana-powder/03-texture",
-            "pos": "50% 50%"
-          }
-        ],
-        "finish": {
-          "label": "Tip",
-          "text": "Use under the eyes to brighten and prevent creasing."
-        }
-      },
-      "missing": [
-        "Client approval of the general How to Use guide, or the exact manufacturer directions."
-      ],
-      "uncertain": [],
-      "sources": {
-        "who": "Listing (ideal for oily/combination skin) + client sheet",
-        "inside": "Client sheet + listing",
-        "how": "General guide (category-common) + original listing (under-eye tip)"
-      }
+     "label": "What it does",
+     "ticks": [
+      "Buildable coverage",
+      "Lightweight, breathable texture",
+      "No cracking or patchiness"
+     ]
     }
-  ]
+   ],
+   "inside": {
+    "sub": "The key ingredient in this formula.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Enriched with Vitamin E for skin nourishment."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Lightweight & breathable",
+      "Radiant matte-glow finish",
+      "Blends evenly"
+     ]
+    }
+   },
+   "how": {
+    "steps": [
+     {
+      "title": "Take",
+      "text": "Take 1–2 pumps on your fingertips or a makeup sponge.",
+      "img": "shared/img/app-foundation-fingertips.jpg",
+      "pos": "60% 40%"
+     },
+     {
+      "title": "Blend",
+      "text": "Dab and blend evenly across face and neck.",
+      "img": "shared/img/app-foundation-blend.jpg",
+      "pos": "40% 45%"
+     },
+     {
+      "title": "Build",
+      "text": "Build coverage as desired, natural or full glam.",
+      "img": "gallery:true-base-liquid-foundation/03-texture",
+      "pos": "55% 50%"
+     }
+    ],
+    "finish": {
+     "label": "You'll need",
+     "text": "True Base Liquid Foundation and your fingertips or a makeup sponge."
+    },
+    "guide": "verified"
+   },
+   "missing": [],
+   "uncertain": [
+    "Waterproof and \"all skin types\" are on the listing but need evidence, so they are left off."
+   ],
+   "sources": {
+    "who": "Original listing (Key Benefits, Why Choose) + client sheet; shades = product variants",
+    "inside": "Client sheet (Vitamin E) + listing",
+    "how": "Original listing \"How to Apply\" (all three steps)"
+   }
+  },
+  {
+   "slug": "eyebrow-definer",
+   "status": "ready",
+   "eyebrow": "Eyebrow Definer · Vitamin E",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Natural, hair-like strokes",
+      "Bold definition"
+     ]
+    },
+    {
+     "label": "Wear it for",
+     "chips": [
+      "Everyday looks",
+      "Glam looks"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Precision tip shapes and defines",
+      "Glides on without tugging",
+      "Natural-looking finish"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "The key ingredient in this formula.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Infused with Vitamin E for added nourishment."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Smooth glide formula",
+      "Ultra-precise tip",
+      "Natural-looking finish"
+     ]
+    }
+   },
+   "how": {
+    "steps": [
+     {
+      "title": "Stroke",
+      "text": "Use short, light strokes to mimic natural brow hairs.",
+      "img": "shared/img/app-brow-strokes.jpg",
+      "pos": "55% 30%"
+     },
+     {
+      "title": "Fill",
+      "text": "Fill in sparse areas and shape the arch.",
+      "img": "gallery:eyebrow-definer/03-texture",
+      "pos": "50% 45%"
+     },
+     {
+      "title": "Blend",
+      "text": "Blend gently with a spoolie, if desired, for a softer look.",
+      "img": "shared/img/app-brow-spoolie.jpg",
+      "pos": "45% 35%"
+     }
+    ],
+    "finish": {
+     "label": "You'll need",
+     "text": "Eyebrow Definer, plus a spoolie if desired."
+    },
+    "guide": "verified"
+   },
+   "missing": [],
+   "uncertain": [
+    "Size is not confirmed, so no size is shown. Smudge-proof / long-lasting need evidence and are left off."
+   ],
+   "sources": {
+    "who": "Original listing (Why You'll Love It)",
+    "inside": "Client sheet (Vitamin E) + listing",
+    "how": "Original listing \"How to Use\" (all three steps)"
+   }
+  },
+  {
+   "slug": "liquid-eyeliner",
+   "status": "ready",
+   "eyebrow": "Liquid Eyeliner · 6 ml",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Sharp wings",
+      "Soft flicks",
+      "Thin to thick lines"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Bold black finish in one swipe",
+      "Quick drying",
+      "Precision tip brush"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "Ingredient highlights from the product listing.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Gentle on your lids, nourishing for your skin."
+     },
+     {
+      "name": "Film-forming Agents",
+      "img": "gallery:liquid-eyeliner/03-texture",
+      "pos": "45% 45%",
+      "zoom": 1.6,
+      "desc": "Help the line stay in place."
+     },
+     {
+      "name": "Natural Waxes",
+      "img": "shared/img/ing-wax.jpg",
+      "desc": "For a smooth, glide-on texture."
+     }
+    ]
+   },
+   "how": {
+    "steps": [
+     {
+      "title": "Shake",
+      "text": "Shake well before use.",
+      "img": "pack",
+      "pos": "50% 50%"
+     },
+     {
+      "title": "Apply",
+      "text": "Apply along the lash line using the fine-tip brush.",
+      "img": "shared/img/app-liner-lashline.jpg",
+      "pos": "35% 50%"
+     },
+     {
+      "title": "Dry",
+      "text": "Let it dry for a few seconds.",
+      "img": "shared/img/app-liner-finished.jpg",
+      "pos": "50% 50%"
+     },
+     {
+      "title": "Layer",
+      "text": "For a bolder look, layer once more.",
+      "img": "gallery:liquid-eyeliner/03-texture",
+      "pos": "50% 50%"
+     }
+    ],
+    "finish": {
+     "label": "You'll need",
+     "text": "Liquid Eyeliner with its fine-tip brush."
+    },
+    "guide": "verified"
+   },
+   "missing": [],
+   "uncertain": [
+    "Not in the client product sheet; all facts are from the original listing. Waterproof, 12-hour wear and \"dermatologically tested\" need evidence and are left off."
+   ],
+   "sources": {
+    "who": "Original listing (Why You'll Love It); 6 ml from listing + variant",
+    "inside": "Original listing \"Ingredients Highlight\"",
+    "how": "Original listing \"How to Use\" (all four steps)"
+   }
+  },
+  {
+   "slug": "aloe-vera-gel",
+   "status": "ready",
+   "eyebrow": "Aloe Vera Gel · 200 g",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Skin",
+      "Hair",
+      "Everyday use"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Soothes and nourishes",
+      "Hydrates and refreshes",
+      "Gentle on skin and hair"
+     ]
+    },
+    {
+     "label": "Free from",
+     "chips": [
+      "Parabens",
+      "Sulphates",
+      "Silicones",
+      "Mineral oil"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the 200 g jar.",
+    "rows": [
+     {
+      "name": "Aloe Vera",
+      "img": "shared/img/ing-aloe.jpg",
+      "desc": "Aloe Barbadensis Leaf Extract, the base of the gel."
+     },
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Enriched with Vitamin E, as the label states."
+     }
+    ],
+    "list": {
+     "label": "Full ingredients",
+     "text": "Aqua, Aloe Barbadensis Leaf Extract, Vitamin E, Glycerin, Carbomer, Sodium Benzoate."
+    }
+   },
+   "how": {
+    "steps": [
+     {
+      "title": "Dispense",
+      "text": "Dispense onto the palm of your hand.",
+      "img": "shared/img/app-gel-palm.jpg"
+     },
+     {
+      "title": "Apply",
+      "text": "Apply liberally to the skin or hair.",
+      "img": "gallery:wax-powder-aloe-vera-gel-combo/03-texture"
+     },
+     {
+      "title": "Absorb",
+      "text": "Leave to absorb; use as needed.",
+      "img": "shared/img/app-serum-pat.jpg"
+     }
+    ],
+    "finish": {
+     "label": "Caution",
+     "text": "Store in a cool and dry place."
+    },
+    "guide": "verified"
+   },
+   "missing": [],
+   "uncertain": [
+    "The front says \"with Tea Tree\" but Tea Tree Oil is not in the printed ingredient list, so it is left off the slide until the client confirms.",
+    "The ingredient list prints \"Vitamin E, E\" (twice); shown once."
+   ],
+   "sources": {
+    "who": "200 g jar label (Gentle on skin & hair for everyday use; Soothes, Nourishes, Hydrates & Refreshes; No Parabens, Sulphates, Silicones, Mineral Oil)",
+    "inside": "200 g jar ingredient list",
+    "how": "200 g jar \"Directions to use\" + \"Caution\""
+   }
+  },
+  {
+   "slug": "face-serum",
+   "status": "ready",
+   "eyebrow": "Face Serum · 30 ml",
+   "pack": "shared/packs/face-serum-bottle.png",
+   "badge": "Plant based",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Pigmentation & spots",
+      "Uneven skin tone",
+      "Dark circles"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Evens the look of skin tone",
+      "Brightens for a natural glow",
+      "Overnight hydration"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "Three hero actives, as printed on the pack.",
+    "rows": [
+     {
+      "name": "Mulberry Extract",
+      "img": "shared/img/ing-mulberry.jpg",
+      "desc": "Plant extract for the look of dark spots and uneven tone."
+     },
+     {
+      "name": "Alpha Arbutin",
+      "pct": "2%",
+      "img": "shared/img/ing-actives.jpg",
+      "pos": "35% 40%",
+      "zoom": 1.5,
+      "desc": "Helps reduce the look of dark spots and pigmentation."
+     },
+     {
+      "name": "Niacinamide",
+      "pct": "3%",
+      "img": "shared/img/ing-actives.jpg",
+      "pos": "70% 70%",
+      "desc": "Vitamin B3. Helps even tone and supports the moisture barrier."
+     }
+    ]
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Cleanse",
+      "text": "Cleanse your face and pat dry.",
+      "img": "shared/img/app-serum-cleanse.jpg"
+     },
+     {
+      "title": "Apply",
+      "text": "Apply 2–⁠3 drops to face and neck.",
+      "img": "shared/img/app-serum-drops.jpg"
+     },
+     {
+      "title": "Pat",
+      "text": "Pat gently until absorbed.",
+      "img": "shared/img/app-serum-pat.jpg"
+     },
+     {
+      "title": "Follow",
+      "text": "Moisturise; add sunscreen by day.",
+      "img": "shared/img/app-moisturiser.jpg",
+      "pos": "40% 45%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "Skin types (dull/dry, acne-prone) came from old website tags — removed until confirmed.",
+    "Aloe Vera and Hyaluronic Acid are on the old listing but not on the new pack — removed until confirmed.",
+    "Anti-aging is printed on the pack but needs evidence — left off."
+   ],
+   "sources": {
+    "who": "Pack label (Even Skin Tone, Pigmentation, Brightening, Dark Circle; Plant Based) + client sheet (glow, overnight hydration)",
+    "inside": "New silver-collar pack (Mulberry Extract, Alpha Arbutin 2%, Niacinamide 3%)",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "tomato-face-wash",
+   "status": "ready",
+   "eyebrow": "Tomato Wash · 100 ml",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "De-tan care",
+      "Skin brightening"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Removes dirt and excess oil",
+      "Helps brighten skin",
+      "Leaves a fresh, clean feel"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As named on the pack and listing.",
+    "rows": [
+     {
+      "name": "Tomato",
+      "img": "shared/img/ing-tomato.jpg",
+      "desc": "The natural goodness of tomatoes."
+     },
+     {
+      "name": "Fruit AHA",
+      "img": "shared/img/ing-fruit-aha.jpg",
+      "desc": "Fruit-derived acids, printed on the pack."
+     }
+    ]
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Wet",
+      "text": "Wet your face with water.",
+      "img": "shared/img/app-wet-hands.jpg",
+      "pos": "55% 55%"
+     },
+     {
+      "title": "Take",
+      "text": "Take a small amount.",
+      "img": "pack"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage gently in circular motions.",
+      "img": "shared/img/app-face-lather.jpg",
+      "pos": "55% 45%"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse off and pat dry.",
+      "img": "shared/img/app-serum-cleanse.jpg",
+      "pos": "45% 45%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "No back-of-pack photo was supplied, so the full ingredient list and exact directions could not be read; How to use is the common face-wash guide."
+   ],
+   "sources": {
+    "who": "Pack (Skin Brightening) + listing",
+    "inside": "Pack (Infused with Fruit AHA) + listing",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   },
+   "pack": "shared/packs/tomato-face-wash.png",
+   "photos": [
+    "IMG_8279 (main)",
+    "IMG_8278",
+    "IMG_8280",
+    "IMG_8281",
+    "IMG_8295",
+    "IMG_8296",
+    "IMG_8297"
+   ]
+  },
+  {
+   "slug": "face-wash",
+   "status": "ready",
+   "eyebrow": "Daisy Face Wash · 100 ml",
+   "badge": "Sulfate free",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Gentle daily cleansing",
+      "A refreshed glow"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Gently cleanses and hydrates",
+      "Reduces the look of dark spots",
+      "Locks in natural oils"
+     ]
+    },
+    {
+     "label": "Free from",
+     "chips": [
+      "Sulfates",
+      "Parabens"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the pack.",
+    "rows": [
+     {
+      "name": "Daisy Flower Extract",
+      "img": "shared/img/ing-daisy.jpg",
+      "desc": "Bellis perennis, the hero botanical."
+     },
+     {
+      "name": "ProVitamin B5",
+      "img": "shared/img/ing-clear-gel.jpg",
+      "desc": "D-Panthenol; helps skin feel soft and hydrated."
+     },
+     {
+      "name": "Niacinamide",
+      "img": "shared/img/ing-actives.jpg",
+      "desc": "A skin-loving form of Vitamin B3."
+     },
+     {
+      "name": "Aloe Vera Leaf Extract",
+      "img": "shared/img/ing-aloe.jpg",
+      "desc": "Aloe barbadensis; a soothing plant extract."
+     }
+    ]
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Dampen",
+      "text": "Dampen your face with lukewarm water.",
+      "img": "shared/img/app-wet-hands.jpg",
+      "pos": "55% 55%"
+     },
+     {
+      "title": "Dispense",
+      "text": "Take a small amount on your fingertips.",
+      "img": "pack"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage in gentle circular motions.",
+      "img": "shared/img/app-face-lather.jpg",
+      "pos": "55% 45%"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse well and pat your face dry.",
+      "img": "shared/img/app-serum-cleanse.jpg",
+      "pos": "45% 45%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "The box prints \"Plant Beased\" (typo on the pack); the slides spell it correctly.",
+    "\"FDA Approved\" is printed on the box but needs proof, so it is left off."
+   ],
+   "sources": {
+    "who": "Pack front + back (description, benefits, free-from icons)",
+    "inside": "Pack ingredient list",
+    "how": "Pack (How To Use)"
+   },
+   "pack": "shared/packs/face-wash.png",
+   "photos": [
+    "IMG_8277 (main)",
+    "IMG_8266",
+    "IMG_8267",
+    "IMG_8268 (back: ingredients, how to use)",
+    "IMG_8269",
+    "IMG_8270"
+   ]
+  },
+  {
+   "slug": "toner",
+   "status": "ready",
+   "eyebrow": "Fennel Toner · Niacinamide",
+   "badge": "Sulphate free",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Visible pores",
+      "Skin texture"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Minimises the look of pores",
+      "Refreshes and hydrates",
+      "Adds a natural glow"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As named on the pack and client sheet.",
+    "rows": [
+     {
+      "name": "Fennel Extract",
+      "img": "shared/img/ing-fennel.jpg",
+      "desc": "Plant extract with a calming aroma."
+     },
+     {
+      "name": "Niacinamide",
+      "img": "shared/img/ing-actives.jpg",
+      "pos": "70% 70%",
+      "desc": "Vitamin B3, for a refined-looking skin texture."
+     }
+    ]
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Cleanse",
+      "text": "Start with a freshly cleansed face.",
+      "img": "shared/img/app-serum-cleanse.jpg"
+     },
+     {
+      "title": "Apply",
+      "text": "Apply with a cotton pad or palms.",
+      "img": "shared/img/app-toner-cotton.jpg"
+     },
+     {
+      "title": "Absorb",
+      "text": "Let it absorb into the skin.",
+      "img": "shared/img/app-serum-pat.jpg"
+     },
+     {
+      "title": "Follow",
+      "text": "Follow with serum or moisturiser.",
+      "img": "shared/img/app-moisturiser.jpg",
+      "pos": "40% 45%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "The old listing also names Aloe Vera; the sheet and pack do not — left off until confirmed."
+   ],
+   "sources": {
+    "who": "Client sheet",
+    "inside": "Pack (Fennel Toner with Niacinamide) + client sheet",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "face-mask",
+   "status": "ready",
+   "eyebrow": "Face Mask · Mexican Cactus",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "De-tan",
+      "Skin brightening"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Deeply hydrates",
+      "Brightens for a healthy glow",
+      "Smoother-feeling skin"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the pack.",
+    "rows": [
+     {
+      "name": "Mexican Cactus Extract",
+      "img": "shared/img/ing-cactus.jpg",
+      "desc": "Rich in moisture and antioxidants."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Cream mask",
+      "No peeling"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply an even layer to clean skin.",
+      "img": "shared/img/app-mask-brush.jpg"
+     },
+     {
+      "title": "Wait",
+      "text": "Leave on 10 min for women, 15–⁠20 min for men.",
+      "tile": "10–20",
+      "tileSub": "minutes"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse off with water, or remove as directed.",
+      "img": "shared/img/app-serum-cleanse.jpg",
+      "pos": "45% 45%"
+     }
+    ],
+    "finish": {
+     "label": "You'll need",
+     "text": "Face Mask, a brush if you like, and water."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "\"No peeling required – gentle on the skin\" is a safety claim that needs evidence."
+   ],
+   "sources": {
+    "who": "Client sheet + listing",
+    "inside": "Pack (with Mexican Cactus Extract) + listing",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing) + client sheet (leave-on times)"
+   }
+  },
+  {
+   "slug": "volcanic-scrub",
+   "status": "ready",
+   "eyebrow": "Volcanic Scrub · 200 g",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Tan removal",
+      "Skin brightening"
+     ]
+    },
+    {
+     "label": "Use on",
+     "chips": [
+      "Face",
+      "Body"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Gentle exfoliation with fine particles",
+      "Deeply cleanses",
+      "Helps detan and brighten"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As named on the pack and client sheet.",
+    "rows": [
+     {
+      "name": "Korean Volcanic Sand",
+      "img": "shared/img/ing-volcanic-sand.jpg",
+      "desc": "Fine volcanic particles for gentle exfoliation."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Fine scrub particles",
+      "Korean technology"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply to damp skin.",
+      "img": "gallery:volcanic-scrub/03-texture"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage gently, without harsh rubbing.",
+      "img": "shared/img/app-scrub-massage.jpg"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse off thoroughly with water.",
+      "img": "shared/img/app-serum-cleanse.jpg",
+      "pos": "45% 45%"
+     }
+    ],
+    "finish": {
+     "label": "Good to know",
+     "text": "Use twice a week, on face or body."
+    }
+   },
+   "missing": [],
+   "uncertain": [],
+   "sources": {
+    "who": "Client sheet + pack (Skin Brightening & Tan Removal)",
+    "inside": "Client sheet + pack (Korean Technology)",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing) + client sheet (twice a week)"
+   }
+  },
+  {
+   "slug": "herbal-wax-powder",
+   "status": "ready",
+   "eyebrow": "Herbal Body Wax Powder",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Hair removal at home"
+     ]
+    },
+    {
+     "label": "Use on",
+     "chips": [
+      "Legs",
+      "Arms"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Removes unwanted hair and dead skin",
+      "Removes hair at the root",
+      "Leaves skin smooth and soft"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As named on the pack and client sheet.",
+    "rows": [
+     {
+      "name": "Green Apple Extract",
+      "img": "shared/img/ing-green-apple.jpg",
+      "desc": "The base of this herbal formula."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Herbal powder",
+      "For use at home"
+     ]
+    }
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply against the direction of hair growth.",
+      "img": "shared/img/app-wax-apply.jpg",
+      "pos": "50% 50%"
+     },
+     {
+      "title": "Wait",
+      "text": "Leave it on for 15 minutes.",
+      "tile": "15",
+      "tileSub": "minutes"
+     },
+     {
+      "title": "Remove",
+      "text": "Wipe with a wet cloth, then rinse.",
+      "img": "shared/img/app-wax-wipe.jpg",
+      "pos": "45% 50%"
+     }
+    ],
+    "finish": {
+     "label": "Before you start",
+     "text": "Prepare as directed on the pack. Patch test first."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "How to mix the powder is not in the client's information, so the slide says \"prepare as directed on the pack\".",
+    "\"Painless and irritation-free\" needs evidence — left off.",
+    "Size not confirmed."
+   ],
+   "sources": {
+    "who": "Client sheet + listing",
+    "inside": "Pack (with green apple) + client sheet",
+    "how": "Client sheet + brief (apply, 15 minutes, wipe, rinse) + listing (patch test)"
+   }
+  },
+  {
+   "slug": "wax-powder-aloe-vera-gel-combo",
+   "status": "ready",
+   "eyebrow": "Wax Powder + Aloe Vera Gel",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Hair removal at home"
+     ]
+    },
+    {
+     "label": "In the set",
+     "chips": [
+      "Herbal Wax Powder",
+      "Aloe Vera Gel"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Removes unwanted hair and dead skin",
+      "Gel soothes and hydrates skin"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "Key ingredients of each product in the set.",
+    "rows": [
+     {
+      "name": "Green Apple Extract",
+      "img": "shared/img/ing-green-apple.jpg",
+      "desc": "Herbal Wax Powder: the base of the formula."
+     },
+     {
+      "name": "Aloe Vera",
+      "img": "shared/img/ing-aloe.jpg",
+      "desc": "Aloe Vera Gel: Aloe Barbadensis Leaf Extract."
+     },
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Aloe Vera Gel: enriched with Vitamin E."
+     }
+    ]
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Apply wax",
+      "text": "Apply against hair growth.",
+      "img": "shared/img/app-wax-apply.jpg",
+      "pos": "50% 50%"
+     },
+     {
+      "title": "Wait",
+      "text": "Leave on for 15 minutes.",
+      "tile": "15",
+      "tileSub": "minutes"
+     },
+     {
+      "title": "Remove",
+      "text": "Wipe with a wet cloth, then rinse.",
+      "img": "shared/img/app-wax-wipe.jpg",
+      "pos": "45% 50%"
+     },
+     {
+      "title": "Soothe",
+      "text": "Apply Aloe Vera Gel to the skin.",
+      "img": "shared/img/app-gel-palm.jpg",
+      "pos": "50% 50%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "How to mix the wax powder is not in the client's information.",
+    "Set size not confirmed."
+   ],
+   "sources": {
+    "who": "Client sheet + listing",
+    "inside": "Wax pack + client sheet; gel jar label",
+    "how": "Client sheet + brief (wax) + jar label (gel)"
+   }
+  },
+  {
+   "slug": "hair-oil",
+   "status": "ready",
+   "eyebrow": "Hair Oil · 110 ml",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Hair fall concerns",
+      "Scalp care"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Helps reduce hair fall",
+      "Supports hair growth",
+      "For strong, healthy hair"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "A plant-based blend, as printed on the pack.",
+    "rows": [
+     {
+      "name": "Moringa Oil",
+      "img": "shared/img/ing-moringa.jpg",
+      "desc": "Nourishes the scalp."
+     },
+     {
+      "name": "Pumpkin Seed Oil",
+      "img": "shared/img/ing-pumpkin-seeds.jpg",
+      "desc": "Strengthens hair roots."
+     },
+     {
+      "name": "Olive Oil",
+      "img": "shared/img/ing-olive.jpg",
+      "desc": "Moisturises and repairs."
+     }
+    ],
+    "also": {
+     "label": "Also with",
+     "items": [
+      "Jojoba Oil",
+      "Almond Oil",
+      "Wheat Germ Oil"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply to the scalp and lengths.",
+      "img": "shared/img/app-oil-scalp.jpg",
+      "pos": "50% 35%"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage gently into the scalp.",
+      "img": "shared/img/app-scalp-massage.jpg",
+      "pos": "50% 30%"
+     },
+     {
+      "title": "Leave in",
+      "text": "Leave for a few hours or overnight.",
+      "img": "gallery:hair-oil/03-texture",
+      "pos": "50% 50%"
+     },
+     {
+      "title": "Wash",
+      "text": "Wash if needed; no wash is required.",
+      "img": "shared/img/app-wet-hands.jpg",
+      "pos": "55% 55%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "\"Helps reduce hair fall\" and \"Supports hair growth\" are copied from the pack; they are product claims the client should be able to support.",
+    "The box side lists Wheat Germ Oil (the old listing said Wheatgrass Oil) — slides follow the box."
+   ],
+   "sources": {
+    "who": "Bottle + box front",
+    "inside": "Bottle label + box side",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing) + client sheet (no hair wash needed)"
+   },
+   "pack": "shared/packs/hair-oil.png",
+   "photos": [
+    "IMG_8284 (main)",
+    "IMG_8282",
+    "IMG_8283 (box side: oils)",
+    "IMG_8285",
+    "IMG_8286"
+   ]
+  },
+  {
+   "slug": "hair-mask",
+   "status": "ready",
+   "eyebrow": "Hair Mask · 200 g",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Dry, brittle hair",
+      "Frizz"
+     ]
+    },
+    {
+     "label": "Hair types",
+     "chips": [
+      "Dry, damaged hair",
+      "Colour-treated hair"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Nourishes and smoothens",
+      "Tames frizz",
+      "Deeply hydrates"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As listed in the client product sheet.",
+    "rows": [
+     {
+      "name": "Rice",
+      "img": "shared/img/ing-rice.jpg",
+      "desc": "Part of the nourishing blend."
+     },
+     {
+      "name": "Flaxseed",
+      "img": "shared/img/ing-flaxseed.jpg",
+      "desc": "Seeds rich in natural oils."
+     },
+     {
+      "name": "Vegetable Carotene",
+      "img": "shared/img/ing-carotene.jpg",
+      "desc": "Plant-based pigment and nutrient."
+     }
+    ]
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply to clean, damp hair.",
+      "img": "shared/img/app-hairmask-apply.jpg"
+     },
+     {
+      "title": "Focus",
+      "text": "Work through the lengths.",
+      "img": "gallery:hair-mask/03-texture"
+     },
+     {
+      "title": "Wait",
+      "text": "Leave on for 10–⁠15 minutes.",
+      "tile": "10–15",
+      "tileSub": "minutes"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse out well with water.",
+      "img": "shared/img/app-wet-hands.jpg",
+      "pos": "55% 55%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "Sheet says Vegetable Carotene, the red 100 g jar prints Vegetable Keratin — confirm the 200 g formula."
+   ],
+   "sources": {
+    "who": "Client sheet + listing",
+    "inside": "Client sheet (to be confirmed)",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "shampoo",
+   "status": "ready",
+   "eyebrow": "AHA Clarifying Shampoo · 200 ml",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Clarified, hydrated hair",
+      "Stronger-feeling roots"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Gently exfoliates the scalp",
+      "Strengthens hair",
+      "Retains moisture at the roots"
+     ]
+    },
+    {
+     "label": "Free from",
+     "chips": [
+      "Sulfates",
+      "Parabens"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the pack.",
+    "rows": [
+     {
+      "name": "Aloe Vera Leaf Extract",
+      "img": "shared/img/ing-aloe.jpg",
+      "desc": "Aloe barbadensis; a hydrating plant extract."
+     },
+     {
+      "name": "ProVitamin B5",
+      "img": "shared/img/ing-clear-gel.jpg",
+      "desc": "D-Panthenol; helps hair hold moisture."
+     },
+     {
+      "name": "Fruit AHAs",
+      "img": "shared/img/ing-fruit-aha.jpg",
+      "desc": "From bilberry, sugarcane, orange, lemon and sugar maple."
+     },
+     {
+      "name": "Lavender Essential Oil",
+      "img": "shared/img/ing-lavender.jpg",
+      "desc": "A plant essential oil in the blend."
+     }
+    ]
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Wet",
+      "text": "Wet your hair.",
+      "img": "shared/img/app-wet-hands.jpg",
+      "pos": "55% 55%"
+     },
+     {
+      "title": "Lather",
+      "text": "Rub a small amount between your palms.",
+      "img": "pack"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage into the roots, then down to the tips.",
+      "img": "shared/img/app-scalp-massage.jpg",
+      "pos": "50% 30%"
+     },
+     {
+      "title": "Rinse",
+      "text": "Rinse thoroughly with lukewarm water.",
+      "img": "gallery:shampoo/03-texture",
+      "pos": "50% 50%"
+     }
+    ]
+   },
+   "missing": [],
+   "uncertain": [
+    "Bottle prints \"with Vitamin B5\", box prints \"with ProVitamin B5\"; the ingredient list says D-Panthenol (ProVitamin B5), so slides use ProVitamin B5.",
+    "\"FDA Approved\" and \"Best ingredient from USA / Germany\" are printed on the pack but need proof, so they are left off.",
+    "The client sheet's Canadian Maple Tree Extract matches the pack's Sugar Maple extract (part of the fruit AHAs)."
+   ],
+   "sources": {
+    "who": "Pack front + side (benefits, free-from icons)",
+    "inside": "Pack ingredient list",
+    "how": "Pack (How To Use)"
+   },
+   "pack": "shared/packs/shampoo.png",
+   "photos": [
+    "IMG_8276 (main)",
+    "IMG_8271",
+    "IMG_8272",
+    "IMG_8273 (back: ingredients, how to use)",
+    "IMG_8274 (side: benefits)",
+    "IMG_8275"
+   ],
+   "badge": "Sulfate free"
+  },
+  {
+   "slug": "sunscreen",
+   "status": "ready",
+   "eyebrow": "Moisturizer & Sunscreen · 50 g",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Daily sun protection",
+      "Everyday moisture"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Broad spectrum protection",
+      "Water resistant",
+      "Anti-pollution"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the pack.",
+    "rows": [
+     {
+      "name": "Red Algae Extract",
+      "img": "shared/img/ing-red-algae.jpg",
+      "desc": "Chondrus crispus, the hero marine extract."
+     },
+     {
+      "name": "Cactus Water",
+      "img": "shared/img/ing-cactus.jpg",
+      "desc": "Opuntia ficus-indica stem water; hydrating."
+     },
+     {
+      "name": "Aquaxyl",
+      "img": "shared/img/ing-clear-gel.jpg",
+      "desc": "A hydrating complex named on the pack."
+     }
+    ],
+    "also": {
+     "label": "Sun filters",
+     "items": [
+      "Zinc Oxide",
+      "Titanium Dioxide"
+     ]
+    }
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Before sun",
+      "text": "Apply 15 minutes before going out in the sun.",
+      "img": "shared/img/app-sunscreen-face.jpg",
+      "pos": "50% 40%"
+     },
+     {
+      "title": "Spread",
+      "text": "Apply evenly over the exposed skin.",
+      "img": "shared/img/app-moisturiser.jpg",
+      "pos": "40% 45%"
+     },
+     {
+      "title": "Reapply",
+      "text": "Every 4 hours, or after swimming or cleansing.",
+      "tile": "4",
+      "tileSub": "hours"
+     }
+    ],
+    "finish": {
+     "label": "Before you start",
+     "text": "A patch test is recommended."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "\"FDA Approved\" is printed on the box but needs proof, so it is left off."
+   ],
+   "sources": {
+    "who": "Pack front (2-in-1, SPF 50+, PA+++, icons) + back description",
+    "inside": "Pack ingredient list",
+    "how": "Pack (How To Use, patch test)"
+   },
+   "pack": "shared/packs/sunscreen.png",
+   "photos": [
+    "IMG_8294 (main)",
+    "IMG_8290",
+    "IMG_8291 (back: ingredients, how to use)",
+    "IMG_8292"
+   ],
+   "badge": "SPF 50+ · PA+++"
+  },
+  {
+   "slug": "kajal",
+   "status": "ready",
+   "eyebrow": "Kajal · Vitamin E",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Bold, defined eyes"
+     ]
+    },
+    {
+     "label": "Wear it for",
+     "chips": [
+      "Everyday wear",
+      "Bold glam looks"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Intense jet-black colour",
+      "Smooth application, no tugging"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "The key ingredient in this formula.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Enriched with Vitamin E for nourishment and comfort."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Intense pigment",
+      "Smooth, easy glide"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Prep",
+      "text": "Start with clean, dry eyes.",
+      "img": "pack"
+     },
+     {
+      "title": "Apply",
+      "text": "Glide gently along the lash line.",
+      "img": "shared/img/app-kajal.jpg"
+     },
+     {
+      "title": "Build",
+      "text": "Go over once more for a bolder look.",
+      "img": "gallery:kajal/03-texture"
+     }
+    ],
+    "finish": {
+     "label": "Caution",
+     "text": "Avoid direct contact with the eyes."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "Smudge-proof / waterproof need evidence — left off. Size not confirmed."
+   ],
+   "sources": {
+    "who": "Listing + client sheet",
+    "inside": "Client sheet + listing",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "mascara",
+   "status": "ready",
+   "eyebrow": "Mascara · Vitamin E",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Bold, defined lashes"
+     ]
+    },
+    {
+     "label": "Wear it for",
+     "chips": [
+      "Everyday wear",
+      "Party glam"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Jet-black finish",
+      "No clumping or flaking",
+      "Easy to apply and remove"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "Key ingredients from the product listing.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Nourishes and protects lashes."
+     },
+     {
+      "name": "Natural Wax Blend",
+      "img": "shared/img/ing-wax.jpg",
+      "desc": "For smooth application and definition."
+     },
+     {
+      "name": "Polymers",
+      "img": "gallery:mascara/03-texture",
+      "pos": "45% 40%",
+      "zoom": 1.4,
+      "desc": "For long-lasting wear."
+     }
+    ]
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Prep",
+      "text": "Start with clean, dry lashes.",
+      "img": "pack"
+     },
+     {
+      "title": "Brush",
+      "text": "Brush from the lash roots to the tips.",
+      "img": "shared/img/app-mascara.jpg"
+     },
+     {
+      "title": "Layer",
+      "text": "Add a second coat if you like; let dry.",
+      "img": "gallery:mascara/03-texture"
+     }
+    ],
+    "finish": {
+     "label": "Caution",
+     "text": "Avoid direct contact with the eyes."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "The listing calls it a \"Mascara & Eyeliner Combo\" but the product is a single mascara — confirm.",
+    "Size not confirmed."
+   ],
+   "sources": {
+    "who": "Original listing",
+    "inside": "Original listing \"Key Ingredients\"",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "liquid-matte-lipstick",
+   "status": "ready",
+   "eyebrow": "Liquid Matte Lipstick · Vitamin E",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "High-impact colour",
+      "Meetings to nights out"
+     ]
+    },
+    {
+     "label": "Shades",
+     "chips": [
+      "Blush Bloom",
+      "Classic Cherry Red",
+      "Dusty Rose",
+      "Everyday Muse",
+      "Love Stain",
+      "Rust Desire"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Glides on smoothly",
+      "Dries to a velvety matte"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "The key ingredient in this formula.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Infused with Vitamin E for added nourishment."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Velvety matte finish",
+      "Feather-light feel",
+      "Paraben-free"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply to clean, dry lips.",
+      "img": "shared/img/app-lipstick-apply.jpg"
+     },
+     {
+      "title": "Spread",
+      "text": "Spread the colour evenly.",
+      "img": "gallery:liquid-matte-lipstick/03-texture"
+     },
+     {
+      "title": "Set",
+      "text": "Let it set to a matte finish.",
+      "img": "shared/img/app-lips-finished.jpg"
+     }
+    ],
+    "finish": {
+     "label": "You'll need",
+     "text": "Liquid Matte Lipstick in your chosen shade."
+    }
+   },
+   "missing": [],
+   "uncertain": [
+    "Shade name is spelled \"Clasic Cherry Red\" in the shop — the slide uses \"Classic\"; please confirm the spelling.",
+    "Waterproof / smudge-proof need evidence — left off."
+   ],
+   "sources": {
+    "who": "Listing; shades = product variants",
+    "inside": "Client sheet + listing",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "bright-banana-powder",
+   "status": "ready",
+   "eyebrow": "Bright Banana Powder · 30 g",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Setting makeup",
+      "Oil and shine control"
+     ]
+    },
+    {
+     "label": "Skin types",
+     "chips": [
+      "Oily skin",
+      "Combination skin"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Sets foundation and concealer",
+      "Smooth, matte finish",
+      "Lightweight, finely milled"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "The key ingredient in this formula.",
+    "rows": [
+     {
+      "name": "Vitamin E",
+      "img": "shared/img/ing-vitamin-e.jpg",
+      "desc": "Vitamin E-enriched formula for skin nourishment."
+     }
+    ],
+    "formula": {
+     "label": "The formula",
+     "ticks": [
+      "Finely milled powder",
+      "Matte, shine-free finish"
+     ]
+    }
+   },
+   "how": {
+    "guide": "general",
+    "steps": [
+     {
+      "title": "Base first",
+      "text": "Apply after foundation and concealer.",
+      "img": "pack"
+     },
+     {
+      "title": "Focus",
+      "text": "Press onto oily areas like the T-zone.",
+      "img": "shared/img/app-powder-puff.jpg"
+     },
+     {
+      "title": "Dust off",
+      "text": "Dust off any excess.",
+      "img": "gallery:bright-banana-powder/03-texture"
+     }
+    ],
+    "finish": {
+     "label": "Tip",
+     "text": "Use under the eyes to brighten and prevent creasing."
+    }
+   },
+   "missing": [],
+   "uncertain": [],
+   "sources": {
+    "who": "Listing (ideal for oily/combination skin) + client sheet",
+    "inside": "Client sheet + listing",
+    "how": "Common category guide from our side (client allowed it where exact directions are missing)"
+   }
+  },
+  {
+   "slug": "all-season-body-lotion",
+   "status": "ready",
+   "pack": "shared/packs/all-season-body-lotion.png",
+   "photos": [
+    "IMG_8288 (main)",
+    "IMG_8287",
+    "IMG_8289 (back: ingredients, directions)"
+   ],
+   "eyebrow": "Body Lotion · 100 ml",
+   "badge": "Sulfate free",
+   "who": [
+    {
+     "label": "Made for",
+     "chips": [
+      "Soft, smooth skin",
+      "Every season"
+     ]
+    },
+    {
+     "label": "Skin types",
+     "chips": [
+      "All skin types"
+     ]
+    },
+    {
+     "label": "What it does",
+     "ticks": [
+      "Softens and smooths",
+      "Keeps skin nourished",
+      "With natural plant extracts"
+     ]
+    }
+   ],
+   "inside": {
+    "sub": "As printed on the pack.",
+    "rows": [
+     {
+      "name": "Sea Buckthorn Oil",
+      "img": "shared/img/ing-sea-buckthorn.jpg",
+      "desc": "Hippophae rhamnoides fruit oil."
+     },
+     {
+      "name": "Licorice (Mulethi) Root",
+      "img": "shared/img/ing-licorice.jpg",
+      "desc": "Glycyrrhiza glabra root extract."
+     },
+     {
+      "name": "Shea Butter",
+      "img": "shared/img/ing-shea.jpg",
+      "desc": "A rich, softening plant butter."
+     }
+    ],
+    "also": {
+     "label": "Also with",
+     "items": [
+      "Olive Oil Esters",
+      "Camellia Seed Oil"
+     ]
+    }
+   },
+   "how": {
+    "guide": "verified",
+    "steps": [
+     {
+      "title": "Apply",
+      "text": "Apply generously to clean, dry skin.",
+      "img": "pack"
+     },
+     {
+      "title": "Massage",
+      "text": "Massage gently until fully absorbed.",
+      "img": "shared/img/app-body-lotion.jpg",
+      "pos": "55% 50%"
+     },
+     {
+      "title": "Repeat",
+      "text": "Use daily, or as often as needed.",
+      "tile": "Daily",
+      "tileSub": "or as needed"
+     }
+    ]
+   },
+   "missing": [
+    "Price and launch decision — the product is not in the shop yet and stays a hidden draft."
+   ],
+   "uncertain": [
+    "Front prints 100 ml, but the back prints MRP ₹549 at ₹1.83/ml, which works out to 300 ml — confirm the size.",
+    "\"FDA Approved\" and \"Cruelty free\" icons are on the pack but need proof, so they are left off."
+   ],
+   "sources": {
+    "who": "Pack front + back (For All Skin Type, sulfate-free icon)",
+    "inside": "Pack ingredient list + front",
+    "how": "Pack (Directions for Use)"
+   }
+  }
+ ]
 }

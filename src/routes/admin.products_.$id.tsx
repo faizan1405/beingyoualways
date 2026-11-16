@@ -214,12 +214,12 @@ function EditProduct() {
           {info && slides.length === 4 && (
             <Panel title="Product infographics (4 slides)">
               <p className={`mb-3 rounded-md px-2.5 py-1.5 text-xs font-medium ${info.status === "ready" ? "bg-primary/10 text-primary" : "border border-accent/40 bg-accent/10 text-foreground"}`}>
-                {info.status === "ready" ? "Live — shoppers see these four slides." : info.status === "preview" ? "Shown in the shop preview — How to use is a general guide." : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
+                {info.status !== "draft" ? (p.status === "draft" ? "Slides ready — they appear once this product is published." : "Live — shoppers see these four slides.") : "Draft — not shown to shoppers. The shop keeps the previous photos until the missing information below is supplied."}
               </p>
               {info.guide === "general" && (
                 <div className="mb-3 rounded-md border border-dashed border-accent px-2.5 py-2 text-xs">
-                  <p className="font-semibold">General guide — pending client approval</p>
-                  <p className="mt-1 text-muted-foreground">These How to use steps are common for this kind of product, not the manufacturer's directions. They are not client-approved.</p>
+                  <p className="font-semibold">Common category guide (client allowed)</p>
+                  <p className="mt-1 text-muted-foreground">The pack's exact directions weren't available, so these How to use steps are the usual method for this kind of product. Replace them if the manufacturer's directions arrive.</p>
                   <ol className="mt-1.5 list-decimal space-y-0.5 pl-4 text-muted-foreground">{info.steps.map((s) => <li key={s.title}><span className="font-medium text-foreground">{s.title}:</span> {s.text}</li>)}</ol>
                 </div>
               )}
@@ -231,7 +231,7 @@ function EditProduct() {
                 ))}
               </div>
               {info.missing.length > 0 && (
-                <div className="mt-3"><p className="text-xs font-semibold">{info.status === "preview" ? "Needed before it counts as approved" : "Missing before it can go live"}</p>
+                <div className="mt-3"><p className="text-xs font-semibold">{info.status === "draft" ? "Missing before it can go live" : "Still needed"}</p>
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-muted-foreground">{info.missing.map((m) => <li key={m}>{m}</li>)}</ul></div>
               )}
               {info.uncertain.length > 0 && (

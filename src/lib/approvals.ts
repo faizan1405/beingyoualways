@@ -62,12 +62,11 @@ export function buildApprovalChecklist({
   // A supplied photo counts as resolved once the admin has added it to that product's gallery.
   const openPhotos = pendingPhotos.filter((ph) => !products.find((p) => p.slug === ph.slug)?.images?.includes(ph.src));
   const unpricedDrafts = products.filter((p) => p.status === "draft" && !p.isSample && p.variants.every((v) => v.price <= 0));
-  const awaiting = [...openPhotos.map((ph) => ph.label), ...unpricedDrafts.map((p) => `${p.name} — price, size and photo`)];
+  const awaiting = [...openPhotos.map((ph) => ph.label), ...unpricedDrafts.map((p) => `${p.name} — ${p.images?.length ? "price and size" : "price, size and photo"}`)];
   const flagged = flaggedPoints();
   const fdaCount = flagged.filter((f) => f.flag === "certification").length;
   const draftInfo = live.filter((p) => infographicFor(p.slug)?.status !== "ready");
-  const generalInfo = live.filter((p) => infographicFor(p.slug)?.status === "preview");
-  const heldInfo = live.filter((p) => { const s = infographicFor(p.slug)?.status; return s !== "ready" && s !== "preview"; });
+  const generalInfo = live.filter((p) => infographicFor(p.slug)?.guide === "general");
 
   return [
     {
@@ -151,9 +150,9 @@ export function buildApprovalChecklist({
     {
       id: "infographics", title: "Product infographic slides", status: productStatus(draftInfo.length, n),
       current: draftInfo.length
-        ? `${n - draftInfo.length} of ${n} live products have client-verified infographics. ${generalInfo.length} show a general How to use guide (pending client approval). ${heldInfo.length} sets are drafts (admin only) — those products keep their previous photos.`
-        : `All ${n} live products show the approved four-slide infographics.`,
-      needed: "Approve or correct each general How to use guide (or send the manufacturer's directions), give the wax powder preparation steps, and confirm the flagged ingredients or sizes (listed on each product's edit page).",
+        ? `${n - draftInfo.length} of ${n} live products show the four-slide infographics. ${draftInfo.length} sets are drafts (admin only) — those products keep their previous photos.`
+        : `All ${n} live products show the four-slide infographics. ${generalInfo.length} use a common category How to use guide (client allowed) because the pack's exact directions weren't available.`,
+      needed: "Optional: send the manufacturer's directions for any product using a common guide, and confirm the flagged ingredients or sizes (listed on each product's edit page).",
       affects: "Product page galleries (Who is it for?, What's inside?, How to use).", missing: names(draftInfo), adminLink: "/admin/products",
     },
     {

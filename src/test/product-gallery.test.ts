@@ -10,18 +10,19 @@ import type { Product } from "@/lib/types";
 type Raw = { id: string; slug: string; variants: { id: string; price: number; compareAtPrice?: number }[]; category: string };
 const raw = imported as unknown as Raw[];
 const bySlug = (s: string) => products.find((p) => p.slug === s)!;
-const ready = raw.filter((r) => infographicFor(r.slug)?.status === "ready");
-const shown = raw.filter((r) => ["ready", "preview"].includes(infographicFor(r.slug)?.status ?? ""));
+const shown = raw.filter((r) => infographicFor(r.slug)?.status === "ready");
 const drafts = raw.filter((r) => infographicFor(r.slug)?.status === "draft");
 
 describe("product infographic galleries", () => {
-  it("has a four-slide infographic set for all 20 catalogue products", () => {
-    expect(infographics).toHaveLength(20);
+  it("has a four-slide infographic set for all 20 catalogue products plus the new body lotion", () => {
+    expect(infographics).toHaveLength(21);
     for (const r of raw) expect(infographicImages(r.slug)).toHaveLength(4);
+    expect(infographicImages("all-season-body-lotion")).toHaveLength(4);
   });
 
-  it("ready and preview products show exactly the four slides: product photo, who, inside, how", () => {
-    expect(shown).toHaveLength(18);
+  it("every catalogue product shows exactly the four slides: product photo, who, inside, how", () => {
+    expect(shown).toHaveLength(20);
+    expect(drafts).toHaveLength(0);
     for (const r of shown) {
       const imgs = bySlug(r.slug).images ?? [];
       expect(imgs).toHaveLength(4);
@@ -33,50 +34,54 @@ describe("product infographic galleries", () => {
     for (const r of raw) expect(galleryView(bySlug(r.slug).images![0]!)).toBe("hero");
   });
 
-  it("draft sets never reach shoppers — those products keep the previous gallery", () => {
-    for (const r of drafts) {
-      const imgs = bySlug(r.slug).images ?? [];
-      expect(imgs).toEqual(galleryImages(r.slug));
-      expect(imgs.some((src) => ["who", "inside", "how"].includes(galleryView(src) ?? ""))).toBe(false);
-    }
-  });
-
-  it("a set reaches shoppers only when it is ready or in preview", () => {
+  it("a set reaches shoppers only when it is ready", () => {
     expect(catalogueImages("face-serum", () => true)).toEqual(infographicImages("face-serum"));
     expect(catalogueImages("face-serum", () => false)).toEqual(galleryImages("face-serum"));
   });
 
-  it("keeps the four client-verified sets ready with their own directions", () => {
-    expect(ready.map((r) => r.slug).sort()).toEqual(["aloe-vera-gel", "eyebrow-definer", "liquid-eyeliner", "true-base-liquid-foundation"]);
-    for (const r of ready) expect(infographicFor(r.slug)?.guide).toBe("verified");
-    expect(infographicFor("aloe-vera-gel")?.steps.map((x) => x.text)).toEqual(["Dispense onto the palm of your hand.", "Apply liberally to the skin or hair."]);
+  it("products photographed in Nov 2026 use the pack's own directions", () => {
+    expect(infographicFor("face-wash")?.guide).toBe("verified");
+    expect(infographicFor("shampoo")?.guide).toBe("verified");
+    expect(infographicFor("sunscreen")?.steps.map((x) => x.text).join(" ")).toMatch(/15 minutes before.*Every 4 hours/);
   });
 
-  it("general How to use guides are flagged as pending client approval, never approved", () => {
+  it("wax powder follows the brief: apply against hair growth, wait 15 minutes, wipe, rinse", () => {
+    const t = infographicFor("herbal-wax-powder")!.steps.map((x) => x.text).join(" ");
+    expect(t).toMatch(/against the direction of hair growth/);
+    expect(t).toMatch(/15 minutes/);
+    expect(t).toMatch(/wet cloth, then rinse/);
+  });
+
+  it("the face serum guide uses 2–3 drops, as the brief allows", () => {
+    expect(infographicFor("face-serum")?.steps.map((x) => x.text).join(" ")).toMatch(/2–3 drops/);
+  });
+
+  it("common category guides are labelled on the slide data, never passed off as pack directions", () => {
     const general = infographics.filter((x) => x.guide === "general");
-    expect(general).toHaveLength(14);
-    for (const g of general) {
-      expect(g.status).toBe("preview");
-      expect(g.missing.join(" ")).toMatch(/approval/i);
-    }
+    expect(general.length).toBeGreaterThan(0);
+    for (const g of general) expect(g.sources.how).toMatch(/common category guide/i);
   });
 
-  it("general guides invent no amounts or timings (only the face mask uses the client sheet's times)", () => {
-    for (const g of infographics.filter((x) => x.guide === "general" && x.slug !== "face-mask")) {
-      for (const st of g.steps) expect(st.text).not.toMatch(/\d/);
-    }
-    expect(infographicFor("face-mask")?.steps.map((x) => x.text).join(" ")).toMatch(/10 min for women, 15–20 min for men/);
+  it("the body lotion is a hidden draft with no price or stock", () => {
+    const p = bySlug("all-season-body-lotion");
+    expect(p.status).toBe("draft");
+    expect(p.variants.every((v) => v.price === 0 && v.stock === 0)).toBe(true);
+    expect(p.images?.map(galleryView)).toEqual([...INFOGRAPHIC_VIEWS]);
   });
 
-  it("the face serum guide follows the brief: cleanse, small amount, spread, moisturiser", () => {
-    expect(infographicFor("face-serum")?.steps.map((x) => x.title)).toEqual(["Cleanse", "Apply", "Spread", "Moisturise"]);
+  it("pack sizes from the new photos replace 'to be confirmed'", () => {
+    expect(bySlug("face-wash").variants[0]!.label).toBe("100 ml");
+    expect(bySlug("shampoo").variants[0]!.label).toBe("200 ml");
+    expect(bySlug("hair-oil").variants[0]!.label).toBe("110 ml");
   });
 
-  it("wax powder sets stay drafts while the preparation method is unknown", () => {
-    for (const slug of ["herbal-wax-powder", "wax-powder-aloe-vera-gel-combo"]) {
-      expect(infographicFor(slug)?.status).toBe("draft");
-      expect(infographicFor(slug)?.missing.join(" ")).toMatch(/prepare/i);
-    }
+  it("a newer pack photo replaces earlier patched key ingredients, but keeps admin edits", () => {
+    const old: Product = { ...structuredClone(bySlug("shampoo")), keyIngredients: ["Canadian Maple Tree Extract"] };
+    const edited: Product = { ...structuredClone(bySlug("face-wash")), keyIngredients: ["Admin choice"] };
+    const out = reviseStored([old, edited], products);
+    expect(out.find((p) => p.slug === "shampoo")!.keyIngredients).toEqual(bySlug("shampoo").keyIngredients);
+    expect(out.find((p) => p.slug === "face-wash")!.keyIngredients).toEqual(["Admin choice"]);
+    expect(out.some((p) => p.slug === "all-season-body-lotion")).toBe(true);
   });
 
   it("keeps the previous four photos and the originals as backup, not deleted", () => {

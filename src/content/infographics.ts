@@ -1,14 +1,15 @@
 // Four-slide product infographics (01 product photo, 02 Who is it for?, 03 What's inside?,
 // 04 How to use). Wording + status live in infographics.json; the editable layouts and the
 // render script live in design/gallery-slides/.
-// - "ready":   every slide verified (How to use from the pack, client sheet or original listing).
-// - "preview": slides 02–03 verified; How to use is a conservative general guide pending client
-//              approval. Shown in the storefront preview, flagged in admin, never "approved".
+// - "ready":   shown to shoppers. Wording comes from the genuine pack photos, the client sheet or
+//              the original listing; where exact directions are missing, How to use is a common
+//              category guide (guide: "general"), which the client allowed (Nov 2026).
+// - "preview": legacy state, treated like ready.
 // - "draft":   admin only; the shop keeps the previous gallery.
 import data from "./infographics.json";
 
 export type InfographicStatus = "ready" | "preview" | "draft";
-/** Where the How to use steps come from: verified directions or a general category guide. */
+/** Where the How to use steps come from: pack/client directions or a common category guide. */
 export type HowGuide = "verified" | "general" | "none";
 
 export interface InfographicEntry {
@@ -32,14 +33,15 @@ type RawEntry = Omit<InfographicEntry, "guide" | "steps"> & {
 export const infographics: InfographicEntry[] = (data.products as unknown as RawEntry[]).map((p) => ({
   slug: p.slug, status: p.status, eyebrow: p.eyebrow,
   guide: p.how.guide ?? "none",
-  steps: (p.how.steps ?? []).map((s) => ({ title: s.title, text: s.text })),
+  // Slides keep word joiners (U+2060) so "10–15" never breaks across lines; data stays plain.
+  steps: (p.how.steps ?? []).map((s) => ({ title: s.title, text: s.text.replace(/\u2060/g, "") })),
   missing: p.missing, uncertain: p.uncertain, sources: p.sources,
 }));
 
 export const infographicFor = (slug: string) => infographics.find((x) => x.slug === slug);
-/** Fully verified by the client's information. */
+/** Live for shoppers. */
 export const isInfographicReady = (slug: string) => infographicFor(slug)?.status === "ready";
-/** Shown in the storefront preview: verified sets plus sets whose How to use is a general guide. */
+/** Shown to shoppers (ready, or the legacy preview state). */
 export const isInfographicShown = (slug: string) => {
   const s = infographicFor(slug)?.status;
   return s === "ready" || s === "preview";

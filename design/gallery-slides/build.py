@@ -96,7 +96,7 @@ def slide_inside(p):
     elif i.get("also"):
         band = (f'<div class="band"><div class="label">{e(i["also"]["label"])}</div><div class="alsos">'
                 + "".join(f"<b>{e(a)}</b>" for a in i["also"]["items"]) + "</div></div>")
-    one = " one" if len(i["rows"]) == 1 else ""
+    one = " one" if len(i["rows"]) == 1 else " four" if len(i["rows"]) >= 4 else ""
     body = (f'<div class="eyebrow">Key ingredients</div><h1>What\'s inside?</h1><div class="sub">{e(i["sub"])}</div>'
             f'<div class="rows{one}">{"".join(rows)}{formula}</div>'
             f'<div class="packbox"><img class="{pack_cls(p)}" src="{e(pack_src(p))}" alt=""></div>{band}')
@@ -160,7 +160,8 @@ INSIDE_CSS = """
 .ph{flex:none;width:210px;height:210px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:#fff}
 .ph img{width:100%;height:100%;object-fit:cover}
 .rows.one .ph{width:260px;height:260px}
-.nm{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:70px;line-height:1;color:var(--green);display:flex;align-items:baseline;gap:20px}
+.rows.four{gap:24px;top:450px}.rows.four .ph{width:172px;height:172px}.rows.four .nm{font-size:60px}.rows.four .ds{font-size:38px;margin-top:10px}
+.nm{font-variant-numeric:lining-nums;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:70px;line-height:1;color:var(--green);display:flex;align-items:baseline;gap:20px}
 .pct{font-family:'Manrope';font-size:36px;font-weight:800;color:#fff;background:var(--terra);padding:6px 18px;border-radius:10px;transform:translateY(-8px)}
 .ds{margin-top:14px;font-size:42px;line-height:1.25;color:var(--muted);max-width:600px}
 .formula{margin-top:26px;padding-top:40px;border-top:2px solid var(--line)}
@@ -177,9 +178,9 @@ INSIDE_CSS = """
 HOW_CSS = """
 .steps{margin-top:80px;display:grid;gap:40px}
 .steps.c2{grid-template-columns:repeat(2,1fr)}.steps.c3{grid-template-columns:repeat(3,1fr)}
-.steps.c4{grid-template-columns:repeat(2,1fr);gap:44px 48px;margin-top:70px}
-.steps.c4 .st{display:grid;grid-template-columns:270px 1fr;grid-template-rows:1fr 1fr;column-gap:34px}
-.steps.c4 .ph{grid-row:1/3}.steps.c4 h3{margin-top:0;align-self:end}.steps.c4 p{align-self:start}
+.steps.c4{grid-template-columns:repeat(2,1fr);gap:64px 48px;margin-top:90px}
+.steps.c4 .st{display:grid;grid-template-columns:300px 1fr;grid-template-rows:1fr auto auto 1fr;column-gap:32px;min-height:300px}
+.steps.c4 .ph{grid-row:1/5}.steps.c4 h3{grid-row:2;margin-top:0;font-size:64px}.steps.c4 p{grid-row:3;font-size:40px}
 .steps.c4 .n{width:76px;height:76px;font-size:36px;left:18px;top:18px}
 .st .ph{position:relative;aspect-ratio:1/1;border-radius:28px;overflow:hidden;background:var(--soft)}
 .steps.c2 .ph{aspect-ratio:4/3}
@@ -189,9 +190,10 @@ HOW_CSS = """
 .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#eef1ec !important}
 .tile b{font-family:'Cormorant Garamond',serif;font-size:190px;line-height:1;font-variant-numeric:lining-nums;color:var(--green)}
 .tile b.long{font-size:150px;letter-spacing:-.02em}
+.steps.c4 .tile b{font-size:120px}.steps.c4 .tile b.long{font-size:86px}.steps.c4 .tile small{font-size:28px}
 .tile small{margin-top:6px;font-size:38px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 .n{position:absolute;left:24px;top:24px;width:96px;height:96px;border-radius:50%;background:var(--green);color:#fff;font-size:42px;font-weight:800;display:grid;place-items:center}
-.st h3{margin-top:34px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:72px;line-height:1;color:var(--green)}
+.st h3{font-variant-numeric:lining-nums;margin-top:34px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:72px;line-height:1;color:var(--green)}
 .st p{margin-top:14px;font-size:42px;line-height:1.25;color:var(--muted)}
 
 .tip{position:absolute;left:120px;right:120px;bottom:170px;display:flex;align-items:center;gap:36px;padding:32px 44px;border-radius:24px;border:2px solid var(--line)}

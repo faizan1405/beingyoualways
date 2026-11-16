@@ -11,7 +11,7 @@ const bySlug = (s: string) => products.find((p) => p.slug === s)!;
 const price = (s: string) => { const v = bySlug(s).variants[0]!; return [v.price, v.compareAtPrice]; };
 
 describe("catalogue audit — no duplicates", () => {
-  it("has 21 products: the 20 imported + the Magic Drop draft", () => expect(products).toHaveLength(21));
+  it("has 22 products: the 20 imported + the Magic Drop and body lotion drafts", () => expect(products).toHaveLength(22));
   it("has unique ids and slugs", () => {
     expect(new Set(products.map((p) => p.id)).size).toBe(products.length);
     expect(new Set(products.map((p) => p.slug)).size).toBe(products.length);
@@ -40,8 +40,8 @@ describe("verified updates keep ids and prices", () => {
     expect(bySlug("face-serum").variants[0]!.label).toBe("30 ml");
     expect(bySlug("aloe-vera-gel").variants[0]!.label).toBe("200 g");
   });
-  it("leaves uncertain sizes unconfirmed (shampoo) and adds no extra sizes", () => {
-    expect(bySlug("shampoo").variants.map((v) => v.label)).toEqual(["Size to be confirmed"]);
+  it("uses the shampoo size from the new pack photo (200 ml) and adds no extra sizes", () => {
+    expect(bySlug("shampoo").variants.map((v) => v.label)).toEqual(["200 ml"]);
     for (const s of ["hair-mask", "aloe-vera-gel"]) expect(bySlug(s).variants).toHaveLength(1);
   });
   it("names the sunscreen as printed on the pack, same id", () => {
@@ -89,7 +89,7 @@ describe("saved demo data upgrade", () => {
     expect(s!.variants[0]!.label).toBe("50 g");
     expect(s!.variants[0]!.price).toBe(455);
     expect(s!.images).toEqual(bySlug("sunscreen").images);
-    expect(rest.map((p) => p.id)).toEqual([magicDropDraft.id]);
+    expect(rest.map((p) => p.id)).toEqual([magicDropDraft.id, "bya-draft-body-lotion"]);
   });
   it("keeps an admin's uploaded photos and own edits", () => {
     const edited = { ...old("face-serum"), images: ["data:image/webp;base64,AAA"], directions: "Admin wrote this", name: "My name" };

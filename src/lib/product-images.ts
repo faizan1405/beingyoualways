@@ -6,7 +6,8 @@
 //   never regenerated. Texture shots show no packaging. Kept as backup.
 // - Infographic set: 01-hero (above) + src/assets/products/infographics/<slug>/02-who,
 //   03-inside, 04-how .webp, rendered from design/gallery-slides. Shoppers see it when the set
-//   is "ready" or "preview" (general How to use guide) in src/content/infographics.json.
+//   is "ready" in src/content/infographics.json. Products photographed later (e.g. the body
+//   lotion) may have only 01-hero in gallery/; that is enough for the infographic set.
 import { isInfographicShown } from "@/content/infographics";
 
 const files = import.meta.glob<string>("../assets/products/*.webp", { eager: true, import: "default" });
