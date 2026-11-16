@@ -1,0 +1,1 @@
+- Product gallery infographic slides are built from editable HTML/CSS in `design/gallery-slides/<slug>/` (shared styles in `shared/slide.css`) and exported to 1600² WebP; text is never AI-rendered and packaging is the real photo cut-out — keeps copy correct and editable.
