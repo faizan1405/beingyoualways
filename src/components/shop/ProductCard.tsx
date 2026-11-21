@@ -5,7 +5,6 @@ import { useRef, useState } from "react";
 import { inr } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 import type { Product } from "@/lib/types";
-import { categories } from "@/lib/mock-data";
 import { isUnconfirmed, mrpOf, requiresChoice, variantKindLabel } from "@/lib/variants";
 import { minPrice, totalStock } from "@/services/productService";
 import { cn } from "@/lib/utils";
@@ -20,10 +19,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   const choose = requiresChoice(product);
   const only = product.variants[0];
   const out = totalStock(product) === 0;
-  const cat = categories.find((c) => c.slug === product.category)?.name;
   const mrp = choose ? null : mrpOf(only);
   const kind = variantKindLabel(product);
-  const quickCls = "btn-motion btn-fill absolute inset-x-3 bottom-3 flex h-11 items-center justify-center gap-1.5 rounded-btn border border-primary bg-primary text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-foreground shadow-soft [--btn-fill:color-mix(in_oklab,var(--primary)_78%,var(--foreground))] md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:translate-y-0 md:focus-visible:opacity-100";
+  const fromPrice = choose && new Set(product.variants.map((v) => v.price)).size > 1;
+  const actionCls = "btn-motion btn-fill relative flex h-11 w-full items-center justify-center gap-1.5 rounded-btn border border-primary/70 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary transition-colors hover:text-primary-foreground [--btn-fill:var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   const quickAdd = () => {
     if (busy.current || !only) return;
@@ -34,7 +33,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   };
 
   return (
-    <article className="group relative flex flex-col">
+    <article className="group relative flex h-full flex-col">
       <div className="relative overflow-hidden rounded-lg ring-1 ring-transparent transition-[box-shadow,transform] duration-500 ease-[var(--ease-lux)] group-hover:-translate-y-1 group-hover:shadow-lift group-hover:ring-border">
         <Link to="/product/$slug" params={{ slug: product.slug }} aria-label={product.name}>
           <ProductVisual
@@ -53,26 +52,21 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
         </button>
         {out && <span className="absolute left-3 top-3 rounded-full bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-background">Unavailable</span>}
         {!out && mrp && <span className="absolute left-3 top-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">Offer</span>}
-        {!out && (choose ? (
-          <Link to="/product/$slug" params={{ slug: product.slug }} className={quickCls} aria-label={`Choose a ${kind} for ${product.name}`}>
-            Choose {kind} <ArrowRight className="size-3.5" />
-          </Link>
-        ) : (
-          <button type="button" onClick={quickAdd} className={quickCls} aria-label={`Add ${product.name} to bag`}>
-            {added ? <><Check className="size-3.5" /> Added</> : <><Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" /> Add to bag</>}
-          </button>
-        ))}
       </div>
-      <div className="mt-4 flex flex-col gap-1">
-        <p className="eyebrow !text-[10px]">{cat}</p>
-        <Link to="/product/$slug" params={{ slug: product.slug }} className="font-serif text-xl leading-tight hover:text-primary">
+      <div className="mt-4 flex flex-1 flex-col">
+        {/* Ratings/review counts render here only once verified review data exists — never placeholder numbers. */}
+        <Link to="/product/$slug" params={{ slug: product.slug }} className="line-clamp-2 font-serif text-lg leading-snug transition-colors hover:text-primary md:text-xl">
           {product.name}
         </Link>
-        <div className="flex items-baseline gap-2 text-sm">
-          <span className="font-semibold">{choose && new Set(product.variants.map((v) => v.price)).size > 1 ? "From " : ""}{inr(minPrice(product))}</span>
-          {mrp && <span className="text-muted-foreground line-through"><span className="sr-only">MRP </span>{inr(mrp)}</span>}
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+          <span className="font-serif text-2xl font-semibold leading-none text-primary md:text-[1.7rem]">
+            {fromPrice && <span className="mr-1 font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">From</span>}
+            {inr(minPrice(product))}
+          </span>
+          {mrp && <span className="text-sm text-muted-foreground line-through"><span className="sr-only">MRP </span>{inr(mrp)}</span>}
+          {mrp && mrp > minPrice(product) && <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">Save {inr(mrp - minPrice(product))}</span>}
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {product.variants.some((v) => v.swatch) ? (
             <>
               {product.variants.map((v) => v.swatch && <span key={v.id} title={v.label} className="size-3.5 rounded-full border border-border" style={{ background: v.swatch }} />)}
@@ -82,6 +76,19 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             product.variants.filter((v) => !isUnconfirmed(v.label)).map((v) => (
               <span key={v.id} className="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">{v.label}</span>
             ))
+          )}
+        </div>
+        <div className="mt-auto pt-4">
+          {out ? (
+            <span className={cn(actionCls, "cursor-default border-border text-muted-foreground")}>Unavailable</span>
+          ) : choose ? (
+            <Link to="/product/$slug" params={{ slug: product.slug }} className={actionCls} aria-label={`Choose a ${kind} for ${product.name}`}>
+              Choose {kind} <ArrowRight className="size-3.5" />
+            </Link>
+          ) : (
+            <button type="button" onClick={quickAdd} className={actionCls} aria-label={`Add ${product.name} to bag`}>
+              {added ? <><Check className="size-3.5" /> Added</> : <><Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" /> Add to bag</>}
+            </button>
           )}
         </div>
       </div>

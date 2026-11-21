@@ -1,32 +1,28 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronDown, Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { brandConfig, navigationConfig } from "@/config/business";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useShop } from "@/lib/shop-store";
 
-export const ANNOUNCEMENT = "Naturally you, beautifully always · Plant-based skin, hair & colour care";
-
-const shopNav = [
-  { to: "/shop", label: "Shop All" },
-  { to: "/skincare", label: "Skin Care" },
-  { to: "/haircare", label: "Hair Care" },
-  { to: "/de-tan-care", label: "De-Tan Care" },
-  { to: "/colour-cosmetics", label: "Colour Cosmetics" },
-  { to: "/combos", label: "Combos" },
-] as const;
+const headerNav = navigationConfig.header;
 const moreNav = [
-  { to: "/about", label: "About Us" },
+  { to: "/explore-concerns", label: "Explore by Concern" },
   { to: "/contact", label: "Contact Us" },
   { to: "/faq", label: "FAQs" },
 ] as const;
 
-export function Wordmark({ className = "", compact = false }: { className?: string | undefined; compact?: boolean }) {
+export function Wordmark({ className = "", compact = false, tagline = false }: { className?: string | undefined; compact?: boolean; tagline?: boolean }) {
   return (
-    <Link to="/" className={`flex shrink-0 flex-col items-start leading-none ${className}`} aria-label="Being You – Always, home">
-      <span className={`font-serif tracking-wide transition-[font-size] duration-500 ${compact ? "text-xl md:text-2xl" : "text-2xl md:text-[1.7rem]"}`}>Being You</span>
-      <span className="mt-0.5 pl-0.5 text-[9px] font-semibold uppercase tracking-[0.42em] text-muted-foreground">— Always —</span>
+    <Link to="/" className={`flex shrink-0 flex-col items-center text-center leading-none ${className}`} aria-label="Being You – Always, home">
+      <span className={`font-serif tracking-wide transition-[font-size] duration-500 ${compact ? "text-xl md:text-2xl" : "text-2xl md:text-[2rem]"}`}>Being You</span>
+      <span className="mt-1 pl-[0.42em] text-[9px] font-semibold uppercase tracking-[0.42em] text-muted-foreground">— Always —</span>
+      {tagline && (
+        <span className={`hidden overflow-hidden whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.22em] text-accent transition-[max-height,opacity,margin] duration-500 sm:block ${compact ? "mt-0 max-h-0 opacity-0" : "mt-2 max-h-4 opacity-100"}`}>
+          {brandConfig.headerTagline}
+        </span>
+      )}
     </Link>
   );
 }
@@ -51,47 +47,44 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="bg-primary py-2 text-center text-[11px] font-medium tracking-[0.14em] text-primary-foreground">{ANNOUNCEMENT}</div>
-      <header className={`sticky top-0 z-40 border-b transition-[background-color,box-shadow,border-color] duration-500 ${scrolled ? "border-border/70 bg-page shadow-soft" : "border-transparent bg-page"}`}>
-        <div className={`container-lux flex items-center gap-4 transition-[height] duration-500 ${scrolled ? "h-14 md:h-16" : "h-16 md:h-20"}`}>
-          <button className={`${iconBtn} -ml-2 lg:hidden`} aria-label="Open menu" onClick={() => setMenu(true)}>
-            <Menu className="size-5" />
-          </button>
-          <Wordmark compact={scrolled} />
-
-          <nav aria-label="Main" className="hidden min-w-0 flex-1 items-center justify-center gap-4 lg:flex xl:gap-7">
-            {shopNav.map((n) => (
-              <Link key={n.to} to={n.to} className="link-underline whitespace-nowrap py-2 text-[13px] font-medium text-foreground/80 transition-colors hover:text-primary" activeProps={{ className: "!text-primary" }}>
-                {n.label}
-              </Link>
-            ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="group flex items-center gap-1 whitespace-nowrap py-2 text-[13px] font-medium text-foreground/80 outline-none hover:text-primary focus-visible:text-primary">
-                More <ChevronDown className="size-3.5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="min-w-44">
-                {moreNav.map((n) => (
-                  <DropdownMenuItem key={n.to} asChild><Link to={n.to} className="cursor-pointer">{n.label}</Link></DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </nav>
-
-          <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:ml-0">
+      <header className={`sticky top-0 z-40 border-b bg-page transition-[box-shadow,border-color] duration-500 ${scrolled ? "border-border/70 shadow-soft" : "border-border/50"}`}>
+        <div className={`container-lux grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-[padding] duration-500 ${scrolled ? "py-2" : "py-3 md:py-5"}`}>
+          <div className="-ml-2 flex items-center gap-0.5">
+            <button className={`${iconBtn} lg:hidden`} aria-label="Open menu" onClick={() => setMenu(true)}>
+              <Menu className="size-5" />
+            </button>
             <button className={iconBtn} aria-label={searching ? "Close search" : "Search"} aria-expanded={searching} onClick={() => setSearching((s) => !s)}>
               {searching ? <X className="size-5" /> : <Search className="size-5" />}
             </button>
-            <Link to="/login" className={`${iconBtn} hidden sm:grid`} aria-label="Account"><User className="size-5" /></Link>
             <Link to="/wishlist" className={`${iconBtn} hidden sm:grid`} aria-label="Wishlist"><Heart className="size-5" /></Link>
-            <button className={`${iconBtn} relative -mr-2`} aria-label={`Bag, ${count} items`} onClick={() => setDrawerOpen(true)}>
+          </div>
+
+          <Wordmark compact={scrolled} tagline />
+
+          <div className="-mr-2 flex items-center justify-end gap-0.5">
+            <Link to="/login" className={`${iconBtn} hidden sm:grid`} aria-label="Account"><User className="size-5" /></Link>
+            <button className={`${iconBtn} relative`} aria-label={`Bag, ${count} items`} onClick={() => setDrawerOpen(true)}>
               <ShoppingBag className="size-5" />
               {count > 0 && <span key={bump} className="badge-bump absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground">{count}</span>}
             </button>
           </div>
         </div>
+
+        <nav aria-label="Categories" className="hidden border-t border-border/50 lg:block">
+          <ul className="container-lux flex items-center justify-center gap-10 xl:gap-14">
+            {headerNav.map((n) => (
+              <li key={n.to}>
+                <Link to={n.to} className="link-underline block whitespace-nowrap py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-foreground/75 transition-colors hover:text-primary" activeProps={{ className: "!text-primary" }}>
+                  {n.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         {searching && (
           <form
-            className="container-lux animate-in fade-in slide-in-from-top-2 pb-4 duration-300"
+            className="container-lux animate-in fade-in slide-in-from-top-2 pb-4 pt-2 duration-300"
             onSubmit={(e) => { e.preventDefault(); setSearching(false); navigate({ to: "/shop", search: { q: q || undefined } }); }}
           >
             <label htmlFor="site-search" className="sr-only">Search products</label>
@@ -104,8 +97,9 @@ export function SiteHeader() {
         <SheetContent side="left" className="w-[86vw] max-w-sm overflow-y-auto bg-background">
           <SheetTitle className="font-serif text-2xl">Menu</SheetTitle>
           <nav aria-label="Mobile" className="mt-6 flex flex-col">
-            <p className="eyebrow mb-1">Shop</p>
-            {shopNav.map((n, i) => (
+            <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-accent">{brandConfig.headerTagline}</p>
+            <p className="eyebrow mb-1 mt-6">Shop by category</p>
+            {headerNav.map((n, i) => (
               <Link key={n.to} to={n.to} onClick={() => setMenu(false)} style={{ animationDelay: `${120 + i * 50}ms` }} className="animate-in fade-in slide-in-from-left-4 fill-mode-both border-b border-border py-3.5 font-serif text-2xl duration-500 active:text-accent">{n.label}</Link>
             ))}
             <p className="eyebrow mb-1 mt-8">Help & brand</p>

@@ -37,5 +37,20 @@ export const deTanSlugs: string[] = ["tomato-face-wash", "volcanic-scrub", "face
 /** Combos / bundles listed on the original site. */
 export const comboSlugs: string[] = ["wax-powder-aloe-vera-gel-combo"];
 
+/** Homepage Best Seller picks chosen by the client (Nov 2026 corrections), in display order. */
+export const bestSellerSlugs: string[] = ["face-serum", "hair-oil", "hair-mask", "liquid-matte-lipstick"];
+
+/**
+ * Homepage "Shop by category" groups, as listed by the client (Nov 2026 corrections).
+ * Slugs point at existing product records — one product may sit in several groups
+ * (Tomato Face Wash is in Skin Care and De-Tan Care). Hidden drafts drop out on render.
+ */
+export const homeCategoryGroups: { key: string; label: string; to: "/skincare" | "/haircare" | "/de-tan-care" | "/colour-cosmetics"; slugs: string[] }[] = [
+  { key: "skin", label: "Skin Care", to: "/skincare", slugs: ["face-wash", "tomato-face-wash", "toner", "aloe-vera-gel", "sunscreen", "face-serum"] },
+  { key: "hair", label: "Hair Care", to: "/haircare", slugs: ["hair-oil", "shampoo", "hair-mask"] },
+  { key: "de-tan", label: "De-Tan Care", to: "/de-tan-care", slugs: ["tomato-face-wash", "face-mask", "volcanic-scrub"] },
+  { key: "cosmetics", label: "Cosmetics", to: "/colour-cosmetics", slugs: ["liquid-matte-lipstick", "kajal", "mascara", "liquid-eyeliner", "eyebrow-definer", "true-base-liquid-foundation", "magic-drop", "bright-banana-powder"] },
+];
+
 
 export const getConcern = (slug: string) => concerns.find((c) => c.slug === slug) ?? null;

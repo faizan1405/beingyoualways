@@ -4,6 +4,8 @@
 export const brandConfig = {
   name: "Being You – Always",
   tagline: "Naturally you, beautifully always.",
+  /** Header line under the logo, as on the client's live site header. */
+  headerTagline: "Nature-Powered Skin & Hair Care",
   business: "Plant-Based Skincare, Haircare & Colour Cosmetics",
   shortDescription:
     "Nature-inspired skincare, haircare and colour cosmetics for everyday rituals that feel thoughtful, enjoyable and personal.",
@@ -56,6 +58,15 @@ export const aboutContent = {
 } as const;
 
 export const navigationConfig = {
+  /** Header category row, in the client's order (Nov 2026 corrections). No standalone "Shop" item. */
+  header: [
+    { to: "/skincare", label: "Skin" },
+    { to: "/haircare", label: "Hair" },
+    { to: "/de-tan-care", label: "De-Tan Care" },
+    { to: "/colour-cosmetics", label: "Cosmetic" },
+    { to: "/combos", label: "Combos" },
+    { to: "/about", label: "About Us" },
+  ],
   shop: [
     { to: "/skincare", label: "Skin Care" },
     { to: "/haircare", label: "Hair Care" },
@@ -114,12 +125,17 @@ export const standForContent = {
   ],
 } as const;
 
-/** Original "Global Standards" section — heading and the six countries shown on the old site. */
+/**
+ * Country highlight. `heading` is the old site's wording, kept for reference only: it calls these
+ * ingredient import origins, which is unverified — the page shows the neutral `displayHeading`
+ * until the client proves sourcing. Countries and order from the Nov 2026 corrections.
+ */
 export const globalStandardsContent = {
   heading: "Global Standards for Importing Cosmetic Ingredients",
+  displayHeading: "Global Standards",
   countries: [
     { code: "IN", name: "India" },
-    { code: "KR", name: "South Korea" },
+    { code: "KR", name: "Korea" },
     { code: "ES", name: "Spain" },
     { code: "BR", name: "Brazil" },
     { code: "DE", name: "Germany" },

@@ -31,7 +31,7 @@ function Products() {
 
   const highDemand = useMutation({
     mutationFn: ({ id, on }: { id: string; on: boolean }) => productService.setHighDemand(id, on),
-    onSuccess: (p) => { qc.invalidateQueries({ queryKey: ["admin", "products"] }); toast(p.bestSeller ? `${p.name} now shows in High Demand` : `${p.name} removed from High Demand`); },
+    onSuccess: (p) => { qc.invalidateQueries({ queryKey: ["admin", "products"] }); toast(p.bestSeller ? `${p.name} now shows in Best Seller` : `${p.name} removed from Best Seller`); },
     onError: (e: Error) => toast.error(e.message),
   });
   const marked = data.filter((p) => p.bestSeller).length;
@@ -46,9 +46,9 @@ function Products() {
       actions={<div className="flex flex-wrap gap-2"><Button variant="luxOutline" size="xl" onClick={() => reset.mutate()}><RotateCcw /> Reset demo data</Button><Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
       <Panel>
         <input aria-label="Search products" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className={`${adminInput} mb-2 max-w-sm`} />
-        <p className="mb-4 text-xs text-muted-foreground">{marked} product{marked === 1 ? "" : "s"} in this list marked High Demand — they appear on the homepage (hidden products are skipped).</p>
+        <p className="mb-4 text-xs text-muted-foreground">{marked} product{marked === 1 ? "" : "s"} in this list marked Best Seller — they appear on the homepage (hidden products are skipped).</p>
         {isLoading ? <div className="h-40 animate-pulse rounded bg-secondary" /> : (
-          <Table head={["Product", "Category", "Price", "Stock", "Status", "High Demand", ""]}>
+          <Table head={["Product", "Category", "Price", "Stock", "Status", "Best Seller", ""]}>
             {data.map((p) => {
               const stock = totalStock(p);
               return (
@@ -58,7 +58,7 @@ function Products() {
                   <Td>{inr(minPrice(p))}</Td>
                   <Td><span className={stock === 0 ? "text-destructive" : stock < 10 ? "text-warning" : ""}>{stock}</span></Td>
                   <Td><Pill t={p.status === "active" ? "good" : p.status === "draft" ? "warn" : "muted"}>{p.status}</Pill></Td>
-                  <Td><Switch checked={!!p.bestSeller} disabled={highDemand.isPending} onCheckedChange={(on) => highDemand.mutate({ id: p.id, on })} aria-label={`Show ${p.name} in High Demand`} /></Td>
+                  <Td><Switch checked={!!p.bestSeller} disabled={highDemand.isPending} onCheckedChange={(on) => highDemand.mutate({ id: p.id, on })} aria-label={`Show ${p.name} in Best Seller`} /></Td>
                   <Td className="whitespace-nowrap text-right">
                     <Button variant="ghost" size="icon" asChild aria-label={`Edit ${p.name}`}><Link to="/admin/products/$id" params={{ id: p.id }}><Pencil /></Link></Button>
                     <Button variant="ghost" size="icon" aria-label={`Delete ${p.name}`} onClick={() => setDel(p)}><Trash2 className="text-destructive" /></Button>

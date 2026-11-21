@@ -7,6 +7,7 @@ import { VideoReviews } from "@/components/home/VideoReviews";
 
 import { FaqList, faqs } from "@/components/home/FaqList";
 import { Hero } from "@/components/home/Hero";
+import { CategoryShop } from "@/components/home/CategoryShop";
 import { ProductCard, ProductGridSkeleton } from "@/components/shop/ProductCard";
 import { useHighDemand } from "@/hooks/use-high-demand";
 import { ProductVisual } from "@/components/shop/ProductVisual";
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/_site/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async () => ({ highDemand: await productService.highDemand() }),
+  loader: async () => ({ highDemand: await productService.highDemand(), products: await productService.list() }),
   component: Home,
 });
 
@@ -46,7 +47,7 @@ function SectionHead({ id, eyebrow, title, link }: { id?: string | undefined; ey
 }
 
 function Home() {
-  const { highDemand: initialHighDemand } = Route.useLoaderData();
+  const { highDemand: initialHighDemand, products } = Route.useLoaderData();
   const highDemand = useHighDemand(initialHighDemand);
   return (
     <>
@@ -54,8 +55,11 @@ function Home() {
 
       <ShopByConcern />
 
-      <section className="container-lux pb-20 md:pb-28" aria-labelledby="high-demand-h">
-        <SectionHead id="high-demand-h" eyebrow="Selected by our team" title="High demand" link={{ to: "/shop", label: "Shop all" }} />
+      <CategoryShop products={products} />
+
+      <section className="border-t border-border/60 bg-page pt-20 pb-20 md:pt-28 md:pb-28" aria-labelledby="best-seller-h">
+        <div className="container-lux">
+        <SectionHead id="best-seller-h" eyebrow="Favourite picks" title="Best Seller" link={{ to: "/shop", label: "Shop all" }} />
         {highDemand.list.length > 0 ? (
           <StaggerContainer key={highDemand.list.map((p) => p.id).join()} step={70} max={4} className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
             {highDemand.list.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
@@ -65,12 +69,13 @@ function Home() {
         ) : (
           <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center">
             <Sparkles className="size-5 text-accent" strokeWidth={1.5} aria-hidden />
-            <p className="mt-4 font-serif text-2xl">Our High Demand picks are on their way.</p>
+            <p className="mt-4 font-serif text-2xl">Our Best Seller picks are on their way.</p>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">In the meantime, explore the full collection of plant-based skin, hair and colour care.</p>
             <Button variant="luxOutline" size="lg" className="mt-6" asChild><Link to="/shop">Shop the collection <ArrowRight /></Link></Button>
-            <p className="mt-5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Preview · mark products as High Demand in Admin → Products</p>
+            <p className="mt-5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Preview · mark products as Best Seller in Admin → Products</p>
           </div>
         )}
+        </div>
       </section>
 
       <section className="border-t border-border/60 bg-page">

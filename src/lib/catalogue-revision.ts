@@ -151,3 +151,9 @@ export function reviseStored(stored: Product[], seed: Product[]): Product[] {
   for (const a of addedProducts) if (!out.some((p) => p.id === a.id || p.slug === a.slug)) out.push(structuredClone(a));
   return out;
 }
+
+/** Version of the client's Best Seller picks; bump to re-apply them once to saved demo data. */
+export const BEST_SELLER_PICKS = "2026-11-21";
+/** Saved demo data gets the client's chosen Best Seller picks once (later admin toggles are kept). */
+export const applyBestSellerPicks = (list: Product[], picks: string[]): Product[] =>
+  list.map((p) => ({ ...p, bestSeller: picks.includes(p.slug) }));

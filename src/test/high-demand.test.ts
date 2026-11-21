@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { products } from "@/lib/mock-data";
 import { productService, selectHighDemand } from "@/services/productService";
 
-describe("homepage High Demand", () => {
+describe("homepage Best Seller", () => {
   it("shows only products marked High Demand, not every product", () => {
     const shown = selectHighDemand(products);
     expect(shown.length).toBeGreaterThan(0);
@@ -11,8 +11,8 @@ describe("homepage High Demand", () => {
     expect(shown.every((p) => p.bestSeller === true)).toBe(true);
   });
 
-  it("starts from the client's featured picks on the original site", () => {
-    expect(selectHighDemand(products).map((p) => p.slug)).toEqual(products.filter((p) => p.featured).map((p) => p.slug));
+  it("starts with exactly the client's four picks, in their order", () => {
+    expect(selectHighDemand(products).map((p) => p.slug)).toEqual(["face-serum", "hair-oil", "hair-mask", "liquid-matte-lipstick"]);
   });
 
   it("skips products hidden from the shop even when marked", () => {

@@ -2,8 +2,8 @@
 // bodies for fetch(`${API_BASE_URL}/products...`) without touching pages.
 import { categories, products as seed } from "@/lib/mock-data";
 import type { CategorySlug, Product } from "@/lib/types";
-import { productConcerns, type ConcernSlug } from "@/lib/concerns";
-import { CATALOGUE_REVISION, reviseStored } from "@/lib/catalogue-revision";
+import { bestSellerSlugs, productConcerns, type ConcernSlug } from "@/lib/concerns";
+import { BEST_SELLER_PICKS, CATALOGUE_REVISION, applyBestSellerPicks, reviseStored } from "@/lib/catalogue-revision";
 
 // Demo admin edits persist in localStorage; resetDemo() restores the imported catalogue.
 const KEY = "bya.products.v2";
@@ -12,6 +12,8 @@ const withHighDemandDefaults = (list: Product[]): Product[] =>
   list.map((p) => (p.bestSeller === undefined ? { ...p, bestSeller: seed.find((s) => s.id === p.id)?.bestSeller ?? false } : p));
 // Saved demo data from before a catalogue revision is upgraded once (admin edits kept).
 const REV_KEY = "bya.products.rev";
+// The client's Best Seller picks are applied to saved demo data once per picks version.
+const PICKS_KEY = "bya.products.bestSellerPicks";
 const load = (): Product[] => {
   if (typeof window === "undefined") return structuredClone(seed);
   try {
@@ -21,6 +23,10 @@ const load = (): Product[] => {
     if (localStorage.getItem(REV_KEY) !== CATALOGUE_REVISION) {
       list = reviseStored(list, seed);
       try { localStorage.setItem(KEY, JSON.stringify(list)); localStorage.setItem(REV_KEY, CATALOGUE_REVISION); } catch { /* storage full: use upgraded copy for this visit */ }
+    }
+    if (localStorage.getItem(PICKS_KEY) !== BEST_SELLER_PICKS) {
+      list = applyBestSellerPicks(list, bestSellerSlugs);
+      try { localStorage.setItem(KEY, JSON.stringify(list)); localStorage.setItem(PICKS_KEY, BEST_SELLER_PICKS); } catch { /* storage full: use upgraded copy for this visit */ }
     }
     return list;
   } catch { return structuredClone(seed); }
@@ -66,8 +72,11 @@ export function filterProducts(list: Product[], query: ProductQuery): Product[] 
   return out;
 }
 
-/** Homepage High Demand: only active products the admin has marked, in catalogue order. Never filler. */
-export const selectHighDemand = (list: Product[]): Product[] => list.filter((p) => p.status === "active" && p.bestSeller === true);
+/** Homepage Best Seller: only active products marked Best Seller — client's picks in their order, then other marked ones. Never filler. */
+export const selectHighDemand = (list: Product[]): Product[] => {
+  const rank = (p: Product) => { const i = bestSellerSlugs.indexOf(p.slug); return i < 0 ? bestSellerSlugs.length : i; };
+  return list.filter((p) => p.status === "active" && p.bestSeller === true).map((p, i) => ({ p, i })).sort((a, b) => rank(a.p) - rank(b.p) || a.i - b.i).map(({ p }) => p);
+};
 
 export const concernsOf = (p: Product): string[] => p.concerns ?? productConcerns[p.slug] ?? [];
 

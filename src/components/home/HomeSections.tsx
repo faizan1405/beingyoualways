@@ -99,11 +99,12 @@ export function WhyChooseUs() {
 
 /** Original "Global Standards" section: heading + six countries. Flags only — no certification or sourcing claims are added. */
 export function GlobalStandards() {
-  const { heading, countries } = globalStandardsContent;
+  // Neutral heading: the old site's "importing ingredients" wording is unverified (see business.ts).
+  const { displayHeading: heading, countries } = globalStandardsContent;
   return (
     <section aria-label={heading} className="container-lux py-20 md:py-28">
       <div className="text-center">
-        <RevealOnScroll as="p" kind="fade" className="eyebrow">Ingredients from around the world</RevealOnScroll>
+        <RevealOnScroll as="p" kind="fade" className="eyebrow">Around the world</RevealOnScroll>
         <TextReveal text={heading} className="mx-auto mt-3 max-w-3xl text-4xl leading-tight md:text-5xl" delay={80} />
       </div>
       <div className="relative mt-14 md:mt-16">
