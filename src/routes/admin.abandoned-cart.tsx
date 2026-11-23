@@ -10,7 +10,12 @@ import { useAllProducts, useDemoStore } from "@/hooks/use-demo-store";
 import { inr } from "@/lib/format";
 import type { AbandonedCartSettings } from "@/lib/types";
 import { discountStore } from "@/services/discountService";
+import { REMINDER_LABEL, reminderDecision, type ReminderDecision } from "@/lib/whatsapp-cloud";
 import { abandonedStore, fillTemplate, reminderDueAt, whatsappService } from "@/services/whatsappService";
+
+// Carts already reminded come from the server's message log; nothing has been sent, so it is empty.
+const REMINDED = new Set<string>();
+const TONE: Record<ReminderDecision, "info" | "warn" | "muted"> = { due: "info", waiting: "warn", off: "muted", "checked-out": "muted", "no-consent": "muted", "already-sent": "muted", "invalid-number": "warn" };
 
 export const Route = createFileRoute("/admin/abandoned-cart")({ component: Abandoned });
 
@@ -29,7 +34,7 @@ function Abandoned() {
   const rows = carts.map((c) => {
     const lines = c.items.map((i) => { const p = products.find((x) => x.id === i.productId); const v = p?.variants.find((x) => x.id === i.variantId); return { name: p?.name ?? "Removed product", label: v?.label ?? "", price: v?.price ?? 0, quantity: i.quantity }; });
     const due = reminderDueAt(c, saved.settings.delayHours);
-    return { ...c, lines, value: lines.reduce((t, l) => t + l.price * l.quantity, 0), due, eligible: saved.settings.enabled && due <= now };
+    return { ...c, lines, value: lines.reduce((t, l) => t + l.price * l.quantity, 0), due, decision: reminderDecision(c, saved.settings, now, REMINDED) };
   });
   const preview = fillTemplate(s.template, { name: "Riya", cart_link: "beingyoualways.com/cart" }) + (s.includeDiscount && s.discountCode ? ` Use code ${s.discountCode} at checkout.` : "");
 
@@ -40,7 +45,7 @@ function Abandoned() {
           <form className="space-y-4" noValidate onSubmit={(e) => { e.preventDefault(); try { whatsappService.saveAbandonedSettings({ ...s, discountCode: s.includeDiscount ? s.discountCode : "" }); toast("Settings saved — no reminders will be sent (simulation)"); } catch (err) { toast.error((err as Error).message); } }}>
             <label className="flex items-center justify-between text-sm">Automation enabled <Switch checked={s.enabled} onCheckedChange={(v) => setS({ ...s, enabled: v })} aria-label="Automation enabled" /></label>
             <div><label htmlFor="dh" className={adminLabel}>Send reminder after (hours)</label><input id="dh" type="number" min={1} max={72} className={adminInput} value={s.delayHours} onChange={(e) => setS({ ...s, delayHours: Number(e.target.value) })} /><p className="mt-1 text-xs text-muted-foreground">Agreed with the client: 6 hours. Allowed: 1–72.</p></div>
-            <div><label htmlFor="tm" className={adminLabel}>Message template</label><textarea id="tm" rows={4} maxLength={1024} className={`${adminInput} h-auto py-2`} value={s.template} onChange={(e) => setS({ ...s, template: e.target.value })} /><p className="mt-1 text-xs text-muted-foreground">Variables: {"{name}"}, {"{cart_link}"} (required)</p></div>
+            <div><label htmlFor="tm" className={adminLabel}>Message template</label><textarea id="tm" rows={4} maxLength={1024} className={`${adminInput} h-auto py-2`} value={s.template} onChange={(e) => setS({ ...s, template: e.target.value })} /><p className="mt-1 text-xs text-muted-foreground">Variables: {"{name}"}, {"{cart_link}"} (required). Must match the wording Meta approves for the <span className="font-mono">abandoned_cart_reminder</span> template.</p></div>
             <label className="flex items-center justify-between text-sm">Include a discount code <Switch checked={s.includeDiscount} onCheckedChange={(v) => setS({ ...s, includeDiscount: v })} aria-label="Include a discount code" /></label>
             {s.includeDiscount && (
               <div><label htmlFor="dc" className={adminLabel}>Discount code</label>
@@ -57,18 +62,19 @@ function Abandoned() {
         </Panel>
       </div>
       <Panel title="Abandoned carts (demo)">
-        <Table head={["Shopper", "Products in cart", "Cart value", "Left at", "Reminder timing", "Eligibility"]}>
+        <Table head={["Shopper", "Products in cart", "Cart value", "Left at", "Reminder timing", "WhatsApp consent", "Reminder"]}>
           {rows.map((c) => (
             <tr key={c.id}>
               <Td className="font-semibold">{c.customerName}<div className="text-xs font-normal text-muted-foreground">{c.phone}</div></Td>
               <Td><ul className="text-xs">{c.lines.map((l) => <li key={l.name + l.label}>{l.name} · {l.label} × {l.quantity}</li>)}</ul></Td>
               <Td>{inr(c.value)}</Td><Td>{fmt(new Date(c.abandonedAt))}</Td>
               <Td>{saved.settings.enabled ? fmt(c.due) : "Automation off"}</Td>
-              <Td>{!saved.settings.enabled ? <Pill t="muted">off</Pill> : c.eligible ? <Pill t="info">eligible · would send</Pill> : <Pill t="warn">waiting</Pill>}</Td>
+              <Td className="text-xs">{c.whatsappConsent === true ? "Yes" : c.whatsappConsent === false ? "No" : "Not asked"}</Td>
+              <Td><Pill t={TONE[c.decision]}>{REMINDER_LABEL[c.decision]}</Pill></Td>
             </tr>
           ))}
         </Table>
-        <p className="mt-3 text-[11px] text-muted-foreground">Cart values use today's prices. “Would send” means the reminder time has passed — nothing is actually sent.</p>
+        <p className="mt-3 text-[11px] text-muted-foreground">Cart values use today's prices. The Hostinger server runs the same checks every few minutes: reminders go only to shoppers who agreed to WhatsApp messages, once per cart, using the approved <span className="font-mono">abandoned_cart_reminder</span> template, and are cancelled if checkout is completed. “Due” means the server would send now — nothing is sent from this demo. Demo phone numbers are masked, so they can't receive messages.</p>
       </Panel>
       <Panel title="Automation history">
         {saved.history.length === 0 ? <p className="text-sm text-muted-foreground">No changes yet. Each saved change is listed here.</p> : (

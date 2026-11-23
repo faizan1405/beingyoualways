@@ -45,6 +45,7 @@ import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
+import { Route as AdminWhatsappApiRouteImport } from './routes/admin.whatsapp-api'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
 import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account.addresses'
@@ -237,6 +238,11 @@ const AdminWhatsappRoute = AdminWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminWhatsappApiRoute = AdminWhatsappApiRouteImport.update({
+  id: '/whatsapp-api',
+  path: '/whatsapp-api',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin_/login',
   path: '/admin/login',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/whatsapp-api': typeof AdminWhatsappApiRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
@@ -379,6 +386,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/whatsapp-api': typeof AdminWhatsappApiRoute
   '/admin/login': typeof AdminLoginRoute
   '/': typeof SiteIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -430,6 +438,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/whatsapp-api': typeof AdminWhatsappApiRoute
   '/admin_/login': typeof AdminLoginRoute
   '/_site/': typeof SiteIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -482,6 +491,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin/whatsapp-api'
     | '/admin/login'
     | '/admin/'
     | '/account/addresses'
@@ -528,6 +538,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin/whatsapp-api'
     | '/admin/login'
     | '/'
     | '/admin'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin/whatsapp-api'
     | '/admin_/login'
     | '/_site/'
     | '/admin/'
@@ -854,6 +866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWhatsappRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/whatsapp-api': {
+      id: '/admin/whatsapp-api'
+      path: '/whatsapp-api'
+      fullPath: '/admin/whatsapp-api'
+      preLoaderRoute: typeof AdminWhatsappApiRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin_/login': {
       id: '/admin_/login'
       path: '/admin/login'
@@ -1031,6 +1050,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminWhatsappRoute: typeof AdminWhatsappRoute
+  AdminWhatsappApiRoute: typeof AdminWhatsappApiRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCustomersIdRoute: typeof AdminCustomersIdRoute
   AdminOrdersIdRoute: typeof AdminOrdersIdRoute
@@ -1049,6 +1069,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminWhatsappRoute: AdminWhatsappRoute,
+  AdminWhatsappApiRoute: AdminWhatsappApiRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminCustomersIdRoute: AdminCustomersIdRoute,
   AdminOrdersIdRoute: AdminOrdersIdRoute,

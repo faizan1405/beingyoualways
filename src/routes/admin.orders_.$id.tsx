@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useDemoStore } from "@/hooks/use-demo-store";
 import { inr, shortDate } from "@/lib/format";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/types";
+import { orderNotification } from "@/lib/whatsapp-cloud";
 import { orderService, orderStore } from "@/services/orderService";
 
 export const Route = createFileRoute("/admin/orders_/$id")({ component: OrderAdmin });
@@ -28,6 +29,7 @@ function OrderAdmin() {
     toast(`Status set to ${s} (demo — customer not notified)`);
   };
   const a = o.shippingAddress;
+  const wa = orderNotification(o);
 
   return (
     <AdminPage title={`Order ${o.id}`} subtitle={`${when(o.createdAt)} · demo order — not a real purchase`}
@@ -75,6 +77,15 @@ function OrderAdmin() {
               <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Payment status</dt><dd className="capitalize">{o.paymentStatus === "cod" ? "Pay on delivery" : o.paymentStatus}{o.paymentStatus === "paid" ? " (simulated)" : ""}</dd></div>
             </dl>
             <p className="mt-2 text-xs text-muted-foreground">Payments aren't connected, so payment status can't be changed here.</p>
+          </Panel>
+          <Panel title="WhatsApp update">
+            {!wa ? <p className="text-sm text-muted-foreground">No WhatsApp message for the “{o.status}” status.</p> : (
+              <>
+                <p className="text-xs text-muted-foreground">Template <span className="font-mono font-semibold text-foreground">{wa.template}</span> · filled from this order</p>
+                <div className="mt-2 rounded-lg bg-sage/25 p-3"><p className="rounded-lg rounded-tr-none bg-card p-3 text-sm shadow-soft">{wa.preview}</p></div>
+                <p className="mt-2 text-xs text-muted-foreground">{wa.blocked ? `Can't be sent: ${wa.blocked}` : `To +${wa.to}.`} Not sent — the WhatsApp API is connected through the Hostinger server, which isn't live yet.</p>
+              </>
+            )}
           </Panel>
           <Panel title="Customer">
             <p className="text-sm font-semibold">{o.customerName}</p>

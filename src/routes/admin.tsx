@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ClipboardCheck, Quote, BarChart3, Bot, LayoutTemplate, LogOut, Menu, MessageCircle, Package, Settings, ShoppingCart, Tag, Timer, Users, X } from "lucide-react";
+import { ClipboardCheck, PlugZap, Quote, BarChart3, Bot, LayoutTemplate, LogOut, Menu, MessageCircle, Package, Settings, ShoppingCart, Tag, Timer, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { adminAuthService, type AdminSession } from "@/services/adminAuthService";
@@ -23,6 +23,7 @@ const nav = [
   { to: "/admin/orders", label: "Orders", I: ShoppingCart },
   { to: "/admin/customers", label: "Customers", I: Users },
   { to: "/admin/testimonials", label: "Customer Stories", I: Quote },
+  { to: "/admin/whatsapp-api", label: "WhatsApp Connection", I: PlugZap },
   { to: "/admin/whatsapp", label: "WhatsApp Marketing", I: MessageCircle },
   { to: "/admin/abandoned-cart", label: "Abandoned Cart", I: Timer },
   { to: "/admin/chatbot", label: "Chatbot", I: Bot },

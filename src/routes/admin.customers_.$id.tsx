@@ -52,6 +52,15 @@ function CustomerAdmin() {
             <p className="text-sm">Method: {c.signInMethod ? (c.signInMethod === "google" ? "Google" : "WhatsApp OTP") : "None yet"}</p>
             <div className="mt-3 flex flex-wrap gap-2"><NotConnected label="Google sign-in not connected" /><NotConnected label="WhatsApp OTP not connected" /></div>
           </Panel>
+          <Panel title="WhatsApp marketing consent">
+            <label htmlFor="wc" className={adminLabel}>Consent</label>
+            <select id="wc" className={adminInput} value={c.whatsappOptIn ?? ""} onChange={async (e) => { const v = e.target.value; await customerService.update(c.id, { whatsappOptIn: v === "opted-in" || v === "opted-out" ? v : undefined }); toast("Consent updated (demo)"); }}>
+              <option value="">Not asked — no marketing messages</option>
+              <option value="opted-in">Opted in (customer agreed)</option>
+              <option value="opted-out">Opted out / replied STOP</option>
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">Only record consent the customer actually gave. Order updates and sign-in codes don't need marketing consent; campaigns and cart reminders do.</p>
+          </Panel>
         </div>
         <div className="space-y-4">
           <Panel title="Order history">

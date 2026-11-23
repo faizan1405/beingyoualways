@@ -127,8 +127,8 @@ export const campaigns: WhatsAppCampaign[] = [];
 
 // DEMO abandoned carts (invented shoppers, masked numbers). Values come from current prices.
 export const abandonedCarts: AbandonedCart[] = [
-  { id: "ac1", customerName: "Riya Mehta", phone: "+91 98XXX 10022", items: [{ productId: "bya-1069", variantId: "face-serum-1", quantity: 1 }, { productId: "bya-1059", variantId: "hair-oil-1", quantity: 1 }], abandonedAt: "2026-11-06T06:10:00Z" },
-  { id: "ac2", customerName: "Guest shopper", phone: "+91 97XXX 44310", items: [{ productId: "bya-1073", variantId: "sunscreen-1", quantity: 1 }], abandonedAt: "2026-11-06T08:40:00Z" },
+  { id: "ac1", customerName: "Riya Mehta", phone: "+91 98XXX 10022", items: [{ productId: "bya-1069", variantId: "face-serum-1", quantity: 1 }, { productId: "bya-1059", variantId: "hair-oil-1", quantity: 1 }], abandonedAt: "2026-11-06T06:10:00Z", whatsappConsent: true },
+  { id: "ac2", customerName: "Guest shopper", phone: "+91 97XXX 44310", items: [{ productId: "bya-1073", variantId: "sunscreen-1", quantity: 1 }], abandonedAt: "2026-11-06T08:40:00Z", whatsappConsent: null },
 ];
 
 const opt = (id: string, label: string, response: string, next?: string) => ({ id, label, response, ...(next ? { next } : {}) });

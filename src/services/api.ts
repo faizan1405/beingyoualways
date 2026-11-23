@@ -26,7 +26,21 @@ export const API_ENDPOINTS = {
   content: "/api/admin/content",
   adminLogin: "/api/admin/login",
   adminMe: "/api/admin/me",
+  // WhatsApp Cloud API (all Meta calls happen on the server with the token from server env)
+  otpRequest: "/api/auth/whatsapp/request-otp",       // POST { phone } → { expiresInSeconds, resendInSeconds }
+  otpVerify: "/api/auth/whatsapp/verify-otp",         // POST { phone, code } → sets httpOnly session cookie
+  waStatus: "/api/admin/whatsapp/status",             // GET token, permissions, number, WABA, tier, quality
+  waTemplates: "/api/admin/whatsapp/templates",       // GET approved / pending templates from Meta
+  waMessages: "/api/admin/whatsapp/messages",         // GET sent / failed messages with webhook statuses
+  waErrors: "/api/admin/whatsapp/errors",             // GET recent Meta API errors
+  waTest: "/api/admin/whatsapp/tests",                // POST { check, recipient } — one authorized test number only
+  waOrderNotify: "/api/admin/orders/:id/notify",      // POST (also sent automatically on status change)
+  waCampaignSchedule: "/api/admin/whatsapp/campaigns/:id/schedule", // POST — admin presses Schedule; never automatic
+  waOptOut: "/api/admin/whatsapp/opt-outs",           // GET / POST consent changes ("STOP" replies arrive via webhook)
+  waWebhook: "/api/whatsapp/webhook",                 // GET verify handshake, POST Meta events (signature checked)
 } as const;
+
+export const isBackendConfigured = () => HOSTINGER_API_BASE_URL !== null;
 
 export class BackendNotConnectedError extends Error {
   constructor() { super("The Hostinger backend is not connected yet."); }

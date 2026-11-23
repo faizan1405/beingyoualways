@@ -107,8 +107,12 @@ export interface Customer {
   notes: string;
   /** How the customer signs in, once Google / WhatsApp OTP is connected on the backend. */
   signInMethod: "google" | "whatsapp" | null;
+  /** WhatsApp marketing consent. Missing = never asked, so no marketing messages. */
+  whatsappOptIn?: WhatsAppOptIn | undefined;
   isDemo: boolean;
 }
+
+export type WhatsAppOptIn = "opted-in" | "opted-out";
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "cod";
 export const ORDER_STATUSES = ["new", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"] as const;
@@ -168,6 +172,8 @@ export interface WhatsAppCampaign {
   template: string;
   body: string;
   segment: CampaignSegment;
+  /** Template variable → customer field (e.g. {{1}} → "name"). */
+  variables?: string[] | undefined;
   scheduledFor?: string | undefined;
   /** "scheduled" is a simulation only — nothing is sent until the WhatsApp API is connected. */
   status: CampaignStatus;
@@ -182,6 +188,10 @@ export interface AbandonedCart {
   phone: string;
   items: { productId: string; variantId: string; quantity: number }[];
   abandonedAt: string;
+  /** Shopper agreed to WhatsApp reminders (null = not asked → never remind). */
+  whatsappConsent?: boolean | null | undefined;
+  /** Set when the shopper later completed checkout → reminder is cancelled. */
+  checkedOutAt?: string | undefined;
 }
 
 export interface AbandonedCartSettings {

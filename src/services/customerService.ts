@@ -28,7 +28,7 @@ const r = <T,>(v: T) => Promise.resolve(structuredClone(v));
 export const customerService = {
   list: () => r(customerStore.get().map((c) => withStats(c, orderStore.get()))),
   get: (id: string) => { const c = customerStore.get().find((x) => x.id === id); return r(c ? withStats(c, orderStore.get()) : null); },
-  update: (id: string, patch: Partial<Pick<Customer, "status" | "notes" | "segment">>) => {
+  update: (id: string, patch: Partial<Pick<Customer, "status" | "notes" | "segment" | "whatsappOptIn">>) => {
     customerStore.set((all) => all.map((c) => (c.id === id ? { ...c, ...patch } : c)));
     return customerService.get(id);
   },

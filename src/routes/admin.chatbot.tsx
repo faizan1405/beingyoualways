@@ -11,6 +11,7 @@ import { useDemoStore } from "@/hooks/use-demo-store";
 import { newId } from "@/lib/demo-store";
 import type { ChatbotConfig, ChatbotMenu, ChatbotOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { replyToText } from "@/lib/whatsapp-cloud";
 import { chatbotStore, fillTemplate, whatsappService } from "@/services/whatsappService";
 
 export const Route = createFileRoute("/admin/chatbot")({ component: Chatbot });
@@ -25,6 +26,15 @@ function Conversation({ config }: { config: ChatbotConfig }) {
   const start = () => { const m = menuOf(config.entryMenuId); return m ? [open(m)] : [{ from: "bot" as const, text: "The first menu is switched off — customers would get no reply." }]; };
   const [chat, setChat] = useState<Bubble[]>(start);
   useEffect(() => { setChat(start()); }, [config]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [typed, setTyped] = useState("");
+  const send = (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = typed.trim();
+    if (!t) return;
+    const r = replyToText(t, config, STORE.store_url);
+    setChat((c) => [...c.map((b) => ({ ...b, options: undefined })), { from: "user", text: t }, { from: "bot", text: r.reply + (r.handoff ? "\n\n(Handed to a team member)" : "") }]);
+    setTyped("");
+  };
   const choose = (o: ChatbotOption) => {
     const next = menuOf(o.next);
     setChat((c) => [...c.map((b) => ({ ...b, options: undefined })), { from: "user", text: o.label }, { from: "bot", text: fillTemplate(o.response, STORE) }, ...(next ? [open(next)] : [])]);
@@ -41,6 +51,12 @@ function Conversation({ config }: { config: ChatbotConfig }) {
           </div>
         ))}
       </div>
+      <form onSubmit={send} className="mt-2 flex gap-2">
+        <label htmlFor="typed" className="sr-only">Type a message like a customer</label>
+        <input id="typed" className={adminInput} placeholder="Type like a customer, e.g. where is my order BYA-1042" value={typed} onChange={(e) => setTyped(e.target.value)} maxLength={300} />
+        <Button type="submit" size="sm" variant="outline" className="h-10">Send</Button>
+      </form>
+      <p className="mt-1 text-[11px] text-muted-foreground">Typed messages are matched to product, order tracking, shipping, refund and support topics; anything unclear goes to a person.</p>
       <Button type="button" size="sm" variant="ghost" className="mt-2" onClick={() => setChat(start())}><RotateCcw /> Restart preview</Button>
     </div>
   );
@@ -61,7 +77,7 @@ function Chatbot() {
   const addMenu = () => { const m: ChatbotMenu = { id: newId("m"), name: "New menu", enabled: true, greeting: "How can we help?", options: [] }; setC({ ...c, menus: [...c.menus, m] }); setSel(m.id); };
 
   return (
-    <AdminPage title="WhatsApp Chatbot" actions={<NotConnected />} subtitle="Rules-based menu replies (not AI). Build and try the flow here — it isn't connected to WhatsApp yet.">
+    <AdminPage title="WhatsApp Chatbot" actions={<NotConnected />} subtitle="Rules-based replies (not AI). On the live server, customer messages arrive through Meta's webhook and get these replies. Build and try the flow here — it isn't connected to WhatsApp yet.">
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <div className="space-y-4">
           <Panel title="Menus" action={<Button size="sm" variant="outline" onClick={addMenu}><Plus /> New menu</Button>}>

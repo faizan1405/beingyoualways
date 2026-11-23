@@ -25,7 +25,7 @@ export interface ApprovalItem {
   missing?: string[];
   /** Storefront pages this item affects. */
   pages?: string[];
-  adminLink?: "/admin/products" | "/admin/testimonials" | "/admin/settings" | "/admin/whatsapp";
+  adminLink?: "/admin/products" | "/admin/testimonials" | "/admin/settings" | "/admin/whatsapp" | "/admin/whatsapp-api";
 }
 
 interface Inputs {
@@ -135,9 +135,11 @@ export function buildApprovalChecklist({
     },
     {
       id: "whatsapp-api", title: "WhatsApp Business API", status: whatsappApiConnected ? "confirmed" : "waiting",
-      current: "Not connected. Campaigns, abandoned-cart reminders and the chatbot are drafts / previews only — nothing is sent.",
-      needed: "An approved WhatsApp Business API account (Meta) and approved message templates, connected through the Hostinger backend.",
-      affects: "WhatsApp campaigns, 6-hour cart reminders, chatbot, order updates, OTP sign-in.", pages: ["Admin → WhatsApp", "Abandoned Cart", "Chatbot", "Sign in"], adminLink: "/admin/whatsapp",
+      current: whatsappApiConnected
+        ? "Connected — the Hostinger server's authenticated request to Meta succeeded."
+        : "Meta App, Business Account and Phone Number IDs are recorded. Not connected: the Hostinger server isn't live and the access token hasn't been validated. OTP sign-in, order updates, cart reminders, campaigns and the chatbot are ready in the admin but nothing is sent.",
+      needed: "Hostinger backend with the owner's access token in its server settings, the 10 message templates approved in WhatsApp Manager, the webhook set up in Meta, and one authorized test number.",
+      affects: "WhatsApp campaigns, 6-hour cart reminders, chatbot, order updates, OTP sign-in.", pages: ["Admin → WhatsApp", "Abandoned Cart", "Chatbot", "Sign in"], adminLink: "/admin/whatsapp-api",
     },
     {
       id: "claims", title: "Brand claims & ingredient sourcing", status: claimsConfirmed ? "confirmed" : "waiting",

@@ -69,7 +69,8 @@ function Login() {
             if (!/^[6-9]\d{9}$/.test(digits)) return setErr("Enter a valid 10-digit mobile number");
             if (mode === "register" && name.trim().length < 2) return setErr("Please enter your name");
             setErr("");
-            await authService.requestOtp(digits);
+            const r = await authService.requestOtp(digits);
+            if (!r.ok) return setErr(r.error);
             navigate({ to: "/verify-otp", search: { phone: digits } });
           }}
         >

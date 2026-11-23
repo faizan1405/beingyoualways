@@ -3,6 +3,7 @@
 // so they're ready to hand to the Hostinger backend once the approved API is connected.
 import { createDemoStore, isArrayOf, isObject, newId, nowIso } from "@/lib/demo-store";
 import { abandonedCarts as cartSeed, campaigns as seed, chatbotConfig } from "@/lib/mock-data";
+import { REQUIRED_TEMPLATES, campaignRecipients, toWhatsAppDigits } from "@/lib/whatsapp-cloud";
 import type { AbandonedCart, AbandonedCartSettings, CampaignSegment, ChatbotConfig, Customer, Order, OrderEvent, WhatsAppCampaign } from "@/lib/types";
 
 export const WHATSAPP_CONNECTED = false;
@@ -33,8 +34,8 @@ export const chatbotStore = createDemoStore<ChatbotConfig>({
   validate: (v): v is ChatbotConfig => isObject(v) && Array.isArray(v["menus"]) && typeof v["entryMenuId"] === "string",
 });
 
-/** Approved-template names expected on WhatsApp Business (names only; content is composed below). */
-export const CAMPAIGN_TEMPLATES = ["new_launch", "festive_offer", "restock", "winback", "abandoned_cart_reminder"];
+/** Marketing templates a campaign can use (must be approved by Meta before sending). */
+export const CAMPAIGN_TEMPLATES = REQUIRED_TEMPLATES.filter((t) => t.category === "MARKETING" && t.name !== "abandoned_cart_reminder").map((t) => t.name);
 
 export const SEGMENTS: { key: CampaignSegment; label: string; hint: string }[] = [
   { key: "all", label: "All customers", hint: "Every active customer" },
@@ -50,6 +51,19 @@ export function segmentSize(seg: CampaignSegment, customers: Customer[], orders:
   if (seg === "new") return active.filter((c) => c.segment === "new").length;
   if (seg === "previous-buyers") return active.filter((c) => orders.some((o) => o.customerId === c.id)).length;
   return carts.length;
+}
+
+/** Customers a campaign may actually message: in the segment AND opted in with a usable number. */
+export function segmentRecipients(seg: CampaignSegment, customers: Customer[], orders: Order[], carts: AbandonedCart[]) {
+  const inSegment = customers.filter((c) => {
+    if (seg === "all") return true;
+    if (seg === "new") return c.segment === "new";
+    if (seg === "previous-buyers") return orders.some((o) => o.customerId === c.id);
+    return carts.some((k) => k.customerName === c.name);
+  });
+  const r = campaignRecipients(inSegment);
+  const guestCarts = seg === "abandoned" ? carts.filter((k) => !customers.some((c) => c.name === k.customerName) && k.whatsappConsent === true && toWhatsAppDigits(k.phone)).length : 0;
+  return { ...r, eligibleCount: r.eligible.length + guestCarts };
 }
 
 export const fillTemplate = (body: string, vars: Record<string, string>) => body.replace(/\{(\w+)\}/g, (m, k: string) => vars[k] ?? m);
@@ -76,7 +90,7 @@ export const whatsappService = {
     const action = prev ? "Edited" : "Created";
     const saved: WhatsAppCampaign = {
       ...c, id: prev?.id ?? newId("w"), status, createdAt: prev?.createdAt ?? at, updatedAt: at,
-      history: [...(prev?.history ?? []), { at, label: `${action} as ${status === "scheduled" ? `scheduled simulation for ${c.scheduledFor?.replace("T", " ")}` : "draft"} — not sent` }],
+      history: [...(prev?.history ?? []), { at, label: `${action} as ${status === "scheduled" ? `planned for ${c.scheduledFor?.replace("T", " ")}` : "draft"} — not sent` }],
     };
     campaignStore.set((all) => [saved, ...all.filter((x) => x.id !== saved.id)]);
     return saved;
