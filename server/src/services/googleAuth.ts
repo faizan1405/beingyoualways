@@ -1,4 +1,4 @@
-import { createHash, createPublicKey, randomBytes, verify } from "node:crypto";
+import { createHash, createHmac, createPublicKey, randomBytes, timingSafeEqual, verify } from "node:crypto";
 
 import type { Config } from "../config.js";
 import { badRequest, HttpError } from "../errors.js";
@@ -30,6 +30,8 @@ export interface GoogleState {
   state: string;
   nonce: string;
   verifier: string;
+  /** ms since epoch — the cookie is refused once it is older than the flow's 10 minutes */
+  issuedAt: number;
 }
 
 interface Jwk {
@@ -54,6 +56,32 @@ export function createGoogleAuth(config: Config, logger: Logger) {
     const body = (await res.json()) as { keys?: Jwk[] };
     jwks = { at: Date.now(), keys: Array.isArray(body.keys) ? body.keys : [] };
     return jwks.keys;
+  }
+
+  const mac = (body: string) => createHmac("sha256", config.authSecret).update(`google-flow.${body}`).digest("base64url");
+
+  /** The flow cookie is signed with AUTH_SECRET so it can't be forged, edited or replayed after it expires. */
+  function seal(flow: GoogleState): string {
+    const body = Buffer.from(JSON.stringify(flow), "utf8").toString("base64url");
+    return `${body}.${mac(body)}`;
+  }
+
+  function open(raw: string | undefined, now = Date.now()): GoogleState | null {
+    if (!raw || raw.length > 2048) return null;
+    const dot = raw.lastIndexOf(".");
+    if (dot <= 0) return null;
+    const body = raw.slice(0, dot);
+    const given = Buffer.from(raw.slice(dot + 1), "utf8");
+    const expected = Buffer.from(mac(body), "utf8");
+    if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
+    try {
+      const v = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as Partial<GoogleState>;
+      if (typeof v.state !== "string" || typeof v.nonce !== "string" || typeof v.verifier !== "string" || typeof v.issuedAt !== "number") return null;
+      if (v.issuedAt > now + 60_000 || now - v.issuedAt > STATE_TTL_MS) return null;
+      return { state: v.state, nonce: v.nonce, verifier: v.verifier, issuedAt: v.issuedAt };
+    } catch {
+      return null;
+    }
   }
 
   function start(): GoogleFlow {
@@ -142,6 +170,9 @@ export function createGoogleAuth(config: Config, logger: Logger) {
     configured: Boolean(config.google),
     start,
     complete,
+    verifyIdToken,
+    seal,
+    open,
     stateCookie: "bya_google_flow",
   };
 }

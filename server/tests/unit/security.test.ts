@@ -16,7 +16,7 @@ describe("configuration", () => {
   it("requires https CORS origins in production", () => {
     expect(() => loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32) })).toThrow(/CORS_ORIGINS/);
     expect(() => loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32), CORS_ORIGINS: "http://beingyoualways.com" })).toThrow(/https/);
-    const c = loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32), CORS_ORIGINS: "https://beingyoualways.com/" });
+    const c = loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32), CORS_ORIGINS: "https://beingyoualways.com/", PUBLIC_SITE_URL: "https://beingyoualways.com", MEDIA_ROOT: "/srv/bya-media" }, "/srv/app");
     expect(c.corsOrigins).toEqual(["https://beingyoualways.com"]);
     expect(c.cookie.secure).toBe(true);
   });

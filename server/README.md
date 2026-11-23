@@ -1,4 +1,4 @@
-# Being You – Always — API server (Phases 1–2)
+# Being You – Always — API server (Phases 1–3)
 
 Express + TypeScript + Prisma on **Hostinger MySQL/MariaDB**. Serves the product catalogue, real
 checkout (Cash on Delivery + Razorpay), private order-status pages, and the admin: sign-in, products,
@@ -101,40 +101,71 @@ CSRF/origin checks and no credential leaks when the database is down.
 
 # Deploying on Hostinger (GitHub → Hostinger)
 
-Needs a Hostinger plan with **Node.js web apps** (check your plan in hPanel; a VPS also works).
-Deploy two apps from the same repository: the **API** (this folder) and the **website** (repository root).
-Recommended: website on `beingyoualways.com`, API on `api.beingyoualways.com` (same site → `COOKIE_SAMESITE=lax`).
+Needs a Hostinger plan with **Node.js web apps** (Business / Cloud, or a VPS). Both apps deploy from this
+one GitHub repository and redeploy automatically on every push to the chosen branch:
 
-## 1. Database
+| App | Folder | Domain | Build | Start |
+|---|---|---|---|---|
+| API | `server` | `api.beingyoualways.com` | `npm ci && npm run build` | `npm start` (`node dist/src/index.js`) |
+| Website | repository root | `beingyoualways.com` (+ `www` only if used) | `npm install && NITRO_PRESET=node-server npm run build` | `node .output/server/index.mjs` |
+
+Same site (`*.beingyoualways.com`) → keep `COOKIE_SAMESITE=lax` and set `COOKIE_DOMAIN=.beingyoualways.com`.
+Node 20 or 22 for both.
+
+## 1. Database (once)
 hPanel → **Databases → MySQL Databases**: create a database + user. Note host, name, user, password.
 Build `DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/NAME"` (URL-encode special characters in the password).
 
-## 2. API app
-hPanel → **Websites → Add website → Node.js app → Import from GitHub**
-- Root / application directory: `server`
-- Node version: 20 or 22
-- Install: `npm ci` · Build: `npm run build` · Start: `npm start` (entry `dist/src/index.js`)
-- Environment variables: everything in `.env.example` (`NODE_ENV=production`, `DATABASE_URL`,
-  `CORS_ORIGINS=https://beingyoualways.com,https://www.beingyoualways.com`, `COOKIE_DOMAIN=.beingyoualways.com`
-  when the API is on a subdomain). Never commit real values.
-- Domain: attach `api.beingyoualways.com` and enable SSL.
-
-Then, once, from the app's terminal/SSH in the `server` folder:
+## 2. Media folder (once) — survives every redeploy
+GitHub redeploys replace the app folder, so uploads must live **outside** it. Over SSH / File Manager:
 ```bash
-npm run db:migrate          # applies prisma/migrations (safe to re-run)
-npm run db:seed:prod        # roles + 3 categories + the catalogue (never duplicates or overwrites)
+mkdir -p ~/bya-media && chmod 750 ~/bya-media     # owned by the hosting user the Node app runs as
+```
+Set `MEDIA_ROOT=/home/<your-hostinger-user>/bya-media` (absolute). In production the server refuses to start
+if `MEDIA_ROOT` is relative, inside the deploy folder, or not writable — the message says which.
+The email outbox (`MEDIA_ROOT/outbox`) lives there too.
+
+## 3. API app
+hPanel → **Websites → Add website → Node.js app → Import Git repository** → pick the repo and branch.
+- Application root / directory: `server` · Node 20/22 · Build: `npm ci && npm run build` · Start: `npm start`
+- Environment variables (hPanel, never in Git) — every name in `.env.example`. At minimum:
+  `NODE_ENV=production`, `DATABASE_URL`, `CORS_ORIGINS=https://beingyoualways.com,https://www.beingyoualways.com`
+  (drop `www` if unused), `PUBLIC_SITE_URL=https://beingyoualways.com`, `COOKIE_DOMAIN=.beingyoualways.com`,
+  `ORDER_LINK_SECRET`, `MEDIA_ROOT`, plus the Google, email and Razorpay groups below when you switch them on.
+- Domain: attach `api.beingyoualways.com`, enable SSL (HTTPS is required: cookies are `Secure` in production).
+
+First deploy only, from the app's SSH terminal in the `server` folder:
+```bash
+npm run db:migrate          # prisma migrate deploy — applies pending migrations, never resets or drops the database
+npm run db:seed:prod        # roles + categories + catalogue (never duplicates or overwrites)
 npm run admin:create -- --email owner@beingyoualways.com --name "Store Owner"   # prompts for the password
 ```
-Check: `https://api.beingyoualways.com/api/health` → `{"status":"ok","database":"ok"}`.
+Later deploys that add a migration: back up (see below), then `npm run db:migrate`, then restart.
+(Alternative: Start command `npm run start:migrate` applies pending migrations on every start.)
+**Never** run `prisma migrate dev`, `migrate reset` or `db push` against production.
 
-## 3. Website app
-Same flow with application directory = repository root:
-- Build: `NITRO_PRESET=node-server npm run build` · Start: `node .output/server/index.mjs`
-- Environment (build time): `VITE_API_BASE_URL=https://api.beingyoualways.com`
-- Without `VITE_API_BASE_URL` the site builds in labelled demo mode — always set it for production.
+Check: `https://api.beingyoualways.com/api/health` → `{"status":"ok","database":"ok"}` (503 + `database: unreachable` if MySQL is down).
+The start-up log line shows `env`, `google: on|off`, `mail: smtp|outbox` and `razorpay: test|live|off`.
 
-The website's own build was checked with `NITRO_PRESET=node-server` (Node output in `.output/`).
-All product photos and customer videos/photos are real files inside the repository (no Lovable-hosted media).
+## 4. Website app
+Add a second Node.js app from the same repository:
+- Application root: repository root · Node 20/22
+- Build: `npm install && NITRO_PRESET=node-server npm run build` · Start: `node .output/server/index.mjs`
+  (`NITRO_PRESET=node-server` turns the build into a plain Node server; it's ignored inside Lovable's own preview.)
+- Environment (needed **at build time**): `VITE_API_BASE_URL=https://api.beingyoualways.com`.
+  Without it a production build has no demo data and no admin — always set it.
+- Domain: `beingyoualways.com` (+ `www` redirect if used), SSL on.
+
+If the API is down the website says so ("The store can't be reached right now") instead of showing stale or demo data.
+All product photos and customer media shipped with the site are real files in the repository; photos uploaded
+later from the admin live in `MEDIA_ROOT` and in MySQL.
+
+## Secrets
+- Real values live only in hPanel environment variables (or a local `server/.env`, which is git-ignored).
+  `.env.example` holds names and placeholders only.
+- Repository audit (Nov 2026): no credentials found in tracked files or in Git history (Google, Razorpay, SMTP,
+  database URLs, private keys) — only obviously fake test values. No history clean-up is needed.
+- If a real secret is ever committed: rotate it at the provider first, then remove it from history.
 
 ## Admin accounts and recovery
 - There is no public sign-up. The first account is created with `admin:create` (must be the owner).
@@ -145,6 +176,7 @@ All product photos and customer videos/photos are real files inside the reposito
 - Passwords: at least 12 characters; common/guessable passwords are refused.
 
 ## Backups and recovery
+- Back up **both** the database and the `MEDIA_ROOT` folder (they belong together).
 - hPanel → **Databases → phpMyAdmin → Export** (or Hostinger's automatic backups). Before every deploy
   that adds a migration: `mysqldump --single-transaction -h HOST -u USER -p NAME > bya-$(date +%F).sql`.
 - Restore: import the dump into an empty database, point `DATABASE_URL` at it, run `npm run db:migrate`.
@@ -181,15 +213,33 @@ All product photos and customer videos/photos are real files inside the reposito
 - [ ] Stock counts entered for every product that should be orderable.
 - [ ] Razorpay test orders pass end-to-end on the Hostinger domain; then live keys.
 
-## Google sign-in (needs the owner's Google account)
-1. Google Cloud Console → create a project → **OAuth consent screen**: app name "Being You – Always",
-   support email, website + privacy policy links, scopes `openid`, `email`, `profile` → publish.
-2. **Credentials → Create credentials → OAuth client ID → Web application**.
-   Authorised redirect URI: `https://api.beingyoualways.com/api/auth/google/callback` (exactly).
-3. Put the values in the API app's environment: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
-   `GOOGLE_REDIRECT_URL` (the URI above) and `PUBLIC_SITE_URL=https://beingyoualways.com`. Restart.
-4. Check: `/api/auth/google/status` → `{"configured":true}`; the Google button on /login then sends
-   shoppers to Google. Until then it says Google sign-in isn't configured — sign-in is never simulated.
+## Google sign-in
+How it works: the website sends the shopper to `/api/auth/google/start`; the API redirects to Google
+(authorization code + PKCE, fresh `state` and `nonce`, held in a 10-minute HttpOnly cookie signed with
+`AUTH_SECRET`); Google returns to `/api/auth/google/callback`; the API swaps the code server-to-server, verifies
+the ID token (Google's signing keys, issuer, audience, expiry, nonce, confirmed email), creates or finds the
+shopper in MySQL, sets the shopper session cookie and sends the browser back to `PUBLIC_SITE_URL/login` — never
+to an address taken from the request. Shopper sessions can't open anything under `/api/admin`.
+Account linking: a returning Google ID signs into its account; a confirmed password account with the same
+email gets Google added; an unconfirmed password account is never taken over; an account tied to a different
+Google ID is never re-pointed.
+
+Google Cloud Console → APIs & Services:
+1. **OAuth consent screen**: app name "Being You – Always", support email, home page
+   `https://beingyoualways.com`, privacy policy `https://beingyoualways.com/privacy-policy`, scopes
+   `openid`, `email`, `profile`; authorised domain `beingyoualways.com`. Publish (or add test users first).
+2. **Credentials → OAuth client ID → Web application**:
+   - Authorised redirect URI (exactly): `https://api.beingyoualways.com/api/auth/google/callback`
+   - Authorised JavaScript origins: not used by this flow (everything runs server-side); adding
+     `https://beingyoualways.com` (and `https://www.beingyoualways.com` if used) is harmless.
+3. API app environment: `AUTH_GOOGLE_ID` (the `…apps.googleusercontent.com` client ID), `AUTH_GOOGLE_SECRET`,
+   `GOOGLE_REDIRECT_URL=https://api.beingyoualways.com/api/auth/google/callback`, `AUTH_SECRET` (48 random
+   characters), `PUBLIC_SITE_URL=https://beingyoualways.com`. Restart.
+   The server refuses to start if these are half-set, swapped, the redirect isn't exactly the callback route,
+   or it isn't https.
+4. Check: `/api/auth/google/status` → `{"configured":true}`; then sign in once with a real Google account
+   on the live site and confirm `/account` shows it. Until configured, the site says Google sign-in isn't
+   set up — sign-in is never simulated.
 
 ## Account emails (needs a mailbox)
 Messages: confirm email, reset password, password changed/reset notice, account deleted notice
@@ -203,8 +253,11 @@ queued — it never claims an email was sent.
 
 ## Media files
 Uploads go to `MEDIA_ROOT` (photos converted to WebP with thumbnails; videos kept as uploaded) and their
-details to MySQL. Put `MEDIA_ROOT` outside the deploy folder (e.g. `/home/USER/bya-media`) so redeploys
-keep it, and back it up together with the database.
+details to MySQL; files are only ever served through the API, which checks visibility. `MEDIA_ROOT` must be an
+absolute folder outside the deploy folder (see step 2) and is backed up together with the database:
+```bash
+tar -czf ~/backups/bya-media-$(date +%F).tar.gz -C ~ bya-media     # restore: tar -xzf … -C ~
+```
 
 ## Later phases (structure ready, not implemented)
 WhatsApp Cloud API + OTP (`docs/whatsapp-hostinger-backend.md`),

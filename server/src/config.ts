@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { isAbsolute, relative, resolve } from "node:path";
 
 import { z } from "zod";
 
@@ -35,9 +36,14 @@ const schema = z.object({
   CUSTOMER_SESSION_IDLE_DAYS: z.coerce.number().int().min(1).max(90).default(14),
   /** Where verification / recovery links point. */
   PUBLIC_SITE_URL: z.string().url().default("http://localhost:8080"),
+  /** Google OAuth client (Google Cloud Console → Credentials). GOOGLE_CLIENT_ID/SECRET are older aliases. */
+  AUTH_GOOGLE_ID: z.string().trim().optional(),
+  AUTH_GOOGLE_SECRET: z.string().trim().optional(),
   GOOGLE_CLIENT_ID: z.string().trim().optional(),
   GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   GOOGLE_REDIRECT_URL: z.string().trim().optional(),
+  /** Signs the short-lived Google sign-in cookie (32+ random characters); required in production with Google. */
+  AUTH_SECRET: z.string().trim().optional(),
   // ── Phase 3: media (files on the server disk, metadata in MySQL) ──
   MEDIA_ROOT: z.string().trim().default("./media"),
   MEDIA_MAX_IMAGE_BYTES: z.coerce.number().int().min(10_240).default(8 * 1024 * 1024),
@@ -70,6 +76,8 @@ export interface Config {
   publicSiteUrl: string;
   /** null until all three Google credentials are present — sign-in with Google stays off until then. */
   google: { clientId: string; clientSecret: string; redirectUrl: string } | null;
+  /** HMAC key for the Google sign-in flow cookie (random per start outside production when unset). */
+  authSecret: string;
   media: { root: string; maxImageBytes: number; maxVideoBytes: number };
   /** null when SMTP isn't configured: mail then goes to the outbox folder, never to a fake "sent". */
   mail: { transport: "outbox" | "smtp"; host: string; port: number; user: string; password: string; from: string } | null;
@@ -80,7 +88,10 @@ export interface Config {
 export class ConfigError extends Error {}
 
 /** Reads and validates environment variables. Error messages name variables, never their values. */
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
+/** The one callback path the API serves — the Google Console redirect URI must end with exactly this. */
+export const GOOGLE_CALLBACK_PATH = "/api/auth/google/callback";
+
+export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = process.cwd()): Config {
   const parsed = schema.safeParse(env);
   if (!parsed.success) {
     const problems = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
@@ -115,16 +126,55 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     orderLinkSecret = randomBytes(32).toString("hex"); // development only: order links stop working after a restart
   }
   // Google sign-in is all-or-nothing: half-configured credentials would leave a broken button on the site.
-  const googleId = e.GOOGLE_CLIENT_ID?.trim() ?? "";
-  const googleSecret = e.GOOGLE_CLIENT_SECRET?.trim() ?? "";
+  const pick = (current: string | undefined, legacy: string | undefined, name: string, legacyName: string) => {
+    const a = current?.trim() ?? "", b = legacy?.trim() ?? "";
+    if (a && b && a !== b) throw new ConfigError(`Invalid server configuration — ${name} and ${legacyName} are both set to different values; keep only ${name}`);
+    return a || b;
+  };
+  const googleId = pick(e.AUTH_GOOGLE_ID, e.GOOGLE_CLIENT_ID, "AUTH_GOOGLE_ID", "GOOGLE_CLIENT_ID");
+  const googleSecret = pick(e.AUTH_GOOGLE_SECRET, e.GOOGLE_CLIENT_SECRET, "AUTH_GOOGLE_SECRET", "GOOGLE_CLIENT_SECRET");
   const googleRedirect = e.GOOGLE_REDIRECT_URL?.trim() ?? "";
   const googleParts = [googleId, googleSecret, googleRedirect].filter(Boolean).length;
   if (googleParts > 0 && googleParts < 3) {
-    throw new ConfigError("Invalid server configuration — GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REDIRECT_URL must all be set to enable sign-in with Google");
+    throw new ConfigError("Invalid server configuration — AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET and GOOGLE_REDIRECT_URL must all be set to enable sign-in with Google");
   }
   const google = googleParts === 3 ? { clientId: googleId, clientSecret: googleSecret, redirectUrl: googleRedirect } : null;
-  if (google && e.NODE_ENV === "production" && !google.redirectUrl.startsWith("https://")) {
-    throw new ConfigError("Invalid server configuration — GOOGLE_REDIRECT_URL must use https in production");
+  if (google) {
+    // catches the two values being pasted the wrong way round
+    if (!/^[0-9]+-[A-Za-z0-9_]+\.apps\.googleusercontent\.com$/.test(google.clientId)) {
+      throw new ConfigError("Invalid server configuration — AUTH_GOOGLE_ID should look like 1234…-abc….apps.googleusercontent.com (is it swapped with the secret?)");
+    }
+    let redirect: URL;
+    try {
+      redirect = new URL(google.redirectUrl);
+    } catch {
+      throw new ConfigError("Invalid server configuration — GOOGLE_REDIRECT_URL is not a valid URL");
+    }
+    if (redirect.pathname !== GOOGLE_CALLBACK_PATH || redirect.search || redirect.hash) {
+      throw new ConfigError(`Invalid server configuration — GOOGLE_REDIRECT_URL must be the API address followed by exactly ${GOOGLE_CALLBACK_PATH}`);
+    }
+    if (e.NODE_ENV === "production" && redirect.protocol !== "https:") {
+      throw new ConfigError("Invalid server configuration — GOOGLE_REDIRECT_URL must use https in production");
+    }
+  }
+  let authSecret = e.AUTH_SECRET?.trim() ?? "";
+  if (authSecret && authSecret.length < 32) throw new ConfigError("Invalid server configuration — AUTH_SECRET must be at least 32 characters");
+  if (!authSecret) {
+    if (google && e.NODE_ENV === "production") throw new ConfigError("Invalid server configuration — AUTH_SECRET is required in production when Google sign-in is enabled");
+    authSecret = randomBytes(32).toString("hex"); // unsigned flows from before a restart simply expire
+  }
+  const publicSiteUrl = e.PUBLIC_SITE_URL.replace(/\/$/, "");
+  const mediaRoot = resolve(cwd, e.MEDIA_ROOT);
+  if (e.NODE_ENV === "production") {
+    if (!publicSiteUrl.startsWith("https://")) throw new ConfigError("Invalid server configuration — PUBLIC_SITE_URL must use https in production");
+    if (!corsOrigins.includes(new URL(publicSiteUrl).origin)) {
+      throw new ConfigError("Invalid server configuration — PUBLIC_SITE_URL must be one of the CORS_ORIGINS (the storefront's own address)");
+    }
+    // a GitHub redeploy replaces the app folder; uploads kept inside it would be lost
+    const rel = relative(resolve(cwd), mediaRoot);
+    if (!isAbsolute(e.MEDIA_ROOT) || rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) {
+      throw new ConfigError("Invalid server configuration — MEDIA_ROOT must be an absolute folder outside the app's deploy folder (e.g. /home/USER/bya-media) so uploads survive redeploys");
+    }
   }
   // SMTP is optional. Without it, messages are written to the outbox folder instead of being sent.
   let mail: Config["mail"] = null;
@@ -152,9 +202,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       ttlMs: e.CUSTOMER_SESSION_TTL_DAYS * 86_400_000,
       idleMs: e.CUSTOMER_SESSION_IDLE_DAYS * 86_400_000,
     },
-    publicSiteUrl: e.PUBLIC_SITE_URL.replace(/\/$/, ""),
+    publicSiteUrl,
     google,
-    media: { root: e.MEDIA_ROOT, maxImageBytes: e.MEDIA_MAX_IMAGE_BYTES, maxVideoBytes: e.MEDIA_MAX_VIDEO_BYTES },
+    authSecret,
+    media: { root: mediaRoot, maxImageBytes: e.MEDIA_MAX_IMAGE_BYTES, maxVideoBytes: e.MEDIA_MAX_VIDEO_BYTES },
     mail,
     mailFrom: e.MAIL_FROM,
   };

@@ -73,3 +73,15 @@ Open (needs the client / Hostinger — cannot be done from here):
 - [x] Account emails: confirm email, reset password, password changed/reset and account deleted notices (text + HTML, names escaped); exact Google + SMTP settings listed in `server/README.md` and `.env.example`.
 - [x] Tests: real database integration tests + website suite; production build.
 - [ ] Blocked: Google OAuth credentials, SMTP for verification emails, Hostinger deploy.
+
+# Roadmap — Google sign-in + GitHub → Hostinger readiness
+
+- [x] Google: `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` / `AUTH_SECRET` names (old names still read), startup validation (swapped values, exact callback path, https, AUTH_SECRET in production).
+- [x] Google: signed 10-minute flow cookie, no re-pointing an account linked to another Google ID, every failure returns to the store's sign-in page with a clear reason.
+- [x] Real-database tests of the store side of Google sign-in (stand-in Google signer); unit tests for token checks.
+- [x] Media: absolute `MEDIA_ROOT` bug fixed (uploads had landed inside the app folder); production requires a folder outside the deploy folder; start-up write check.
+- [x] Deploy: server lockfile repaired for `npm ci`; stray test uploads removed from Git; `.env` ignored; secrets audit clean (files + history).
+- [x] Website: Node (Hostinger) build verified against a local API; honest "store can't be reached" page; live sign-in note no longer says "demo".
+- [x] Docs: Hostinger GitHub deploy, migrations, media persistence/backups, Google Console settings.
+- [ ] Blocked (owner): set the variables in hPanel, create MySQL + media folder, deploy, then one real Google sign-in on the live domain.
+- [ ] Blocked (owner): SMTP mailbox; Razorpay test keys; shipping/COD confirmation.

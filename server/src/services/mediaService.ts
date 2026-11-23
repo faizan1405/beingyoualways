@@ -111,7 +111,7 @@ function readUpload(req: Request, maxBytes: number, tempPath: string): Promise<U
  * an unapproved or archived file can't be fetched by guessing a path.
  */
 export function createMediaService(prisma: PrismaClient, config: Config) {
-  const root = join(process.cwd(), config.media.root);
+  const root = config.media.root; // already an absolute path (resolved once in config)
   const keyOf = (id: string) => `/api/media/${id}`;
 
   const absOf = (storageKey: string) => {

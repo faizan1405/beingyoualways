@@ -2,6 +2,7 @@ import { createApp, createServices } from "./app.js";
 import { ConfigError, loadConfig } from "./config.js";
 import { createPrisma } from "./db.js";
 import { createLogger } from "./logger.js";
+import { checkMediaFolder } from "./startupChecks.js";
 
 const boot = createLogger("info");
 let config;
@@ -12,11 +13,17 @@ try {
   process.exit(1);
 }
 
+const media = await checkMediaFolder(config.media.root);
+if (!media.ok) {
+  boot.error(`Invalid server configuration — ${media.message}`);
+  process.exit(1);
+}
+
 const logger = createLogger(config.logLevel);
 const prisma = createPrisma(config.databaseUrl);
 const services = createServices({ config, prisma, logger });
 const app = createApp({ config, prisma, logger, services });
-const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, razorpay: config.razorpay?.mode ?? "off", testOrders: config.storeTestMode }));
+const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, google: config.google ? "on" : "off", mail: config.mail ? "smtp" : "outbox", razorpay: config.razorpay?.mode ?? "off", testOrders: config.storeTestMode }));
 
 // Every 5 minutes: confirm unpaid online orders with Razorpay (missed webhooks, closed tabs) and release expired stock holds.
 const sweep = () => services.checkout.reconcileAll().then((r) => { if (r.paid || r.expired) logger.info("payment sweep", r); }).catch((e) => logger.error("payment sweep failed", { error: e instanceof Error ? e.message : String(e) }));

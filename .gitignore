@@ -34,3 +34,8 @@ dist-ssr
 .env*
 !.env.example
 !**/.env.example
+
+# server test/run artefacts and local uploads (production uploads live in MEDIA_ROOT outside the repo)
+server/tmp/
+server/media/
+server/.env

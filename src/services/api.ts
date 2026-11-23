@@ -104,15 +104,18 @@ export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/cus
 export const isLiveAdminPath = (pathname: string) => pathname.replace(/\/$/, "") === "/admin" || LIVE_ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 export class BackendNotConnectedError extends Error {
+  override name = "BackendNotConnectedError";
   constructor() { super("The Hostinger backend is not connected yet."); }
 }
 
 /** The server couldn't be reached (offline, DNS, CORS or server down). Nothing was saved. */
 export class BackendOfflineError extends Error {
+  override name = "BackendOfflineError";
   constructor() { super("Can't reach the store server right now. Nothing was saved — check the connection and try again."); }
 }
 
 export class ApiError extends Error {
+  override name = "ApiError";
   constructor(public status: number, public code: string, message: string, public details?: { field: string; message: string }[], public data?: unknown) { super(message); }
 }
 
