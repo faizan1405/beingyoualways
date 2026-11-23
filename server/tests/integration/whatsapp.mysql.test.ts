@@ -421,6 +421,120 @@ describe("six-hour bag reminder", () => {
   });
 });
 
+describe("earlier bag-page opt-in (Phase 5)", () => {
+  const waSignIn = async (phone: string) => {
+    expect((await post("/api/auth/whatsapp/request-otp", { phone })).status).toBe(200);
+    const code = meta.last()!.template!.components![0]!.parameters[0]!.text;
+    const ok = await post("/api/auth/whatsapp/verify-otp", { phone, code });
+    expect(ok.status).toBe(200);
+    return { cookie: (ok.headers["set-cookie"] as unknown as string[]).find((c) => c.startsWith("bya_customer_session="))!.split(";")[0]!, created: ok.body.created as boolean };
+  };
+  const bag = (cookie: string | undefined, key: string, consent: boolean) => post("/api/checkout/reminders/bag", { checkoutKey: key, lines: [{ ...SERUM, quantity: 1 }], reminderConsent: consent }, cookie);
+  const status = (cookie?: string) => { const r = request(app).get("/api/checkout/reminders/bag"); return cookie ? r.set("Cookie", cookie) : r; };
+
+  it("a signed-out shopper is asked to sign in with WhatsApp first, and can't sign anyone up", async () => {
+    expect((await status()).body).toMatchObject({ available: true, eligible: false, reason: "sign_in", on: false });
+    const r = await bag(undefined, randomUUID(), true);
+    expect(r.status).toBe(403);
+    expect(await prisma.abandonedCheckout.count({ where: { status: "OPEN", customerId: null, phone: { startsWith: "91987667" } } })).toBe(0);
+  });
+
+  it("an account whose mobile was only typed (not proved) can't opt in", async () => {
+    const reg = await post("/api/customer/register", { name: "Typed Number", email: "typed@example.com", phone: "9876670001", password: "Jasmine-Clove-Harbour-41" });
+    expect(reg.status).toBe(200);
+    const cookie = (reg.headers["set-cookie"] as unknown as string[]).find((c) => c.startsWith("bya_customer_session="))!.split(";")[0]!;
+    expect((await status(cookie)).body).toMatchObject({ eligible: false, reason: "verify_phone" });
+    expect((await bag(cookie, randomUUID(), true)).status).toBe(403);
+    expect(await prisma.abandonedCheckout.count({ where: { phone: "919876670001" } })).toBe(0);
+  });
+
+  it("a WhatsApp-verified shopper starts unticked, opts in with one tick and can untick again", async () => {
+    const { cookie } = await waSignIn("9876670002");
+    expect((await status(cookie)).body).toMatchObject({ available: true, eligible: true, on: false, phone: expect.stringMatching(/•|\*/) });
+    const key = randomUUID();
+    const on = await bag(cookie, key, true);
+    expect(on.status).toBe(200);
+    expect(on.body.tracking).toBe(true);
+    const row = await prisma.abandonedCheckout.findUniqueOrThrow({ where: { checkoutKey: key } });
+    expect(row.phone).toBe("919876670002");
+    expect(row.remindAt.getTime() - row.lastActivityAt.getTime()).toBe(6 * 3_600_000);
+    expect((await prisma.whatsAppConsent.findFirstOrThrow({ where: { phone: "919876670002", purpose: "cart_reminder" }, orderBy: { recordedAt: "desc" } })).source).toBe("bag_reminder");
+    // the bag box is only about the reminder: it never adds the number to offers or campaigns
+    expect(await prisma.whatsAppConsent.count({ where: { phone: "919876670002", purpose: "marketing" } })).toBe(0);
+    expect((await status(cookie)).body.on).toBe(true);
+    // the same key at checkout continues the same reminder (never two)
+    await post("/api/checkout/reminders/started", { checkoutKey: key, lines: [{ ...SERUM, quantity: 3 }], contact: { name: "Verified Shopper", phone: "9876670002" }, reminderConsent: true });
+    expect(await prisma.abandonedCheckout.count({ where: { phone: "919876670002", status: "OPEN" } })).toBe(1);
+    const off = await bag(cookie, key, false);
+    expect(off.body.tracking).toBe(false);
+    expect((await prisma.abandonedCheckout.findUniqueOrThrow({ where: { checkoutKey: key } })).status).toBe("SKIPPED");
+    expect((await status(cookie)).body.on).toBe(false);
+  });
+
+  it("a bag-page reminder is sent once; replying STOP before it is due cancels it", async () => {
+    const a = await waSignIn("9876670003");
+    const k1 = randomUUID();
+    await bag(a.cookie, k1, true);
+    await prisma.abandonedCheckout.update({ where: { checkoutKey: k1 }, data: { remindAt: new Date(Date.now() - 1000) } });
+    expect((await services.carts.processDue()).queued).toBe(1);
+    await drain();
+    expect(meta.sent.filter((m) => m.to === "919876670003" && m.template?.name === "abandoned_cart_reminder")).toHaveLength(1);
+
+    const b = await waSignIn("9876670004");
+    const k2 = randomUUID();
+    await bag(b.cookie, k2, true);
+    await hook(inbound("919876670004", "STOP"));
+    await drain();
+    await prisma.abandonedCheckout.update({ where: { checkoutKey: k2 }, data: { remindAt: new Date(Date.now() - 1000) } });
+    await services.carts.processDue();
+    expect((await prisma.abandonedCheckout.findUniqueOrThrow({ where: { checkoutKey: k2 } })).status).toBe("SKIPPED");
+    expect(meta.sent.filter((m) => m.to === "919876670004" && m.template?.name === "abandoned_cart_reminder")).toHaveLength(0);
+  });
+
+  it("is offered nowhere while bag reminders are switched off", async () => {
+    const before = (await adminGet("/api/admin/whatsapp/automations")).body.automations;
+    await adminPost("/api/admin/whatsapp/automations", { ...before, abandonedCart: false }, owner, "put");
+    expect((await status()).body).toMatchObject({ available: false });
+    await adminPost("/api/admin/whatsapp/automations", before, owner, "put");
+  });
+});
+
+describe("account safety: phone numbers must be proved (Phase 5)", () => {
+  it("WhatsApp sign-in never lands in an account that only typed that number", async () => {
+    const reg = await post("/api/customer/register", { name: "Not The Owner", email: "squatter@example.com", phone: "9876680001", password: "Pepper-Moss-Lantern-73" });
+    expect(reg.status).toBe(200);
+    const squatter = await prisma.customer.findUniqueOrThrow({ where: { email: "squatter@example.com" } });
+    await post("/api/auth/whatsapp/request-otp", { phone: "9876680001" });
+    const code = meta.last()!.template!.components![0]!.parameters[0]!.text;
+    const ok = await post("/api/auth/whatsapp/verify-otp", { phone: "9876680001", code });
+    expect(ok.status).toBe(200);
+    expect(ok.body.created).toBe(true);
+    expect(ok.body.customer.id).not.toBe(squatter.id);
+    expect((await prisma.customer.findUniqueOrThrow({ where: { id: squatter.id } })).phone).toBeNull();
+    expect((await prisma.customer.findUniqueOrThrow({ where: { phone: "9876680001" } })).phoneVerifiedAt).not.toBeNull();
+  });
+
+  it("changing the mobile in the profile makes it unproved again", async () => {
+    await post("/api/auth/whatsapp/request-otp", { phone: "9876680002" });
+    const code = meta.last()!.template!.components![0]!.parameters[0]!.text;
+    const ok = await post("/api/auth/whatsapp/verify-otp", { phone: "9876680002", code });
+    const cookie = (ok.headers["set-cookie"] as unknown as string[]).find((c) => c.startsWith("bya_customer_session="))!.split(";")[0]!;
+    const res = await json(request(app).patch("/api/customer/me")).set("Cookie", cookie).send({ name: "Moved Number", phone: "9876680003" });
+    expect(res.status).toBe(200);
+    expect((await prisma.customer.findUniqueOrThrow({ where: { phone: "9876680003" } })).phoneVerifiedAt).toBeNull();
+  });
+
+  it("guest checkout never adds an email to an existing WhatsApp account", async () => {
+    await post("/api/auth/whatsapp/request-otp", { phone: "9876680004" });
+    const code = meta.last()!.template!.components![0]!.parameters[0]!.text;
+    expect((await post("/api/auth/whatsapp/verify-otp", { phone: "9876680004", code })).status).toBe(200);
+    const r = await post("/api/checkout/orders", { checkoutKey: randomUUID(), lines: [{ ...SERUM, quantity: 1 }], contact: { name: "Someone Else", email: "intruder@example.com", phone: "9876680004" }, address, paymentMethod: "cod" });
+    expect(r.status).toBe(201);
+    expect((await prisma.customer.findUniqueOrThrow({ where: { phone: "9876680004" } })).email).toBeNull();
+    expect((await prisma.order.findFirstOrThrow({ where: { orderNumber: r.body.order.orderNumber } })).email).toBe("intruder@example.com");
+  });
+});
+
 describe("marketing campaigns need explicit approval", () => {
   let id = "";
   it("saving a draft sends nothing; staff can't create, admin can't approve", async () => {

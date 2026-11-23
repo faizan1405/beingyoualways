@@ -46,9 +46,18 @@ export function createFakeRazorpay() {
     pay(orderId: string, opts: { status?: GatewayPayment["status"]; amountPaise?: number; method?: string } = {}) {
       const o = orders.get(orderId);
       if (!o) throw new Error("unknown order");
-      const p: GatewayPayment = { id: id("pay"), orderId, amountPaise: opts.amountPaise ?? o.amountPaise, currency: "INR", status: opts.status ?? "captured", method: opts.method ?? "upi", errorDescription: opts.status === "failed" ? "Payment declined by bank (simulated)" : null };
+      const p: GatewayPayment = { id: id("pay"), orderId, amountPaise: opts.amountPaise ?? o.amountPaise, currency: "INR", status: opts.status ?? "captured", method: opts.method ?? "upi", errorDescription: opts.status === "failed" ? "Payment declined by bank (simulated)" : null, amountRefundedPaise: 0 };
       o.payments.push(p);
       return { payment: p, checkout: { razorpay_order_id: orderId, razorpay_payment_id: p.id, razorpay_signature: hmacHex(KEY_SECRET, `${orderId}|${p.id}`) } };
+    },
+    /** Staff refund in the Razorpay dashboard, and the refund.processed webhook it triggers (refund entity only, as Razorpay sends it). */
+    refund(p: GatewayPayment, amountPaise: number) {
+      const stored = allPayments().find((x) => x.id === p.id)!;
+      stored.amountRefundedPaise += amountPaise;
+      if (stored.amountRefundedPaise >= stored.amountPaise) stored.status = "refunded";
+      const body = { entity: "event", event: "refund.processed", payload: { refund: { entity: { id: id("rfnd"), payment_id: p.id, amount: amountPaise, currency: "INR", status: "processed" } } }, created_at: Math.floor(Date.now() / 1000) };
+      const raw = Buffer.from(JSON.stringify(body));
+      return { raw, signature: hmacHex(WEBHOOK_SECRET, raw), eventId: id("evt") };
     },
     /** A webhook exactly as Razorpay would send it (raw body + signature header). */
     webhook(event: string, p: GatewayPayment, extra: Record<string, unknown> = {}) {

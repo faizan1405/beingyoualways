@@ -1,7 +1,7 @@
 import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
-import { isBackendConfigured } from "@/services/api";
+import { DEMO_MODE, isBackendConfigured, isUnconnectedProduction } from "@/services/api";
 import { customerAuthService } from "@/services/customerAuthService";
 
 export const Route = createFileRoute("/_site/account")({
@@ -27,10 +27,20 @@ const tabs = [
 
 function AccountLayout() {
   const navigate = useNavigate();
+  // A production build without the store server shows no sample account — only an honest notice.
+  if (isUnconnectedProduction()) {
+    return (
+      <div className="container-lux py-12">
+        <h1 className="text-5xl">My Account</h1>
+        <DemoNotice className="mt-5">Accounts aren't open yet — the store server isn't connected. You can still browse the shop.</DemoNotice>
+        <Link to="/shop" className="mt-6 inline-block text-sm underline">Go to the shop</Link>
+      </div>
+    );
+  }
   return (
     <div className="container-lux py-12">
       <h1 className="text-5xl">My Account</h1>
-      <DemoNotice className="mt-5">Demo account with sample data. Secure sign-in will be added with the backend.</DemoNotice>
+      {DEMO_MODE && <DemoNotice className="mt-5">Demo account with sample data (preview only).</DemoNotice>}
       <div className="mt-10 grid gap-10 md:grid-cols-[200px_1fr]">
         <nav aria-label="Account" className="-mx-1 flex gap-1 overflow-x-auto px-1 md:flex-col">
           {tabs.map((t) => (

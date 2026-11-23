@@ -48,11 +48,13 @@ async function load() {
   loaded = true;
   try {
     const res = await fetch(`${HOSTINGER_API_BASE_URL}${API_ENDPOINTS.publicReviews}`, { cache: "no-store", headers: { Accept: "application/json" } });
-    if (!res.ok) return;
+    if (!res.ok) { loaded = false; console.warn(`Store server: customer stories not loaded (${res.status})`); return; }
     const body = (await res.json()) as { reviews?: AdminReview[] };
     const next = (body.reviews ?? []).map(reviewToTestimonial);
     if (JSON.stringify(next) !== JSON.stringify(cache)) { cache = next; emit(); }
-  } catch {
+  } catch (e) {
+    loaded = false; // try again on the next page that needs it
+    console.warn("Store server: customer stories not loaded", e);
     // no stories rather than invented ones
   }
 }

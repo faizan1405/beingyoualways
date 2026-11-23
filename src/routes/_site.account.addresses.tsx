@@ -5,16 +5,19 @@ import { toast } from "sonner";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { Button } from "@/components/ui/button";
-import { isBackendConfigured } from "@/services/api";
+import { DEMO_MODE, isBackendConfigured } from "@/services/api";
 import { DEMO_CUSTOMER_ID, customerService } from "@/services/customerService";
 import { customerAuthService, type ShopperAddress } from "@/services/customerAuthService";
 
 export const Route = createFileRoute("/_site/account/addresses")({
+  // the shopper cookie only exists in the browser, so this page loads its data there, never during server rendering
+  ssr: false,
   loader: async () => {
     if (isBackendConfigured()) {
       const r = await customerAuthService.addresses();
       return { live: true as const, demo: [], error: r.ok ? null : r.error, server: r.ok ? r.addresses : [] };
     }
+    if (!DEMO_MODE) return { live: false as const, demo: [], error: null, server: [] }; // never sample data outside the preview
     return { live: false as const, demo: (await customerService.get(DEMO_CUSTOMER_ID))!.addresses, error: null, server: [] };
   },
   component: Addresses,

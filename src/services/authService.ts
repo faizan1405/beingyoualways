@@ -3,7 +3,7 @@
 // an httpOnly session cookie. Until that backend is configured this file runs a clearly
 // labelled DEMO that never sends a code — and the demo switches itself off as soon as
 // HOSTINGER_API_BASE_URL is set, so fake six-digit sign-in can't reach production.
-import { API_ENDPOINTS, apiRequest, isBackendConfigured } from "./api";
+import { API_ENDPOINTS, DEMO_MODE, apiRequest, isBackendConfigured } from "./api";
 import { OTP_POLICY, canRequestOtp, canVerifyOtp, emptyOtpState, otpMessage, recordFailedAttempt, recordOtpSent, type OtpState } from "@/lib/whatsapp-cloud";
 
 export type AuthProvider = "whatsapp" | "google";
@@ -27,7 +27,8 @@ export type OtpVerifyResult = { ok: true; demo: boolean } | { ok: false; error: 
 export const GOOGLE_OAUTH_START_URL: string | null = null;
 
 /** Demo sign-in only exists while there is no backend. */
-export const isDemoSignIn = () => !isBackendConfigured();
+export const isDemoSignIn = () => DEMO_MODE;
+const SIGNIN_OFF = "WhatsApp sign-in isn't available yet — the store server isn't connected.";
 
 // Client-side copy of the limits (the server enforces the real ones). This tab only.
 const KEY = "bya.otp";
@@ -53,6 +54,7 @@ export const authService = {
         return { ok: true, demo: false, ...r };
       } catch (e) { return { ok: false, error: (e as Error).message }; }
     }
+    if (!DEMO_MODE) return { ok: false, error: SIGNIN_OFF };
     save(phone, recordOtpSent(st, now));
     return { ok: true, demo: true, resendInSeconds: OTP_POLICY.resendCooldownSeconds, expiresInSeconds: OTP_POLICY.expirySeconds };
   },
@@ -73,6 +75,7 @@ export const authService = {
         return { ok: false, error: left ? `${(e as Error).message} ${left} attempt${left === 1 ? "" : "s"} left.` : otpMessage(canVerifyOtp(next, now)), attemptsLeft: left };
       }
     }
+    if (!DEMO_MODE) return { ok: false, error: SIGNIN_OFF };
     save(phone, emptyOtpState());
     return { ok: true, demo: true };
   },

@@ -39,13 +39,24 @@ export function createDashboardService(prisma: PrismaClient) {
 
       // Daily series (India time) straight from MySQL.
       const testSql = q.includeTest ? Prisma.empty : Prisma.sql`AND isTest = false`;
-      const series = await prisma.$queryRaw<{ day: string; orders: bigint; paid: Prisma.Decimal | null }[]>`
-        SELECT DATE_FORMAT(DATE_ADD(createdAt, INTERVAL 330 MINUTE), '%Y-%m-%d') AS day,
-               COUNT(*) AS orders,
-               SUM(CASE WHEN paymentStatus = 'PAID' THEN grandTotal ELSE 0 END) AS paid
-        FROM \`Order\`
-        WHERE createdAt >= ${gte} AND createdAt < ${lt} AND status <> 'PENDING_PAYMENT' ${testSql}
-        GROUP BY day ORDER BY day`;
+      // Orders count on the day they were placed; revenue counts on the day the money was verified
+      // (paidAt) — the same rule as the headline figure, so the chart always adds up to it.
+      const [placedDays, paidDays] = await Promise.all([
+        prisma.$queryRaw<{ day: string; orders: bigint }[]>`
+          SELECT DATE_FORMAT(DATE_ADD(createdAt, INTERVAL 330 MINUTE), '%Y-%m-%d') AS day, COUNT(*) AS orders
+          FROM \`Order\`
+          WHERE createdAt >= ${gte} AND createdAt < ${lt} AND status <> 'PENDING_PAYMENT' ${testSql}
+          GROUP BY day`,
+        prisma.$queryRaw<{ day: string; paid: Prisma.Decimal | null }[]>`
+          SELECT DATE_FORMAT(DATE_ADD(paidAt, INTERVAL 330 MINUTE), '%Y-%m-%d') AS day, SUM(grandTotal) AS paid
+          FROM \`Order\`
+          WHERE paymentStatus = 'PAID' AND paidAt >= ${gte} AND paidAt < ${lt} ${testSql}
+          GROUP BY day`,
+      ]);
+      const days = new Map<string, { orders: number; paidPaise: number }>();
+      for (const d of placedDays) days.set(d.day, { orders: Number(d.orders), paidPaise: 0 });
+      for (const d of paidDays) days.set(d.day, { orders: days.get(d.day)?.orders ?? 0, paidPaise: toPaise(d.paid) });
+      const series = [...days.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([day, v]) => ({ day, ...v }));
 
       return {
         range: { from, to },
@@ -60,7 +71,7 @@ export function createDashboardService(prisma: PrismaClient) {
         byStatus: Object.fromEntries(byStatus.map((s) => [s.status, s._count])),
         payments: byPayment.map((p) => ({ method: p.paymentMethod, status: p.paymentStatus, orders: p._count, amountPaise: toPaise(p._sum.grandTotal) })),
         topProducts: top.map((t) => ({ productId: t.productId, name: t.productName, quantity: t._sum.quantity ?? 0, salesPaise: toPaise(t._sum.lineTotal) })),
-        series: series.map((s) => ({ day: s.day, orders: Number(s.orders), paidPaise: toPaise(s.paid) })),
+        series,
       };
     },
   };

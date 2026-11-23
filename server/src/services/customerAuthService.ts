@@ -123,7 +123,9 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     if (!row || row.purpose !== purpose || row.usedAt || row.expiresAt < now()) {
       throw badRequest("That link is no longer valid. Please ask for a new one.");
     }
-    await prisma.customerToken.update({ where: { id: row.id }, data: { usedAt: now() } });
+    // only one request can claim the link, even if two arrive at the same moment
+    const claimed = await prisma.customerToken.updateMany({ where: { id: row.id, usedAt: null, expiresAt: { gte: now() } }, data: { usedAt: now() } });
+    if (claimed.count !== 1) throw badRequest("That link is no longer valid. Please ask for a new one.");
     return row;
   }
 
@@ -133,20 +135,23 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     const problem = passwordProblem(input.password, input.email, MIN_PASSWORD);
     if (problem) throw badRequest(problem);
 
-    const taken = await prisma.customer.findUnique({ where: { email: input.email }, select: { id: true, passwordHash: true, name: true } });
+    const taken = await prisma.customer.findUnique({ where: { email: input.email }, select: { id: true, passwordHash: true, name: true, email: true, deletedAt: true } });
     if (taken?.passwordHash) throw conflict("An account with this email already exists. Sign in instead, or use Forgotten password.");
+    if (taken && !taken.deletedAt && taken.email) {
+      // This email already has orders (checkout) or a Google sign-in. Typing the address proves nothing, so the
+      // password is never attached here and no session opens: the owner gets a link at that address instead.
+      const token = await issueToken(taken.id, "RESET_PASSWORD", taken.email, RESET_MINUTES * 60_000);
+      const link = `${config.publicSiteUrl}/reset-password?token=${token}`;
+      await mailer.send({ to: taken.email, ...passwordResetTemplate({ name: taken.name, link, minutes: RESET_MINUTES }) });
+      await logActivity(prisma, null, { action: "customer.registerExisting", entityType: "customer", entityId: taken.id, summary: "Sign-up with an email that already had orders — a set-password link was emailed" });
+      return { setupLinkSent: true as const };
+    }
     if (input.phone) {
       const phoneTaken = await prisma.customer.findUnique({ where: { phone: input.phone }, select: { id: true } });
       if (phoneTaken) throw conflict("That mobile number is already used by another account.");
     }
 
-    // An account created at checkout has no password yet — completing it keeps the order history.
-    const customer = taken
-      ? await prisma.customer.update({
-          where: { id: taken.id },
-          data: { name: input.name, phone: input.phone ?? null, passwordHash: await hashPassword(input.password), passwordChangedAt: now(), signInMethod: "password" },
-        })
-      : await prisma.customer.create({
+    const customer = await prisma.customer.create({
           data: {
             name: input.name,
             email: input.email,
@@ -162,7 +167,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
 
     const session = await openSession(customer.id, req);
     await logActivity(prisma, null, { action: "customer.register", entityType: "customer", entityId: customer.id, summary: `Account created for ${customer.email}` });
-    return { customer: view(customer), session, emailConfirmation: mail.delivered ? "sent" : "queued" };
+    return { setupLinkSent: false as const, customer: view(customer), session, emailConfirmation: mail.delivered ? "sent" : "queued" };
   }
 
   // ── sign in ─────────────────────────────────────────────────────────────────
@@ -234,9 +239,16 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     const problem = passwordProblem(input.password, undefined, MIN_PASSWORD);
     if (problem) throw badRequest(problem);
     const row = await consumeToken(input.token, "RESET_PASSWORD");
+    const before = await prisma.customer.findUnique({ where: { id: row.customerId }, select: { email: true, emailVerifiedAt: true, signInMethod: true } });
+    // the link reached this inbox, which proves the address — so it counts as confirmed
+    const provedEmail = !!before?.email && before.email === row.target && !before.emailVerifiedAt;
     const c = await prisma.customer.update({
       where: { id: row.customerId },
-      data: { passwordHash: await hashPassword(input.password), passwordChangedAt: now(), failedLoginCount: 0, lockedUntil: null },
+      data: {
+        passwordHash: await hashPassword(input.password), passwordChangedAt: now(), failedLoginCount: 0, lockedUntil: null,
+        ...(provedEmail ? { emailVerifiedAt: now() } : {}),
+        ...(before && !before.signInMethod ? { signInMethod: "password" } : {}),
+      },
     });
     // a reset signs every other device out
     await revokeEverySession(c.id);
@@ -263,13 +275,18 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
   // ── profile, addresses, orders ──────────────────────────────────────────────
 
   async function updateProfile(ctx: CustomerContext, input: ProfileInput) {
+    const current = await prisma.customer.findUnique({ where: { id: ctx.id }, select: { phone: true } });
     if (input.phone) {
       const other = await prisma.customer.findUnique({ where: { phone: input.phone }, select: { id: true } });
       if (other && other.id !== ctx.id) throw conflict("That mobile number is already used by another account.");
     }
     const c = await prisma.customer.update({
       where: { id: ctx.id },
-      data: { name: input.name, ...(input.phone !== undefined ? { phone: input.phone } : {}) },
+      data: {
+        name: input.name,
+        // a new number has not been proved yet; WhatsApp sign-in proves it again
+        ...(input.phone !== undefined ? { phone: input.phone, ...(input.phone !== current?.phone ? { phoneVerifiedAt: null } : {}) } : {}),
+      },
     });
     return { customer: view(c) };
   }

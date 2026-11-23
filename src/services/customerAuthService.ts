@@ -77,12 +77,18 @@ export const customerAuthService = {
     return r.ok ? r.data.customer : null;
   },
 
-  register: async (input: { name: string; email: string; password: string; phone?: string | undefined }): Promise<AccountResult> => {
+  /**
+   * Creates an account. When the email already has orders (or a Google sign-in), the server opens nothing and
+   * emails a set-password link to that address instead — `setupLinkSent` tells the page to say so.
+   */
+  register: async (input: { name: string; email: string; password: string; phone?: string | undefined }): Promise<AccountResult | { ok: true; setupLinkSent: true; message: string }> => {
     if (!isLive()) return { ok: false, error: EMAIL_SIGNIN_UNAVAILABLE };
     const body: Record<string, string> = { name: input.name, email: input.email, password: input.password };
     if (input.phone) body["phone"] = input.phone;
-    const r = await run<{ customer: ShopperAccount; emailConfirmation: string }>(API_ENDPOINTS.customerRegister, { method: "POST", body });
-    return r.ok ? { ok: true, customer: r.data.customer } : { ok: false, error: r.error };
+    const r = await run<{ customer?: ShopperAccount; emailConfirmation?: string; setupLinkSent?: boolean; message?: string }>(API_ENDPOINTS.customerRegister, { method: "POST", body });
+    if (!r.ok) return { ok: false, error: r.error };
+    if (r.data.setupLinkSent || !r.data.customer) return { ok: true, setupLinkSent: true, message: r.data.message ?? "We've emailed you a link to finish setting up your account." };
+    return { ok: true, customer: r.data.customer };
   },
 
   login: async (input: { email: string; password: string }): Promise<AccountResult> => {

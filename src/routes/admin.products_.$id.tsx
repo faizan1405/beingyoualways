@@ -39,7 +39,7 @@ function EditProduct() {
   const isNew = id === "new";
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["admin", "product", id], queryFn: () => (isNew ? Promise.resolve(blank()) : productService.getById(id)) });
+  const { data, isLoading, error, refetch } = useQuery({ queryKey: ["admin", "product", id], queryFn: () => (isNew ? Promise.resolve(blank()) : productService.getById(id)) });
   const [p, setP] = useState<Product | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const all = useAllProducts();
@@ -55,6 +55,15 @@ function EditProduct() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't save the product"),
   });
 
+  if (error) {
+    return (
+      <div role="alert" className="rounded-xl border border-destructive/40 bg-card p-5 text-sm">
+        <p className="font-semibold">This product couldn't be loaded.</p>
+        <p className="mt-1 text-muted-foreground">{error instanceof Error ? error.message : "The store server didn't answer."} Nothing was changed.</p>
+        <button type="button" className="mt-3 underline" onClick={() => void refetch()}>Try again</button>
+      </div>
+    );
+  }
   if (isLoading || !p) return isLoading ? <div className="h-96 animate-pulse rounded-xl bg-card" /> : <p>Product not found.</p>;
 
   const up = (patch: Partial<Product>) => setP({ ...p, ...patch });

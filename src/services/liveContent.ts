@@ -16,11 +16,13 @@ async function load() {
   loaded = true;
   try {
     const res = await fetch(`${HOSTINGER_API_BASE_URL}${API_ENDPOINTS.publicContent}`, { cache: "no-store", headers: { Accept: "application/json" } });
-    if (!res.ok) return;
+    if (!res.ok) { loaded = false; console.warn(`Store server: page text not loaded (${res.status})`); return; }
     const body = (await res.json()) as { content?: Record<string, unknown> };
     const next = mergeSiteContent(body.content?.[SITE_CONTENT_KEY]);
     if (JSON.stringify(next) !== JSON.stringify(cache)) { cache = next; emit(); }
-  } catch {
+  } catch (e) {
+    loaded = false; // try again on the next page that needs it
+    console.warn("Store server: page text not loaded", e);
     // keep the built-in copy — the shop must never go blank because the server is down
   }
 }

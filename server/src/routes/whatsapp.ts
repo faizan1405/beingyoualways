@@ -9,7 +9,7 @@ import { requirePermission } from "../middleware/auth.js";
 import { requireCustomer, setCustomerCookie } from "../middleware/customerAuth.js";
 import { lookupLimiter } from "../middleware/security.js";
 import { approveSchema, campaignInputSchema, type CampaignService } from "../services/campaignService.js";
-import { checkoutStartedSchema, recoverSchema, type CartRecoveryService } from "../services/cartRecovery.js";
+import { bagReminderSchema, checkoutStartedSchema, recoverSchema, type CartRecoveryService } from "../services/cartRecovery.js";
 import type { Chatbot } from "../services/chatbot.js";
 import { consentInputSchema, messageFilterSchema, replySchema, testSchema, type WhatsAppAdmin } from "../services/whatsappAdmin.js";
 import type { WhatsAppOtpService } from "../services/whatsappOtp.js";
@@ -59,6 +59,8 @@ export function cartReminderRoutes(carts: CartRecoveryService, config: Config) {
   r.use(noStore);
   const limit = lookupLimiter(config);
   r.post("/started", limit, async (req, res) => { res.json(await carts.started(checkoutStartedSchema.parse(req.body), req.customer?.id ?? null)); });
+  r.get("/bag", async (req, res) => { res.json(await carts.bagStatus(req.customer?.id ?? null)); });
+  r.post("/bag", limit, async (req, res) => { res.json(await carts.saveBag(bagReminderSchema.parse(req.body), req.customer?.id ?? null)); });
   r.post("/recover", limit, async (req, res) => { res.json(await carts.recover(recoverSchema.parse(req.body).token)); });
   return r;
 }

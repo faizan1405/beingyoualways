@@ -3,17 +3,20 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { OrderStatusBadge } from "@/components/shop/OrderBadges";
 import { inr, inrPaise, shortDate } from "@/lib/format";
-import { isBackendConfigured } from "@/services/api";
+import { DEMO_MODE, isBackendConfigured } from "@/services/api";
 import { DEMO_CUSTOMER_ID } from "@/services/customerService";
 import { customerAuthService } from "@/services/customerAuthService";
 import { orderService } from "@/services/orderService";
 
 export const Route = createFileRoute("/_site/account/orders")({
+  // the shopper cookie only exists in the browser, so this page loads its data there, never during server rendering
+  ssr: false,
   loader: async () => {
     if (isBackendConfigured()) {
       const r = await customerAuthService.orders();
       return { live: true as const, demoOrders: [], error: r.ok ? null : r.error, serverOrders: r.ok ? r.orders : [] };
     }
+    if (!DEMO_MODE) return { live: false as const, demoOrders: [], error: null, serverOrders: [] }; // never sample data outside the preview
     return { live: false as const, demoOrders: await orderService.forCustomer(DEMO_CUSTOMER_ID), error: null, serverOrders: [] };
   },
   component: Orders,

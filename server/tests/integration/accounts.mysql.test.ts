@@ -146,6 +146,36 @@ describe("1. shopper accounts", () => {
     shopper = cookieOf(again);
   });
 
+  it("signing up with an email that already has orders never opens that account — the owner gets a link instead", async () => {
+    const existing = await prisma.customer.create({ data: { name: "Earlier Guest", email: "earlier.guest@example.com", phone: "9811100001" } });
+    const res = await shopPost("/api/customer/register", { name: "Pretender", email: "earlier.guest@example.com", password: "Lotus-Ember-Quarry-58" });
+    expect(res.status).toBe(202);
+    expect(res.body.setupLinkSent).toBe(true);
+    expect(res.headers["set-cookie"]).toBeUndefined();
+    const row = await prisma.customer.findUniqueOrThrow({ where: { id: existing.id } });
+    expect(row.passwordHash).toBeNull();
+    expect(row.name).toBe("Earlier Guest");
+    // the real owner opens the emailed link, sets a password, and the address counts as confirmed
+    const token = newestLink("reset-password");
+    expect((await shopPost("/api/customer/reset-password", { token, password: "Owner-Chooses-This-91" })).status).toBe(200);
+    const after = await prisma.customer.findUniqueOrThrow({ where: { id: existing.id } });
+    expect(after.emailVerifiedAt).not.toBeNull();
+    expect((await shopPost("/api/customer/login", { email: "earlier.guest@example.com", password: "Owner-Chooses-This-91" })).status).toBe(200);
+  });
+
+  it("a reset link works once even when two requests use it at the same moment", async () => {
+    const dir = path.join(MEDIA, "outbox");
+    const before = new Set(readdirSync(dir));
+    await shopPost("/api/customer/forgot-password", { email: "earlier.guest@example.com" });
+    const fresh = readdirSync(dir).find((f) => !before.has(f))!;
+    const token = readFileSync(path.join(dir, fresh), "utf8").match(/reset-password\?token=([A-Za-z0-9_-]+)/)![1]!;
+    const [a, b] = await Promise.all([
+      shopPost("/api/customer/reset-password", { token, password: "Twin-Request-One-42" }),
+      shopPost("/api/customer/reset-password", { token, password: "Twin-Request-Two-42" }),
+    ]);
+    expect([a.status, b.status].sort()).toEqual([200, 400]);
+  });
+
   it("locks an account after three wrong answers, even for the right one", async () => {
     await shopPost("/api/customer/register", { name: "Locked Person", email: "lock@example.com", password: "Banyan-Root-Monsoon-8" });
     for (let i = 0; i < 3; i++) {
@@ -252,6 +282,11 @@ describe("3. stored files", () => {
     const fake = await upload("?kind=PRODUCT_IMAGE", Buffer.from("this is a plain text file, not an image"), "serum.png");
     expect(fake.status).toBe(400);
     expect(fake.body.message ?? JSON.stringify(fake.body)).toMatch(/isn't a supported image or video/);
+    const damaged = await upload("?kind=PRODUCT_IMAGE&productId=bya-1069", Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2048, 0x41)]), "broken.jpg");
+    expect(damaged.status).toBe(400);
+    expect(JSON.stringify(damaged.body)).toMatch(/damaged/);
+    const fakeVideo = await upload("?kind=REVIEW_VIDEO", Buffer.concat([Buffer.from([0xff, 0xff, 0xff, 0xff]), Buffer.from("ftyp"), Buffer.alloc(64, 0)]), "story.mp4");
+    expect(fakeVideo.status).toBe(400);
     const wrongKind = await upload("?kind=REVIEW_VIDEO", PNG, "story.png");
     expect(wrongKind.status).toBe(400);
     // a product picture has to say which product it belongs to, and that product has to exist

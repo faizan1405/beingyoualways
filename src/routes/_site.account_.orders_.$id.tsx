@@ -2,10 +2,13 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 
 import { OrderStatusBadge, PaymentBadge } from "@/components/shop/OrderBadges";
 import { inr, shortDate } from "@/lib/format";
+import { DEMO_MODE } from "@/services/api";
 import { orderService } from "@/services/orderService";
 
 export const Route = createFileRoute("/_site/account_/orders_/$id")({
   loader: async ({ params }) => {
+    // sample orders exist only in the preview demo; real orders open from their private order link
+    if (!DEMO_MODE) throw notFound();
     const o = await orderService.get(params.id);
     if (!o) throw notFound();
     return o;

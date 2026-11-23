@@ -12,7 +12,7 @@ import {
   CHECKOUT_STEPS, INDIAN_STATES, emptyCheckout, firstInvalidStep, normalisePhone, validateStep,
   type CheckoutErrors, type CheckoutForm, type CheckoutStep,
 } from "@/lib/checkout-validation";
-import { clearCheckoutDraft, currentCheckoutKey, loadCheckoutDraft, resetCheckoutKey, saveCheckoutDraft } from "@/lib/checkout-draft";
+import { bagReminderOn, clearCheckoutDraft, currentCheckoutKey, loadCheckoutDraft, resetCheckoutKey, saveCheckoutDraft, setBagReminderOn } from "@/lib/checkout-draft";
 import { inr, inrPaise } from "@/lib/format";
 import { orderHash, rememberOrderLink } from "@/lib/order-links";
 import { openRazorpay } from "@/lib/razorpay-checkout";
@@ -83,6 +83,9 @@ function Checkout() {
   // WhatsApp choices: never pre-ticked; "offers" also covers the single 6-hour bag reminder
   const [waUpdates, setWaUpdates] = useState(false);
   const [waOffers, setWaOffers] = useState(false);
+  // read after mount (browser storage), so server and browser render the same first frame
+  const [bagReminder, setBagReminder] = useState(false);
+  useEffect(() => { setBagReminder(bagReminderOn()); }, []);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const loaded = useRef(false);
 
@@ -157,7 +160,8 @@ function Checkout() {
       document.getElementById(keys[0]!)?.focus();
       return;
     }
-    if (step === "contact") pingReminder(waOffers);
+    // A reminder chosen on the bag page stays on unless the shopper turns it off here — leaving this box empty doesn't cancel it.
+    if (step === "contact" && (waOffers || !bagReminderOn())) pingReminder(waOffers);
     const n = CHECKOUT_STEPS[idx + 1];
     if (n) goTo(n.id);
   };
@@ -351,7 +355,17 @@ function Checkout() {
                   <fieldset className="space-y-2.5 rounded-md border border-border p-4 text-sm">
                     <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">WhatsApp (optional)</legend>
                     <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={waUpdates} onChange={(e) => setWaUpdates(e.target.checked)} /> <span>Send my order updates on WhatsApp (confirmation, shipping and delivery).</span></label>
-                    <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={waOffers} onChange={(e) => { setWaOffers(e.target.checked); if (!e.target.checked) pingReminder(false); }} /> <span>Send me offers on WhatsApp, and one reminder if I leave without finishing this order. Reply STOP any time.</span></label>
+                    <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={waOffers} onChange={(e) => { setWaOffers(e.target.checked); if (!e.target.checked && !bagReminderOn()) pingReminder(false); }} /> <span>Send me offers on WhatsApp, and one reminder if I leave without finishing this order. Reply STOP any time.</span></label>
+                    {bagReminder && (
+                      <p className="text-xs text-muted-foreground">
+                        You asked for one bag reminder on WhatsApp from your bag page.{" "}
+                        <button type="button" className="underline" onClick={() => {
+                          void whatsappShop.saveBagReminder({ checkoutKey: currentCheckoutKey(), lines: lines.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.quantity })), reminderConsent: false })
+                            .then(() => { setBagReminderOn(false); setBagReminder(false); toast("Bag reminder cancelled"); })
+                            .catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't cancel it. Please try again."));
+                        }}>Cancel it</button>
+                      </p>
+                    )}
                   </fieldset>
                 )}
               </>

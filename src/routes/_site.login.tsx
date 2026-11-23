@@ -96,6 +96,7 @@ function Login() {
       : await customerAuthService.login({ email: email.trim(), password: pw });
     setEmailBusy(false);
     if (!r.ok) return setEmailErr(r.error);
+    if ("setupLinkSent" in r) { setEmailNote(r.message); return; }
     toast(mode === "register" ? "Account created — check your email to confirm it." : "Signed in.");
     navigate({ to: "/account" });
   };

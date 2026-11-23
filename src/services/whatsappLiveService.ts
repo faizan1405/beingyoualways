@@ -78,11 +78,27 @@ export const whatsappLive = {
   retryOrderMessage: (orderId: string, purpose: string) => send<{ queued: boolean }>(withId("/api/admin/orders/:id/notify", orderId), "POST", { purpose }),
 };
 
+export interface BagReminderStatus {
+  /** the store has bag reminders switched on and WhatsApp connected */
+  available: boolean;
+  /** signed in with a mobile number proved by a WhatsApp code */
+  eligible: boolean;
+  /** masked number the reminder would go to */
+  phone: string | null;
+  reason: "off" | "sign_in" | "verify_phone" | null;
+  /** a reminder is currently scheduled for this shopper */
+  on: boolean;
+}
+
 /** Shopper side: sign-in availability, bag reminders, own preferences. */
 export const whatsappShop = {
   otpAvailability: () => apiRequest<{ available: boolean; reason: string | null }>("/api/auth/whatsapp/status"),
   checkoutStarted: (b: { checkoutKey: string; lines: { productId: string; variantId: string; quantity: number }[]; contact: { name: string; phone: string }; reminderConsent: boolean }) =>
     send<{ tracking: boolean }>("/api/checkout/reminders/started", "POST", b),
+  /** Bag-page reminder: offered only to a shopper signed in with a WhatsApp-verified number. */
+  bagReminderStatus: () => apiRequest<BagReminderStatus>("/api/checkout/reminders/bag"),
+  saveBagReminder: (b: { checkoutKey: string; lines: { productId: string; variantId: string; quantity: number }[]; reminderConsent: boolean }) =>
+    send<{ tracking: boolean; remindAt?: string }>("/api/checkout/reminders/bag", "POST", b),
   recoverBag: (token: string) => send<{ lines: { productId: string; variantId: string; quantity: number }[] }>("/api/checkout/reminders/recover", "POST", { token }),
   preferences: () => apiRequest<{ orderUpdates: boolean; offers: boolean }>("/api/customer/whatsapp"),
   savePreferences: (p: { orderUpdates: boolean; offers: boolean }) => send<{ orderUpdates: boolean; offers: boolean }>("/api/customer/whatsapp", "PUT", p),

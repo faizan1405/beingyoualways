@@ -94,6 +94,9 @@ const cartHashOf = (input: PlaceOrderInput) =>
     m: input.paymentMethod, d: input.discountCode ?? "", p: input.address.pincode, ph: input.contact.phone,
   })).digest("hex");
 
+/** a webhook row still "processing" after this long was abandoned (crash / restart) and may be retried */
+const STALE_EVENT_MS = 2 * 60_000;
+
 export function createCheckoutService(deps: { prisma: PrismaClient; config: Config; settings: SettingsService; gateway: PaymentGateway | null; logger: Logger; hooks?: OrderHooks | null }) {
   const { prisma, config, settings, gateway, logger } = deps;
   const hooks = deps.hooks ?? null;
@@ -180,9 +183,9 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
     if (!customer) {
       const emailTaken = await tx.customer.findUnique({ where: { email: contact.email }, select: { id: true } });
       customer = await tx.customer.create({ data: { name: contact.name, phone: contact.phone, email: emailTaken ? null : contact.email } });
-    } else if (!customer.email && !(await tx.customer.findUnique({ where: { email: contact.email }, select: { id: true } }))) {
-      customer = await tx.customer.update({ where: { id: customer.id }, data: { email: contact.email } });
     }
+    // An existing customer's email is never set from checkout: typed contact details aren't proof, and an
+    // email added here could be used for "Forgotten password" on someone else's account. The order keeps the email.
     const addr = await tx.shippingAddress.create({
       data: { customerId: customer.id, label: address.type, name: contact.name, phone: contact.phone, line1: address.line1, line2: address.line2 || null, city: address.city, state: address.state, pincode: address.pincode },
     });
@@ -236,26 +239,42 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
         return "ignored_already_paid";
       }
       const shortfall: string[] = [];
+      const taken: { variantId: string; quantity: number }[] = [];
       const sorted = [...o.items].sort((a, b) => (a.variantId ?? "").localeCompare(b.variantId ?? ""));
+      const label = (i: (typeof sorted)[number]) => `${i.productName} (${i.variantLabel}) × ${i.quantity}`;
       if (o.stockState === "RESERVED") {
         for (const i of sorted) {
           if (!i.variantId) continue;
           const n = await tx.$executeRaw`UPDATE Inventory SET quantity = quantity - ${i.quantity}, reserved = reserved - ${i.quantity} WHERE variantId = ${i.variantId} AND reserved >= ${i.quantity} AND quantity >= ${i.quantity}`;
-          if (n !== 1) shortfall.push(`${i.productName} (${i.variantLabel}) × ${i.quantity}`);
+          if (n === 1) taken.push({ variantId: i.variantId, quantity: i.quantity });
+          else {
+            shortfall.push(label(i));
+            // whatever is still held for this line is let go — it can't be turned into a sale
+            await tx.$executeRaw`UPDATE Inventory SET reserved = reserved - LEAST(reserved, ${i.quantity}) WHERE variantId = ${i.variantId}`;
+          }
         }
       } else if (o.stockState === "RELEASED") {
         for (const i of sorted) {
           if (!i.variantId) continue;
           const n = await tx.$executeRaw`UPDATE Inventory SET quantity = quantity - ${i.quantity} WHERE variantId = ${i.variantId} AND quantity IS NOT NULL AND quantity - reserved >= ${i.quantity}`;
-          if (n !== 1) shortfall.push(`${i.productName} (${i.variantLabel}) × ${i.quantity}`);
+          if (n === 1) taken.push({ variantId: i.variantId, quantity: i.quantity });
+          else shortfall.push(label(i));
         }
-        if (o.discountId) await tx.$executeRaw`UPDATE Discount SET usedCount = usedCount + 1 WHERE id = ${o.discountId}`;
+      }
+      // All or nothing: a partly-deducted order would later put back stock it never took when cancelled.
+      if (shortfall.length) for (const t of taken) await tx.$executeRaw`UPDATE Inventory SET quantity = quantity + ${t.quantity} WHERE variantId = ${t.variantId}`;
+      const stockState = shortfall.length ? (o.stockState === "RESERVED" || o.stockState === "RELEASED" ? "RELEASED" : o.stockState) : (o.stockState === "RESERVED" || o.stockState === "RELEASED" ? "COMMITTED" : o.stockState);
+      // a released discount is claimed again only if it still has uses left — never past its limit
+      let discountOverLimit = false;
+      if (o.stockState === "RELEASED" && o.discountId) {
+        const n = await tx.$executeRaw`UPDATE Discount SET usedCount = usedCount + 1 WHERE id = ${o.discountId} AND (usageLimit IS NULL OR usedCount < usageLimit)`;
+        discountOverLimit = n !== 1;
       }
       const late = o.status === "CANCELLED";
       const now = new Date();
       await tx.order.update({
         where: { id: orderId },
-        data: { paymentStatus: "PAID", paidAt: now, status: o.status === "PENDING_PAYMENT" || late ? "NEW" : o.status, stockState: "COMMITTED", reservationExpiresAt: null, ...(late ? { cancelledAt: null, cancelReason: null } : {}) },
+        data: { paymentStatus: "PAID", paidAt: now, status: o.status === "PENDING_PAYMENT" || late ? "NEW" : o.status, stockState, reservationExpiresAt: null, ...(late ? { cancelledAt: null, cancelReason: null } : {}) },
       });
       await tx.payment.update({
         where: { id: pay.id },
@@ -264,7 +283,8 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
       const via = { checkout: "checkout signature + Razorpay payment record", webhook: "signed Razorpay webhook", reconcile: "Razorpay payment check" }[source];
       await tx.orderEvent.create({ data: { orderId, type: "payment", message: `Payment received online — ${formatInr(gp.amountPaise)}${gp.method ? ` by ${gp.method}` : ""}${o.isTest ? " (TEST mode, not a real sale)" : ""}. Verified by ${via}.` } });
       if (late) await tx.orderEvent.create({ data: { orderId, type: "status", message: "Payment arrived after the order had expired — the order was reopened." } });
-      if (shortfall.length) await tx.orderEvent.create({ data: { orderId, type: "stock", message: `Needs attention: not enough stock for ${shortfall.join(", ")}. Contact the customer or refund.` } });
+      if (shortfall.length) await tx.orderEvent.create({ data: { orderId, type: "stock", message: `Needs attention: the payment arrived after the stock hold ended and there isn't enough stock for ${shortfall.join(", ")}. No stock was taken for this order — restock and confirm it, or refund the customer.` } });
+      if (discountOverLimit) await tx.orderEvent.create({ data: { orderId, type: "payment", message: "Needs attention: this order's discount code had already reached its usage limit when the late payment arrived. The customer paid the discounted price; the code's count was not raised past its limit." } });
       if (hooks) await hooks.orderEvent(tx, orderId, "payment_confirmation");
       return "applied";
     }, { timeout: 20_000 })).then((outcome) => { if (outcome === "applied") hooks?.kick(); return outcome; });
@@ -462,25 +482,46 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
         logger.warn("razorpay webhook rejected: bad signature");
         throw new HttpError(400, "invalid_signature", "Invalid webhook signature.");
       }
-      let body: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> }; order?: { entity?: { id?: string } } } };
+      let body: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> }; order?: { entity?: { id?: string } }; refund?: { entity?: { id?: string; payment_id?: string; amount?: number | string } } } };
       try { body = JSON.parse(rawBody.toString("utf8")); } catch { throw new HttpError(400, "invalid_json", "Invalid JSON."); }
       const event = String(body.event ?? "unknown").slice(0, 60);
       const eventId = `wh:${(eventIdHeader?.trim() || createHash("sha256").update(rawBody).digest("hex")).slice(0, 100)}`;
       const entity = body.payload?.payment?.entity as Parameters<typeof toGatewayPayment>[0] | undefined;
       const gp = entity?.id ? toGatewayPayment(entity) : null;
+      // refund.* events carry the refund; its payment_id points at the original payment
+      const refundPaymentId = typeof body.payload?.refund?.entity?.payment_id === "string" ? body.payload.refund.entity.payment_id : null;
       const providerOrderId = gp?.orderId ?? body.payload?.order?.entity?.id ?? null;
 
       let ev;
       try {
-        ev = await prisma.paymentEvent.create({ data: { provider: "razorpay", eventId, eventType: event, source: "webhook", signatureValid: true, providerOrderId, providerPaymentId: gp?.id ?? null, amountPaise: gp?.amountPaise ?? null, outcome: "processing" } });
+        ev = await prisma.paymentEvent.create({ data: { provider: "razorpay", eventId, eventType: event, source: "webhook", signatureValid: true, providerOrderId, providerPaymentId: gp?.id ?? refundPaymentId, amountPaise: gp?.amountPaise ?? null, outcome: "processing" } });
       } catch (e) {
-        if (isUniqueViolation(e)) return { received: true, duplicate: true };
-        throw e;
+        if (!isUniqueViolation(e)) throw e;
+        // Finished events are true duplicates. One left "processing" by a crash or restart is picked up
+        // again once it is clearly abandoned, so a retried webhook is never lost.
+        const reclaimed = await prisma.paymentEvent.updateMany({ where: { eventId, outcome: "processing", createdAt: { lt: new Date(Date.now() - STALE_EVENT_MS) } }, data: { outcome: "processing", createdAt: new Date() } });
+        if (reclaimed.count !== 1) return { received: true, duplicate: true };
+        ev = await prisma.paymentEvent.findUniqueOrThrow({ where: { eventId } });
       }
       try {
-        const pay = providerOrderId ? await prisma.payment.findUnique({ where: { providerOrderId } }) : null;
+        const pay = providerOrderId ? await prisma.payment.findUnique({ where: { providerOrderId } })
+          : refundPaymentId ? await prisma.payment.findFirst({ where: { providerPaymentId: refundPaymentId } }) : null;
         let outcome = pay ? "ignored_event" : "ignored_unknown_order";
-        if (pay && gp) {
+        if (pay && event.startsWith("refund.")) {
+          // the amount refunded so far comes from Razorpay itself, never from the webhook body alone
+          const payId = gp?.id ?? refundPaymentId ?? pay.providerPaymentId;
+          const fresh = payId ? await gateway.fetchPayment(payId) : null;
+          const refunded = fresh ? fresh.amountRefundedPaise : 0;
+          await prisma.$transaction(async (tx) => {
+            await lockOrder(tx, pay.orderId);
+            await tx.orderEvent.create({ data: { orderId: pay.orderId, type: "payment", message: `Razorpay reports a refund (${event}) — ${formatInr(refunded)} refunded so far.` } });
+            if (fresh && refunded > 0 && refunded >= fresh.amountPaise) {
+              await tx.order.update({ where: { id: pay.orderId }, data: { paymentStatus: "REFUNDED" } });
+              await tx.payment.update({ where: { id: pay.id }, data: { status: "REFUNDED" } });
+            }
+          });
+          outcome = "recorded";
+        } else if (pay && gp) {
           if (event === "payment.captured" || event === "order.paid") outcome = await applyPaid(pay.orderId, { ...gp, status: "captured" }, "webhook");
           else if (event === "payment.authorized") {
             const o = await load(prisma, pay.orderId);
@@ -488,17 +529,6 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
             else if (gp.amountPaise !== toPaise(o.grandTotal)) outcome = "rejected_mismatch";
             else { const c = await gateway.capture(gp.id, gp.amountPaise); outcome = c.status === "captured" ? await applyPaid(pay.orderId, c, "webhook") : "recorded"; }
           } else if (event === "payment.failed") outcome = await recordAttemptFailed(pay.orderId, gp.errorDescription ?? "payment failed");
-          else if (event.startsWith("refund.")) {
-            const refunded = Number((entity as Record<string, unknown> | undefined)?.["amount_refunded"] ?? 0);
-            await prisma.orderEvent.create({ data: { orderId: pay.orderId, type: "payment", message: `Razorpay reports a refund (${event}) — ${formatInr(refunded)} refunded so far.` } });
-            if (refunded >= gp.amountPaise && refunded > 0) {
-              await prisma.$transaction([
-                prisma.order.update({ where: { id: pay.orderId }, data: { paymentStatus: "REFUNDED" } }),
-                prisma.payment.update({ where: { id: pay.id }, data: { status: "REFUNDED" } }),
-              ]);
-            }
-            outcome = "recorded";
-          }
         }
         await prisma.paymentEvent.update({ where: { id: ev.id }, data: { outcome, orderId: pay?.orderId ?? null, paymentId: pay?.id ?? null } });
         return { received: true, outcome };

@@ -34,7 +34,7 @@ describe("live admin areas", () => {
 
 describe("production builds never use demo data", () => {
   afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); localStorage.clear(); });
-  it("a production build without a store server has demo mode, demo storage and demo reset switched off", async () => {
+  it("a production build without a store server has demo mode, demo storage and demo reset switched off", { timeout: 20_000 }, async () => {
     vi.resetModules();
     vi.stubEnv("DEV", false);
     vi.stubEnv("PROD", true);

@@ -22,7 +22,12 @@ export function LiveCampaigns() {
   const list = useLive(() => whatsappLive.campaigns(), []);
   const tpl = useLive(() => whatsappLive.templates(), []);
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
-  useEffect(() => { void productService.categories().then((c) => setCats(c.map(({ slug, name }) => ({ slug, name })))); }, []);
+  const [catsError, setCatsError] = useState<string | null>(null);
+  useEffect(() => {
+    productService.categories()
+      .then((c) => { setCats(c.map(({ slug, name }) => ({ slug, name }))); setCatsError(null); })
+      .catch((e) => setCatsError(e instanceof Error ? e.message : "Categories couldn't be loaded."));
+  }, []);
   const [editing, setEditing] = useState<{ id: string | null; f: CampaignInput } | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,6 +83,7 @@ export function LiveCampaigns() {
                 </select>
                 {editing.f.segment.kind === "no_order_days" && <input aria-label="Days without an order" type="number" min={7} max={730} className={`${adminInput} mt-2`} value={editing.f.segment.days} onChange={(e) => setF({ segment: { kind: "no_order_days", days: Number(e.target.value) } })} />}
                 {editing.f.segment.kind === "bought_category" && <select aria-label="Category" className={`${adminInput} mt-2`} value={editing.f.segment.category} onChange={(e) => setF({ segment: { kind: "bought_category", category: e.target.value } })}>{cats.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
+                {editing.f.segment.kind === "bought_category" && catsError && <p role="alert" className="mt-1 text-xs text-destructive">{catsError} Reload the page to pick a category.</p>}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><label htmlFor="c-when" className={adminLabel}>Send at (India time, optional)</label><input id="c-when" type="datetime-local" className={adminInput} value={toLocal(editing.f.scheduledAt)} onChange={(e) => setF({ scheduledAt: e.target.value ? `${e.target.value}:00+05:30` : null })} /></div>

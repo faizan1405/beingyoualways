@@ -1,5 +1,5 @@
-// Abandoned-checkout reminders. The website tells the server when a shopper with WhatsApp consent
-// reaches checkout; six hours after their last activity, if no order arrived, one approved template
+// Abandoned-bag reminders. The website tells the server when a shopper with WhatsApp consent
+// reaches checkout, or opts in on the bag page while signed in with a WhatsApp-verified number; six hours after their last activity, if no order arrived, one approved template
 // reminder is queued. Everything is in MySQL, so restarts lose nothing, and the claim + unique
 // dedupe key mean each checkout is reminded at most once.
 import { createHash, randomBytes } from "node:crypto";
@@ -33,6 +33,12 @@ export const checkoutStartedSchema = z.object({
   /** the shopper ticked "remind me on WhatsApp if I don't finish" */
   reminderConsent: z.boolean(),
 });
+/** bag page: product ids + quantities only; the number comes from the signed-in account, never the form */
+export const bagReminderSchema = z.object({
+  checkoutKey: z.string().uuid(),
+  lines: z.array(cartLineSchema).min(1).max(30),
+  reminderConsent: z.boolean(),
+});
 export const recoverSchema = z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{20,80}$/) });
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -41,19 +47,23 @@ export function createCartRecovery(deps: { prisma: PrismaClient; config: Config;
   const { prisma, config, wa, logger } = deps;
   const now = deps.now ?? (() => new Date());
 
-  async function started(input: z.infer<typeof checkoutStartedSchema>, customerId: string | null) {
-    if (!wa.configured) return { tracking: false };
-    const phone = `91${input.contact.phone}`;
+  /** Shared by checkout and the bag page: records the choice and (re)schedules the one reminder. */
+  async function track(input: { checkoutKey: string; lines: z.infer<typeof cartLineSchema>[]; name: string; phone: string; consent: boolean; source: "checkout_reminder" | "bag_reminder"; customerId: string | null }) {
+    const { phone } = input;
     const t = now();
-    if (!input.reminderConsent) {
-      await prisma.abandonedCheckout.updateMany({ where: { checkoutKey: input.checkoutKey, status: "OPEN" }, data: { status: "SKIPPED", skipReason: "The shopper unticked the reminder." } });
+    if (!input.consent) {
+      const n = await prisma.abandonedCheckout.updateMany({ where: { checkoutKey: input.checkoutKey, status: "OPEN" }, data: { status: "SKIPPED", skipReason: "The shopper unticked the reminder." } });
+      // unticking on the bag page is a recorded "no" to reminders (offers choices are left as they were)
+      if (input.source === "bag_reminder" && n.count) await wa.recordConsent(prisma, { phone, purpose: CONSENT.cartReminder, status: "OPTED_OUT", source: input.source, customerId: input.customerId });
       return { tracking: false };
     }
     const { priced } = await priceLines(prisma, input.lines, 100);
     if (!priced.length) return { tracking: false };
     const lines = priced.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.quantity }));
     const subtotalPaise = priced.reduce((s, l) => s + lineTotal(l), 0);
-    await wa.recordConsent(prisma, { phone, purpose: CONSENT.marketing, status: "OPTED_IN", source: "checkout_reminder", customerId });
+    // Checkout's box covers offers and the reminder; the bag page's box covers only the reminder.
+    if (input.source === "checkout_reminder") await wa.recordConsent(prisma, { phone, purpose: CONSENT.marketing, status: "OPTED_IN", source: input.source, customerId: input.customerId });
+    await wa.recordConsent(prisma, { phone, purpose: CONSENT.cartReminder, status: "OPTED_IN", source: input.source, customerId: input.customerId });
     const existing = await prisma.abandonedCheckout.findUnique({ where: { checkoutKey: input.checkoutKey } });
     if (existing && existing.status !== "OPEN" && existing.status !== "SKIPPED") return { tracking: false };
     const remindAt = new Date(t.getTime() + REMINDER_DELAY_MS);
@@ -62,11 +72,38 @@ export function createCartRecovery(deps: { prisma: PrismaClient; config: Config;
       prisma.abandonedCheckout.updateMany({ where: { phone, status: "OPEN", checkoutKey: { not: input.checkoutKey } }, data: { status: "SKIPPED", skipReason: "Replaced by a newer checkout." } }),
       prisma.abandonedCheckout.upsert({
         where: { checkoutKey: input.checkoutKey },
-        create: { checkoutKey: input.checkoutKey, name: input.contact.name, phone, customerId, lines, subtotalPaise, lastActivityAt: t, remindAt },
-        update: { name: input.contact.name, phone, customerId, lines, subtotalPaise, lastActivityAt: t, remindAt, status: "OPEN", skipReason: null },
+        create: { checkoutKey: input.checkoutKey, name: input.name, phone, customerId: input.customerId, lines, subtotalPaise, lastActivityAt: t, remindAt },
+        update: { name: input.name, phone, customerId: input.customerId, lines, subtotalPaise, lastActivityAt: t, remindAt, status: "OPEN", skipReason: null },
       }),
     ]);
     return { tracking: true, remindAt: remindAt.toISOString() };
+  }
+
+  async function started(input: z.infer<typeof checkoutStartedSchema>, customerId: string | null) {
+    if (!wa.configured) return { tracking: false };
+    return track({ checkoutKey: input.checkoutKey, lines: input.lines, name: input.contact.name, phone: `91${input.contact.phone}`, consent: input.reminderConsent, source: "checkout_reminder", customerId });
+  }
+
+  /**
+   * The earlier opt-in on the bag page. Only for a signed-in shopper whose mobile was proved by a WhatsApp
+   * code: nobody can sign someone else's number up for a reminder, and nothing is ever ticked for them.
+   */
+  async function bagStatus(customerId: string | null) {
+    const available = wa.configured && (await wa.automations()).abandonedCart;
+    if (!available) return { available: false, eligible: false, phone: null, reason: "off" as const, on: false };
+    if (!customerId) return { available: true, eligible: false, phone: null, reason: "sign_in" as const, on: false };
+    const c = await prisma.customer.findUnique({ where: { id: customerId }, select: { phone: true, phoneVerifiedAt: true } });
+    if (!c?.phone || !c.phoneVerifiedAt) return { available: true, eligible: false, phone: null, reason: "verify_phone" as const, on: false };
+    const open = await prisma.abandonedCheckout.findFirst({ where: { phone: `91${c.phone}`, status: "OPEN" }, select: { id: true } });
+    return { available: true, eligible: true, phone: maskPhone(`91${c.phone}`), reason: null, on: !!open };
+  }
+
+  async function saveBag(input: z.infer<typeof bagReminderSchema>, customerId: string | null) {
+    const st = await bagStatus(customerId);
+    if (!st.available) throw new HttpError(409, "reminders_off", "Bag reminders aren't switched on right now.");
+    if (!st.eligible) throw new HttpError(403, "verify_phone", "Sign in with your WhatsApp number first, so we know the reminder goes to you.");
+    const c = await prisma.customer.findUniqueOrThrow({ where: { id: customerId! }, select: { name: true, phone: true } });
+    return track({ checkoutKey: input.checkoutKey, lines: input.lines, name: c.name || "there", phone: `91${c.phone}`, consent: input.reminderConsent, source: "bag_reminder", customerId });
   }
 
   /** Called by the worker: queue reminders that are due. */
@@ -81,7 +118,7 @@ export function createCartRecovery(deps: { prisma: PrismaClient; config: Config;
       if (t.getTime() - c.remindAt.getTime() > GIVE_UP_MS) { await set({ status: "EXPIRED", skipReason: c.skipReason ?? "Couldn't be sent in time." }); continue; }
       const ordered = await prisma.order.findFirst({ where: { phone: c.phone.slice(2), createdAt: { gte: c.createdAt } }, select: { id: true } });
       if (ordered) { await set({ status: "CONVERTED", orderId: ordered.id }); continue; }
-      if ((await wa.latestConsent(prisma, c.phone, CONSENT.marketing)) !== "OPTED_IN") { await set({ status: "SKIPPED", skipReason: "The customer opted out of WhatsApp offers." }); continue; }
+      if ((await wa.cartReminderConsent(prisma, c.phone)) !== "OPTED_IN") { await set({ status: "SKIPPED", skipReason: "The customer opted out of WhatsApp offers." }); continue; }
       ready ??= await wa.purposeReady("abandoned_cart");
       if (!ready.ok) { await set({ skipReason: `Waiting: ${ready.reason}` }); continue; }
       const token = randomBytes(24).toString("base64url");
@@ -127,6 +164,6 @@ export function createCartRecovery(deps: { prisma: PrismaClient; config: Config;
     };
   }
 
-  return { started, processDue, recover, list };
+  return { started, bagStatus, saveBag, processDue, recover, list };
 }
 export type CartRecoveryService = ReturnType<typeof createCartRecovery>;

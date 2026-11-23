@@ -66,5 +66,18 @@ export function currentCheckoutKey(): string {
 /** Start a fresh checkout attempt (after an order is placed, or when the bag changed since the last attempt). */
 export function resetCheckoutKey(): string {
   session()?.removeItem(KEY_KEY);
+  setBagReminderOn(false);
   return currentCheckoutKey();
+}
+
+// Whether the shopper turned on the bag-page WhatsApp reminder in this tab — a yes/no flag only, no
+// number or name (those stay on the store server). Checkout reads it so it never cancels that choice by itself.
+const BAG_REMINDER_KEY = "bya.bag.reminder.v1";
+export function bagReminderOn(): boolean {
+  return session()?.getItem(BAG_REMINDER_KEY) === "1";
+}
+export function setBagReminderOn(on: boolean) {
+  const s = session();
+  if (!s) return;
+  if (on) s.setItem(BAG_REMINDER_KEY, "1"); else s.removeItem(BAG_REMINDER_KEY);
 }

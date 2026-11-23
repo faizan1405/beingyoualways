@@ -141,7 +141,13 @@ export async function apiRequest<T>(path: string, init: { method?: Method; body?
   let body: { error?: { code?: string; message?: string; details?: unknown } } = {};
   try { body = await res.json(); } catch { /* not JSON (e.g. a proxy error page) */ }
   const e = body.error;
-  if (res.status === 401) throw new ApiError(401, e?.code ?? "unauthorized", e?.code === "invalid_credentials" ? e.message ?? "Email or password is incorrect." : "Your admin session has ended — please sign in again.");
+  if (res.status === 401) {
+    // Admin screens get the admin wording; shopper calls (sign-in, account, WhatsApp code) show the server's own message.
+    const msg = e?.code === "invalid_credentials" ? e.message ?? "Email or password is incorrect."
+      : /^\/api\/(admin\b|auth\/(me|logout|login)$)/.test(path) ? "Your admin session has ended — please sign in again."
+      : e?.message ?? "Please sign in to continue.";
+    throw new ApiError(401, e?.code ?? "unauthorized", msg);
+  }
   if (res.status === 403) throw new ApiError(403, e?.code ?? "forbidden", e?.message ?? "You don't have permission to do that.");
   const list = Array.isArray(e?.details) ? (e.details as { field: string; message: string }[]) : undefined;
   const detail = list?.length && e?.code === "validation_failed" ? ` (${list.map((d) => `${d.field}: ${d.message}`).join("; ")})` : "";

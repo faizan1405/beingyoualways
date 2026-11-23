@@ -47,7 +47,11 @@ export const PURPOSE_KEYS = Object.keys(PURPOSES) as Purpose[];
 export type OrderPurpose = "order_confirmation" | "payment_confirmation" | "cod_order_confirmation" | "order_packed" | "order_shipped" | "order_out_for_delivery" | "order_delivered" | "order_cancelled";
 
 /** Consent purposes stored in WhatsAppConsent. */
-export const CONSENT = { orderUpdates: "order_updates", marketing: "marketing" } as const;
+/**
+ * order_updates: order news. marketing: offers + campaigns (+ bag reminders).
+ * cart_reminder: only the one bag reminder, chosen on the bag page — never used for campaigns.
+ */
+export const CONSENT = { orderUpdates: "order_updates", marketing: "marketing", cartReminder: "cart_reminder" } as const;
 export type ConsentPurpose = (typeof CONSENT)[keyof typeof CONSENT];
 
 /* ───────────────────────────── template shape (from Meta) ───────────────────────────── */

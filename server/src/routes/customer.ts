@@ -48,6 +48,11 @@ export function customerRoutes(customers: CustomerAuthService, config: Config) {
 
   r.post("/register", authLimit, async (req, res) => {
     const out = await customers.register(registerSchema.parse(req.body), req);
+    if (out.setupLinkSent) {
+      res.setHeader("Cache-Control", "no-store");
+      res.status(202).json({ setupLinkSent: true, message: "We already have orders under this email. We've sent a link to that address — open it to set your password and see them." });
+      return;
+    }
     send(res, out, { emailConfirmation: out.emailConfirmation });
   });
 

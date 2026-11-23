@@ -5,7 +5,7 @@ import { DemoNotice } from "@/components/shop/DemoNotice";
 import { buttonVariants } from "@/components/ui/button";
 import { OrderStatusBadge } from "@/components/shop/OrderBadges";
 import { inr, inrPaise, shortDate } from "@/lib/format";
-import { isBackendConfigured } from "@/services/api";
+import { DEMO_MODE, isBackendConfigured } from "@/services/api";
 import { DEMO_CUSTOMER_ID, customerService } from "@/services/customerService";
 import { customerAuthService, type ShopperAccount, type ShopperOrder } from "@/services/customerAuthService";
 import { orderService } from "@/services/orderService";
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_site/account/")({
     // Signed-in state comes from a shopper cookie, so it is read in the browser, never during
     // server rendering (the server never sees the visitor's cookie).
     if (isBackendConfigured()) return { live: true as const, customer: null, orders: [] };
+    // a real site without its store server shows "not connected" from the account layout — never sample data
+    if (!DEMO_MODE) return { live: true as const, customer: null, orders: [] };
     return { live: false as const, customer: (await customerService.get(DEMO_CUSTOMER_ID))!, orders: await orderService.forCustomer(DEMO_CUSTOMER_ID) };
   },
   component: Dashboard,

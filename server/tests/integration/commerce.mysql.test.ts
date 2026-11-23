@@ -306,6 +306,65 @@ describe("8-14. Razorpay (Test Mode double): verify, fail, cancel, webhooks, out
   });
 });
 
+describe("Phase 5: late payments, refunds and interrupted webhooks", () => {
+  const start = async (qty: number, n: number) => {
+    const res = await place(order([{ ...OIL, quantity: qty }], { paymentMethod: "razorpay", contact: contact(n) }));
+    expect(res.status).toBe(201);
+    return res.body as { order: { orderNumber: string }; accessToken: string; payment: { razorpayOrderId: string } };
+  };
+  const hook = (w: { raw: Buffer; signature: string; eventId: string }) =>
+    request(app).post("/api/webhooks/razorpay").set("Content-Type", "application/json").set("X-Razorpay-Signature", w.signature).set("X-Razorpay-Event-Id", w.eventId).send(w.raw.toString("utf8"));
+  const events = (orderNumber: string) => prisma.orderEvent.findMany({ where: { order: { orderNumber } } }).then((e) => e.map((x) => x.message).join("\n"));
+  let refundable: { payment: Parameters<ReturnType<typeof createFakeRazorpay>["refund"]>[0]; orderNumber: string } | null = null;
+
+  it("a payment arriving after the stock was sold to someone else is recorded, takes no stock and is flagged", async () => {
+    await setStock(OIL.variantId, 2);
+    const o = await start(2, 21);
+    await prisma.order.update({ where: { orderNumber: o.order.orderNumber }, data: { reservationExpiresAt: new Date(Date.now() - 1000) } });
+    expect((await services.checkout.expireStale()).released).toBeGreaterThanOrEqual(1);
+    expect((await place(order([{ ...OIL, quantity: 2 }], { contact: contact(22) }))).status).toBe(201); // COD buyer takes the last two
+    expect(await stock(OIL.variantId)).toMatchObject({ quantity: 0, reserved: 0 });
+    const p = rz.pay(o.payment.razorpayOrderId);
+    expect((await hook(rz.webhook("payment.captured", p.payment))).body.outcome).toBe("applied");
+    const db = await prisma.order.findUniqueOrThrow({ where: { orderNumber: o.order.orderNumber } });
+    expect(db).toMatchObject({ paymentStatus: "PAID", status: "NEW", stockState: "RELEASED" });
+    expect(await stock(OIL.variantId)).toMatchObject({ quantity: 0, reserved: 0 }); // never negative, never partly taken
+    expect(await events(o.order.orderNumber)).toMatch(/Needs attention: .*No stock was taken/);
+    // cancelling it later must not invent stock that was never taken
+    expect((await adminPost(`/api/admin/orders/${db.id}/cancel`, { reason: "Out of stock — refunding" })).status).toBe(200);
+    expect((await stock(OIL.variantId)).quantity).toBe(0);
+    refundable = { payment: p.payment, orderNumber: o.order.orderNumber };
+  });
+
+  it("refund webhooks (refund entity only) are matched to the payment; a full refund marks the order refunded", async () => {
+    await setStock(OIL.variantId, 10);
+    const o = await start(1, 23);
+    const p = rz.pay(o.payment.razorpayOrderId);
+    expect((await hook(rz.webhook("payment.captured", p.payment))).body.outcome).toBe("applied");
+    const partial = await hook(rz.refund(p.payment, 1000));
+    expect(partial.body.outcome).toBe("recorded");
+    expect((await prisma.order.findUniqueOrThrow({ where: { orderNumber: o.order.orderNumber } })).paymentStatus).toBe("PAID");
+    const rest = p.payment.amountPaise - 1000;
+    expect((await hook(rz.refund(p.payment, rest))).body.outcome).toBe("recorded");
+    expect((await prisma.order.findUniqueOrThrow({ where: { orderNumber: o.order.orderNumber } })).paymentStatus).toBe("REFUNDED");
+    expect(await events(o.order.orderNumber)).toMatch(/refunded so far/);
+    expect(refundable).not.toBeNull();
+  });
+
+  it("a webhook left half-processed by a crash is processed when Razorpay retries it; a live one is not doubled", async () => {
+    const o = await start(1, 24);
+    const p = rz.pay(o.payment.razorpayOrderId);
+    const w = rz.webhook("payment.captured", p.payment);
+    await prisma.paymentEvent.create({ data: { provider: "razorpay", eventId: `wh:${w.eventId}`, eventType: "payment.captured", source: "webhook", signatureValid: true, outcome: "processing", createdAt: new Date(Date.now() - 10 * 60_000) } });
+    const retried = await hook(w);
+    expect(retried.body.outcome).toBe("applied");
+    expect((await prisma.order.findUniqueOrThrow({ where: { orderNumber: o.order.orderNumber } })).paymentStatus).toBe("PAID");
+    const w2 = rz.webhook("payment.captured", p.payment);
+    await prisma.paymentEvent.create({ data: { provider: "razorpay", eventId: `wh:${w2.eventId}`, eventType: "payment.captured", source: "webhook", signatureValid: true, outcome: "processing" } });
+    expect((await hook(w2)).body.duplicate).toBe(true);
+  });
+});
+
 describe("16. insufficient stock and concurrent orders", () => {
   it("refuses more than is available", async () => {
     await setStock(SUN.variantId, 3);
@@ -438,6 +497,17 @@ describe("18. dashboard totals match the database", () => {
     expect(withTest.revenuePaise).toBeGreaterThan(d.revenuePaise);
     expect(d.series.reduce((s: number, x: { paidPaise: number }) => s + x.paidPaise, 0)).toBe(d.revenuePaise);
     expect(d.topProducts[0].quantity).toBeGreaterThan(0);
+  });
+  it("an order placed before the range but paid inside it counts on the day it was paid, in the total and the chart", async () => {
+    const paidOne = await prisma.order.findFirstOrThrow({ where: { paymentStatus: "PAID", isTest: false } });
+    await prisma.order.update({ where: { id: paidOne.id }, data: { createdAt: new Date(Date.now() - 60 * 86_400_000) } });
+    try {
+      const d = (await adminGet("/api/admin/dashboard")).body;
+      expect(d.revenuePaise).toBeGreaterThanOrEqual(Math.round(Number(paidOne.grandTotal) * 100));
+      expect(d.series.reduce((s: number, x: { paidPaise: number }) => s + x.paidPaise, 0)).toBe(d.revenuePaise);
+    } finally {
+      await prisma.order.update({ where: { id: paidOne.id }, data: { createdAt: paidOne.createdAt } });
+    }
   });
   it("an empty date range shows zeros, not sample figures", async () => {
     const d = (await adminGet("/api/admin/dashboard?from=2020-01-01&to=2020-01-31")).body;

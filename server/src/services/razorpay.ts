@@ -15,6 +15,8 @@ export interface GatewayPayment {
   status: GatewayPaymentStatus;
   method: string | null;
   errorDescription: string | null;
+  /** total refunded so far, in paise (0 when nothing was refunded) */
+  amountRefundedPaise: number;
 }
 export interface GatewayOrder { id: string; amountPaise: number; currency: string; receipt: string | null }
 
@@ -39,7 +41,7 @@ export function safeEqualHex(expectedHex: string, given: string | undefined): bo
 }
 export const hmacHex = (secret: string, data: string | Buffer) => createHmac("sha256", secret).update(data).digest("hex");
 
-type RawPayment = { id: string; order_id?: string | null; amount: number | string; currency: string; status: string; method?: string | null; error_description?: string | null };
+type RawPayment = { id: string; order_id?: string | null; amount: number | string; currency: string; status: string; method?: string | null; error_description?: string | null; amount_refunded?: number | string | null };
 export const toGatewayPayment = (p: RawPayment): GatewayPayment => ({
   id: p.id,
   orderId: p.order_id ?? null,
@@ -48,6 +50,7 @@ export const toGatewayPayment = (p: RawPayment): GatewayPayment => ({
   status: (["created", "authorized", "captured", "refunded", "failed"].includes(p.status) ? p.status : "created") as GatewayPaymentStatus,
   method: p.method ?? null,
   errorDescription: p.error_description ?? null,
+  amountRefundedPaise: Number(p.amount_refunded ?? 0) || 0,
 });
 
 /** Official Razorpay Node.js SDK. Returns null while no keys are configured (online payment stays off). */

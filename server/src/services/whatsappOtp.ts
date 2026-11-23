@@ -10,6 +10,7 @@ import type { Config } from "../config.js";
 import { HttpError, badRequest } from "../errors.js";
 import { isIndianMobile, normalizeIndianPhone } from "../lib/india.js";
 import type { Logger } from "../logger.js";
+import { logActivity } from "./activity.js";
 import type { CustomerAuthService } from "./customerAuthService.js";
 import type { WhatsAppService } from "./whatsappService.js";
 
@@ -104,6 +105,14 @@ export function createWhatsAppOtp(deps: { prisma: PrismaClient; config: Config; 
     if (used.count !== 1) throw new HttpError(400, "otp_expired", "This code has expired or was already used. Ask for a new one.");
 
     let c = await prisma.customer.findUnique({ where: { phone: local } });
+    // An account that can sign in another way (password / Google) but never proved this number may have
+    // typed someone else's mobile. The verified owner of the number must not land in that account: the
+    // unproved number is taken off it and the owner gets their own account.
+    if (c && !c.phoneVerifiedAt && (c.passwordHash || c.googleSub)) {
+      await prisma.customer.updateMany({ where: { id: c.id, phone: local, phoneVerifiedAt: null }, data: { phone: null } });
+      await logActivity(prisma, null, { action: "customer.phoneReleased", entityType: "customer", entityId: c.id, summary: "An unconfirmed mobile number was removed from an account after its owner proved it on WhatsApp" });
+      c = null;
+    }
     let created = false;
     if (!c) {
       try {

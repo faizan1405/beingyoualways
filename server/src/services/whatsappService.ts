@@ -183,10 +183,19 @@ export function createWhatsAppService(deps: { prisma: PrismaClient; config: Conf
     return row?.status ?? null;
   }
   async function recordConsent(db: Db, input: { phone: string; purpose: ConsentPurpose; status: "OPTED_IN" | "OPTED_OUT"; source: string; customerId?: string | null }) {
+    // Opting out of offers (STOP, account, admin, Meta) always ends a bag-page reminder choice too.
+    if (input.purpose === CONSENT.marketing && input.status === "OPTED_OUT" && (await latestConsent(db, input.phone, CONSENT.cartReminder)) === "OPTED_IN") {
+      await db.whatsAppConsent.create({ data: { phone: input.phone, purpose: CONSENT.cartReminder, status: "OPTED_OUT", source: input.source.slice(0, 60), customerId: input.customerId ?? null } });
+    }
     const current = await latestConsent(db, input.phone, input.purpose);
     if (current === input.status) return false;
     await db.whatsAppConsent.create({ data: { phone: input.phone, purpose: input.purpose, status: input.status, source: input.source.slice(0, 60), customerId: input.customerId ?? null } });
     return true;
+  }
+  /** A bag reminder may go out when the newest offers-or-reminder choice for this number is a yes. */
+  async function cartReminderConsent(db: Db, phone: string) {
+    const row = await db.whatsAppConsent.findFirst({ where: { phone, purpose: { in: [CONSENT.marketing, CONSENT.cartReminder] } }, orderBy: [{ recordedAt: "desc" }, { id: "desc" }] });
+    return row?.status ?? null;
   }
 
   /* ───────── queue ───────── */
@@ -238,7 +247,7 @@ export function createWhatsAppService(deps: { prisma: PrismaClient; config: Conf
     if (opts.retry && now().getTime() - row.createdAt.getTime() > 3 * 86_400_000) return skip("Not sent: waited in the queue for more than 3 days.");
 
     const consentPurpose = SEND_KINDS_NEEDING_CONSENT[row.kind];
-    if (consentPurpose && (await latestConsent(prisma, row.phone, consentPurpose)) !== "OPTED_IN") {
+    if (consentPurpose && (await (row.kind === "cart" ? cartReminderConsent(prisma, row.phone) : latestConsent(prisma, row.phone, consentPurpose))) !== "OPTED_IN") {
       return skip(consentPurpose === CONSENT.marketing ? "Not sent: the customer hasn't agreed to WhatsApp offers or has opted out." : "Not sent: the customer hasn't agreed to WhatsApp order updates or has opted out.");
     }
     if (MARKETING_KINDS.includes(row.kind)) {
@@ -640,6 +649,7 @@ export function createWhatsAppService(deps: { prisma: PrismaClient; config: Conf
     resolveTemplate,
     templateOverview,
     latestConsent,
+    cartReminderConsent,
     recordConsent,
     consentOf: (phone: string, purpose: ConsentPurpose) => latestConsent(prisma, phone, purpose),
     setConsent: (input: Parameters<typeof recordConsent>[1]) => recordConsent(prisma, input),

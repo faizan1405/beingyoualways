@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, CloudOff, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { BagReminderOptIn } from "@/components/site/BagReminderOptIn";
 import { CartLines } from "@/components/site/CartLines";
 import { OrderTotals } from "@/components/site/OrderTotals";
 import { DemoNotice } from "@/components/shop/DemoNotice";
@@ -112,6 +113,7 @@ function CartPage() {
             {live && quote && !quote.shipping.configured && <p className="mt-3 text-xs text-muted-foreground">Ordering is paused while the store finishes setting up delivery charges.</p>}
             <Button variant="lux" size="xl" className="mt-6 w-full" asChild><Link to="/checkout">Proceed to checkout <ArrowRight /></Link></Button>
             <Button variant="link" className="mt-2 w-full" asChild><Link to="/shop">Continue shopping</Link></Button>
+            {live && <BagReminderOptIn />}
             {!live && <DemoNotice className="mt-4 text-xs">Development preview — your bag is saved in this browser only, and orders can't be placed until the shop is connected to the store server.</DemoNotice>}
             <p className="mt-4 text-center text-[11px] text-muted-foreground">
               <Link to="/shipping-policy" className="underline">Shipping</Link> · <Link to="/refund-policy" className="underline">Refund & Returns</Link> · <Link to="/terms" className="underline">Terms</Link>

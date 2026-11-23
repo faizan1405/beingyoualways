@@ -27,7 +27,8 @@ const SIGNATURES = [
   { mime: "image/png", ext: ".png", kind: "image" as const, test: (b: Buffer) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 },
   { mime: "image/gif", ext: ".gif", kind: "image" as const, test: (b: Buffer) => b.subarray(0, 3).toString("latin1") === "GIF" },
   { mime: "image/webp", ext: ".webp", kind: "image" as const, test: (b: Buffer) => b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP" },
-  { mime: "video/mp4", ext: ".mp4", kind: "video" as const, test: (b: Buffer) => b.subarray(4, 8).toString("latin1") === "ftyp" },
+  // MP4: a real "ftyp" box — sensible size and a printable brand (isom, mp42, avc1…), not just the 4 letters
+  { mime: "video/mp4", ext: ".mp4", kind: "video" as const, test: (b: Buffer) => b.length >= 16 && b.subarray(4, 8).toString("latin1") === "ftyp" && b.readUInt32BE(0) >= 16 && b.readUInt32BE(0) <= 512 && /^[\x20-\x7e]{4}$/.test(b.subarray(8, 12).toString("latin1")) },
 ];
 
 export interface UploadedFile {
@@ -212,8 +213,17 @@ export function createMediaService(prisma: PrismaClient, config: Config) {
     let width: number | null = null;
     let height: number | null = null;
     if (sig.kind === "image") {
+      // The picture itself must decode — matching first bytes alone don't make a usable image.
+      let meta: Awaited<ReturnType<ReturnType<typeof sharp>["metadata"]>>;
       try {
-        const meta = await sharp(abs).metadata();
+        meta = await sharp(abs).metadata();
+        if (!meta.width || !meta.height) throw new Error("no dimensions");
+        await sharp(abs).resize({ width: 8, height: 8, fit: "inside" }).toBuffer();
+      } catch {
+        await removeFiles([storageKey]);
+        throw badRequest("That image file is damaged or isn't really an image. Please export it again as JPG, PNG or WebP.");
+      }
+      try {
         width = meta.width ?? null;
         height = meta.height ?? null;
         if (meta.format !== "webp") {

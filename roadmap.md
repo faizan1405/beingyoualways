@@ -98,3 +98,13 @@ Open (needs the client / Hostinger — cannot be done from here):
 - [x] Website: live admin screens (WhatsApp API, campaigns, bag reminders, chatbot, order WhatsApp panel), checkout consent boxes, bag-link restore, account WhatsApp choices, sign-in shows WhatsApp only when the server can send codes.
 - [x] Tests: 30 WhatsApp database tests + unit tests (stand-in for Meta); full server and website suites.
 - [ ] Blocked (owner): System User access token + App Secret on Hostinger, webhook verification on the live API domain, approved templates, a test number — then one real send/receive.
+
+# Roadmap — Phase 5: production audit and fixes (not deployed)
+
+- [x] Server security: no account takeover through registration or guest checkout; WhatsApp sign-in proves phone ownership; reset links work once even when used twice at the same moment.
+- [x] Server money: late Razorpay payments re-check stock and discount limits; stuck payment events retry; refund webhooks read refund payloads; dashboard revenue by paid date.
+- [x] Server media: damaged images and fake MP4 files refused.
+- [x] Earlier bag-page WhatsApp reminder: optional, never ticked, only for a WhatsApp-verified signed-in shopper, its own consent (never enrols in offers), STOP ends it, checkout never silently cancels it.
+- [x] Website: no sample shopper data or demo sign-in codes on the real site; live profile saving; clear errors on admin product editor, campaign categories; public stories/text retry after a server hiccup.
+- [x] Tests: 133 server database tests, 57 server unit tests, 199 website tests; browser check of the bag reminder and account pages against a local store copy.
+- [ ] Blocked (owner): Hostinger deployment + live env, real Meta/Razorpay/Google/SMTP credentials, approved WhatsApp templates and a test number — only then can real sends, payments and emails be checked end to end.
