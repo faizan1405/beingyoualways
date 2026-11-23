@@ -16,6 +16,7 @@ import type {
 import { logActivity } from "./activity.js";
 import { checkOrderToken } from "./orderLinks.js";
 import type { Mailer } from "./mailer.js";
+import { accountDeletedTemplate, passwordChangedTemplate, passwordResetTemplate, verifyEmailTemplate } from "./emailTemplates.js";
 import { dummyHash, hashPassword, needsRehash, passwordProblem, verifyPassword } from "./password.js";
 import { hashToken, newToken } from "./tokens.js";
 import { orderInclude, publicOrder, type OrderRow } from "./orderShared.js";
@@ -96,6 +97,18 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
 
   // ── single-use tokens ───────────────────────────────────────────────────────
 
+  /**
+   * Security notices (password changed, account deleted). The account change has already happened, so a
+   * mail problem must not undo it or show the shopper an error — it is logged by the mailer instead.
+   */
+  async function notify(to: string, content: { subject: string; text: string; html: string }) {
+    try {
+      await mailer.send({ to, ...content });
+    } catch {
+      // outbox write failed (disk); the change itself stands
+    }
+  }
+
   async function issueToken(customerId: string, purpose: "VERIFY_EMAIL" | "RESET_PASSWORD", target: string | null, ttlMs: number) {
     const token = newToken();
     await prisma.customerToken.create({
@@ -145,11 +158,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
 
     const verifyToken = await issueToken(customer.id, "VERIFY_EMAIL", customer.email, VERIFY_HOURS * 3_600_000);
     const link = `${config.publicSiteUrl}/verify-email?token=${verifyToken}`;
-    const mail = await mailer.send({
-      to: customer.email!,
-      subject: "Confirm your email — Being You – Always",
-      text: `Hi ${customer.name},\n\nConfirm this email to finish setting up your account:\n\n${link}\n\nThe link works for ${VERIFY_HOURS} hours. If you didn't ask for this, you can ignore it.\n\n— Being You – Always`,
-    });
+    const mail = await mailer.send({ to: customer.email!, ...verifyEmailTemplate({ name: customer.name, link, hours: VERIFY_HOURS }) });
 
     const session = await openSession(customer.id, req);
     await logActivity(prisma, null, { action: "customer.register", entityType: "customer", entityId: customer.id, summary: `Account created for ${customer.email}` });
@@ -204,11 +213,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     if (c.emailVerifiedAt) return { emailConfirmation: "already-confirmed" as const };
     const token = await issueToken(c.id, "VERIFY_EMAIL", c.email, VERIFY_HOURS * 3_600_000);
     const link = `${config.publicSiteUrl}/verify-email?token=${token}`;
-    const mail = await mailer.send({
-      to: c.email,
-      subject: "Confirm your email — Being You – Always",
-      text: `Hi ${c.name},\n\nConfirm this email:\n\n${link}\n\nThe link works for ${VERIFY_HOURS} hours.\n\n— Being You – Always`,
-    });
+    const mail = await mailer.send({ to: c.email, ...verifyEmailTemplate({ name: c.name, link, hours: VERIFY_HOURS }) });
     return { emailConfirmation: mail.delivered ? ("sent" as const) : ("queued" as const) };
   }
 
@@ -220,11 +225,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     if (c && !c.deletedAt && c.email) {
       const token = await issueToken(c.id, "RESET_PASSWORD", c.email, RESET_MINUTES * 60_000);
       const link = `${config.publicSiteUrl}/reset-password?token=${token}`;
-      await mailer.send({
-        to: c.email,
-        subject: "Reset your password — Being You – Always",
-        text: `Hi ${c.name},\n\nUse this link to choose a new password:\n\n${link}\n\nIt works once and expires in ${RESET_MINUTES} minutes. If you didn't ask for this, nothing needs doing.\n\n— Being You – Always`,
-      });
+      await mailer.send({ to: c.email, ...passwordResetTemplate({ name: c.name, link, minutes: RESET_MINUTES }) });
     }
     return { accepted: true };
   }
@@ -239,6 +240,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
     });
     // a reset signs every other device out
     await revokeEverySession(c.id);
+    if (c.email) await notify(c.email, passwordChangedTemplate({ name: c.name, signInUrl: `${config.publicSiteUrl}/login`, how: "reset" }));
     await logActivity(prisma, null, { action: "customer.passwordReset", entityType: "customer", entityId: c.id, summary: `Password reset for ${c.email}` });
     return { customer: view(c) };
   }
@@ -254,6 +256,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
       data: { passwordHash: await hashPassword(input.password), passwordChangedAt: now() },
     });
     await revokeEverySession(c.id, ctx.sessionId);
+    if (c.email) await notify(c.email, passwordChangedTemplate({ name: c.name, signInUrl: `${config.publicSiteUrl}/login`, how: "changed" }));
     return { changed: true };
   }
 
@@ -365,6 +368,8 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
    * The customer row is emptied and marked, so nothing can sign back in with it.
    */
   async function deleteAccount(ctx: CustomerContext) {
+    // read the address before it is erased, so the confirmation can still reach the shopper
+    const before = await prisma.customer.findUnique({ where: { id: ctx.id }, select: { email: true, name: true } });
     await prisma.$transaction(async (tx) => {
       await tx.customerSession.updateMany({ where: { customerId: ctx.id, revokedAt: null }, data: { revokedAt: now() } });
       // saved addresses that no order depends on go first
@@ -375,6 +380,7 @@ export function createCustomerAuthService(prisma: PrismaClient, config: Config, 
       });
     });
     await logActivity(prisma, null, { action: "customer.deleted", entityType: "customer", entityId: ctx.id, summary: "Customer removed their account (order records kept)" });
+    if (before?.email) await notify(before.email, accountDeletedTemplate({ name: before.name }));
     return { deleted: true };
   }
 

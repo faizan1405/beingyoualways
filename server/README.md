@@ -134,15 +134,14 @@ Same flow with application directory = repository root:
 - Without `VITE_API_BASE_URL` the site builds in labelled demo mode — always set it for production.
 
 The website's own build was checked with `NITRO_PRESET=node-server` (Node output in `.output/`).
-Note: a few customer videos/photos are hosted on Lovable's asset storage (`*.asset.json` pointers);
-move those files to Hostinger media before switching off the Lovable deployment.
+All product photos and customer videos/photos are real files inside the repository (no Lovable-hosted media).
 
 ## Admin accounts and recovery
 - There is no public sign-up. The first account is created with `admin:create` (must be the owner).
   More accounts: `npm run admin:create -- --email x --name y --role admin --allow-additional`.
 - Forgotten password: `npm run admin:reset-password -- --email owner@beingyoualways.com` — sets a new
-  password, clears the lock and signs that account out everywhere. Emailed reset links are prepared in the
-  schema (`PasswordResetToken`) and service, but need an email provider (later phase).
+  password, clears the lock and signs that account out everywhere. Admins have no emailed reset link;
+  shoppers do (see "Account emails" below).
 - Passwords: at least 12 characters; common/guessable passwords are refused.
 
 ## Backups and recovery
@@ -182,8 +181,33 @@ move those files to Hostinger media before switching off the Lovable deployment.
 - [ ] Stock counts entered for every product that should be orderable.
 - [ ] Razorpay test orders pass end-to-end on the Hostinger domain; then live keys.
 
+## Google sign-in (needs the owner's Google account)
+1. Google Cloud Console → create a project → **OAuth consent screen**: app name "Being You – Always",
+   support email, website + privacy policy links, scopes `openid`, `email`, `profile` → publish.
+2. **Credentials → Create credentials → OAuth client ID → Web application**.
+   Authorised redirect URI: `https://api.beingyoualways.com/api/auth/google/callback` (exactly).
+3. Put the values in the API app's environment: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+   `GOOGLE_REDIRECT_URL` (the URI above) and `PUBLIC_SITE_URL=https://beingyoualways.com`. Restart.
+4. Check: `/api/auth/google/status` → `{"configured":true}`; the Google button on /login then sends
+   shoppers to Google. Until then it says Google sign-in isn't configured — sign-in is never simulated.
+
+## Account emails (needs a mailbox)
+Messages: confirm email, reset password, password changed/reset notice, account deleted notice
+(`src/services/emailTemplates.ts`, plain text + HTML).
+1. Create a sending mailbox, e.g. `no-reply@beingyoualways.com` (hPanel → Emails), and set SPF/DKIM for the domain.
+2. Set `MAIL_TRANSPORT=smtp`, `SMTP_HOST` (Hostinger: `smtp.hostinger.com`), `SMTP_PORT=465`,
+   `SMTP_USER` (the mailbox address), `SMTP_PASSWORD`, `MAIL_FROM`. Restart.
+3. Register a test account and confirm the email arrives; Admin → Client approvals shows email as confirmed.
+Without SMTP the server writes each message to `MEDIA_ROOT/outbox/` and the site says the email is
+queued — it never claims an email was sent.
+
+## Media files
+Uploads go to `MEDIA_ROOT` (photos converted to WebP with thumbnails; videos kept as uploaded) and their
+details to MySQL. Put `MEDIA_ROOT` outside the deploy folder (e.g. `/home/USER/bya-media`) so redeploys
+keep it, and back it up together with the database.
+
 ## Later phases (structure ready, not implemented)
-Google sign-in (`Customer.googleSub`), WhatsApp Cloud API + OTP (`docs/whatsapp-hostinger-backend.md`),
-order emails/WhatsApp notifications, 6-hour abandoned-cart reminders, refunds from the admin, review
-photo/video uploads to Hostinger storage. Each needs its own endpoints, secrets in server environment
+WhatsApp Cloud API + OTP (`docs/whatsapp-hostinger-backend.md`),
+order emails/WhatsApp notifications, 6-hour abandoned-cart reminders, refunds from the admin.
+Each needs its own endpoints, secrets in server environment
 variables and real tests before it is marked connected.

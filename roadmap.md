@@ -63,12 +63,13 @@ Open (needs the client / Hostinger — cannot be done from here):
 # Roadmap — Phase 3: real customer accounts, Google login & media (Hostinger)
 
 - [x] Server: customer accounts — email/password sign-up + sign-in, Argon2id hashing, email verification, password recovery, httpOnly sessions, sign-out, rate limits, profile edit, saved addresses, order history, account deletion.
-- [ ] Server: Google sign-in — real OAuth (authorization code + PKCE), server-side verification, safe account linking, env-configured, honest "not configured" status.
+- [x] Server: Google sign-in — real OAuth (authorization code + PKCE), server-side verification, safe account linking, env-configured, honest "not configured" status.
 - [x] Server: customer order access — signed-in order history, guest checkout still works, private order link reused for ownership-verified claiming of guest orders.
 - [x] Server: media — upload product/gallery photos, testimonial photos/videos, thumbnails; type/size/content validation; WebP + thumbnails; video with seeking; MySQL metadata; no orphaned/unsafe deletes. (Hardened: uploads stream to disk, linked product/story verified, safe purge + public-visibility rules.)
 - [x] Server: customer stories (reviews) + website content + client approvals read/write the real database; public stories only when verified + consented + published.
 - [x] Website: real sign-in/register, account pages, admin media upload (product photos with progress, replace/reorder/archive), website content + customer stories + approvals admin screens on the server; storefront wording and stories read the server when connected.
 - [x] Website: Google sign-in wired to the server's OAuth flow (redirect + callback handling); honest "not configured" state until credentials exist.
 - [x] Remove remaining Lovable-hosted media (28 files, ~47 MB) — the real files now live in the project.
+- [x] Account emails: confirm email, reset password, password changed/reset and account deleted notices (text + HTML, names escaped); exact Google + SMTP settings listed in `server/README.md` and `.env.example`.
 - [x] Tests: real database integration tests + website suite; production build.
 - [ ] Blocked: Google OAuth credentials, SMTP for verification emails, Hostinger deploy.
