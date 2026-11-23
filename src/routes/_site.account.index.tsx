@@ -1,17 +1,102 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
+import { DemoNotice } from "@/components/shop/DemoNotice";
+import { buttonVariants } from "@/components/ui/button";
 import { OrderStatusBadge } from "@/components/shop/OrderBadges";
-import { inr, shortDate } from "@/lib/format";
+import { inr, inrPaise, shortDate } from "@/lib/format";
+import { isBackendConfigured } from "@/services/api";
 import { DEMO_CUSTOMER_ID, customerService } from "@/services/customerService";
+import { customerAuthService, type ShopperAccount, type ShopperOrder } from "@/services/customerAuthService";
 import { orderService } from "@/services/orderService";
 
 export const Route = createFileRoute("/_site/account/")({
-  loader: async () => ({ customer: (await customerService.get(DEMO_CUSTOMER_ID))!, orders: await orderService.forCustomer(DEMO_CUSTOMER_ID) }),
+  loader: async () => {
+    // Signed-in state comes from a shopper cookie, so it is read in the browser, never during
+    // server rendering (the server never sees the visitor's cookie).
+    if (isBackendConfigured()) return { live: true as const, customer: null, orders: [] };
+    return { live: false as const, customer: (await customerService.get(DEMO_CUSTOMER_ID))!, orders: await orderService.forCustomer(DEMO_CUSTOMER_ID) };
+  },
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { customer, orders } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  const [shopper, setShopper] = useState<ShopperAccount | null>(null);
+  const [serverOrders, setServerOrders] = useState<ShopperOrder[]>([]);
+  const [checking, setChecking] = useState(data.live);
+
+  useEffect(() => {
+    if (!data.live) return;
+    let alive = true;
+    void (async () => {
+      const me = await customerAuthService.me();
+      const r = me ? await customerAuthService.orders() : null;
+      if (!alive) return;
+      setShopper(me);
+      setServerOrders(r?.ok ? r.orders : []);
+      setChecking(false);
+    })();
+    return () => { alive = false; };
+  }, [data.live]);
+
+  if (data.live) {
+    if (checking) return <p className="text-sm text-muted-foreground">Checking your account…</p>;
+    if (!shopper) {
+      return (
+        <div>
+          <h2 className="text-3xl">My account</h2>
+          <DemoNotice className="mt-5">You are not signed in. Sign in with your email and password to see your orders and saved addresses.</DemoNotice>
+          <div className="mt-6"><Link to="/login" className={buttonVariants({ variant: "lux", size: "lg" })}>Sign in</Link></div>
+        </div>
+      );
+    }
+    return (
+      <div>
+        <h2 className="text-3xl">Hello, {shopper.name.split(" ")[0]}</h2>
+        {!shopper.emailVerified && (
+          <DemoNotice className="mt-5">
+            We haven't confirmed {shopper.email ?? "your email"} yet.{" "}
+            <button
+              type="button"
+              className="underline"
+              onClick={async () => {
+                const r = await customerAuthService.resendVerification();
+                if (!r.ok) return;
+                const { toast } = await import("sonner");
+                toast("Confirmation email sent again.");
+              }}
+            >
+              Send the confirmation email again
+            </button>
+          </DemoNotice>
+        )}
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {[["Orders", serverOrders.length], ["Email", shopper.emailVerified ? "Confirmed" : "Not confirmed"], ["Member since", shortDate(shopper.createdAt)]].map(([k, v]) => (
+            <div key={k} className="rounded-lg bg-secondary p-5"><p className="eyebrow">{k}</p><p className="mt-2 font-serif text-2xl">{v}</p></div>
+          ))}
+        </div>
+        <h3 className="mt-10 text-2xl">Recent orders</h3>
+        {serverOrders.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No orders on this account yet. Orders placed before you had an account can be added with the private link from the order page.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border rounded-lg border border-border">
+            {serverOrders.slice(0, 5).map((o) => (
+              <li key={o.orderNumber} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
+                <span><span className="font-semibold">{o.orderNumber}</span> · {shortDate(o.createdAt)}</span>
+                <span className="flex items-center gap-3">
+                  <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{o.statusLabel}</span>
+                  <span className="font-semibold">{inrPaise(o.totals.totalPaise)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+
+  const { customer, orders } = data;
   return (
     <div>
       <h2 className="text-3xl">Hello, {customer.name.split(" ")[0]}</h2>

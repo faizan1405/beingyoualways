@@ -155,6 +155,7 @@ model Product {
   archivedAt       DateTime?
   variants         ProductVariant[]
   images           ProductImage[]
+  media            MediaAsset[]
   orderItems       OrderItem[]
   reviews          Review[]
 
@@ -217,6 +218,17 @@ model Customer {
   status           CustomerStatus    @default(ACTIVE)
   signInMethod     String?           @db.VarChar(20)
   googleSub        String?           @unique @db.VarChar(64)
+  /// Argon2id hash — null for accounts that have never set a password (Google-only or guest-created).
+  passwordHash     String?           @db.VarChar(255)
+  /// Set when the customer confirms the link sent to their address.
+  emailVerifiedAt  DateTime?
+  failedLoginCount Int               @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  /// Sessions opened before this moment are refused (sign-out everywhere on password change).
+  passwordChangedAt DateTime         @default(now())
+  /// Personal-data removal: the row is anonymised and this is set; nothing is hard-deleted by the site.
+  deletedAt        DateTime?
   notes            String?           @db.Text
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -224,6 +236,51 @@ model Customer {
   orders           Order[]
   reviews          Review[]
   whatsappConsents WhatsAppConsent[]
+  sessions         CustomerSession[]
+  tokens           CustomerToken[]
+
+  @@index([deletedAt])
+}
+
+/// Server-side customer sessions. Only a SHA-256 hash of the cookie token is stored.
+/// Separate from admin sessions: a customer cookie can never reach the admin checks.
+model CustomerSession {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique @db.Char(64)
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  ip         String?   @db.VarChar(64)
+  userAgent  String?   @db.VarChar(255)
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
+enum CustomerTokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+  LINK_GOOGLE
+}
+
+/// Single-use, hashed, short-lived tokens for email verification, password recovery and Google linking.
+model CustomerToken {
+  id         String               @id @default(cuid())
+  tokenHash  String               @unique @db.Char(64)
+  customerId String
+  customer   Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  purpose    CustomerTokenPurpose
+  /// the address the token applies to (verification / change)
+  target     String?              @db.VarChar(191)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime             @default(now())
+
+  @@index([customerId, purpose])
+  @@index([expiresAt])
 }
 
 model ShippingAddress {
@@ -482,6 +539,7 @@ model Review {
   customer         Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
   productId        String?      @db.VarChar(64)
   product          Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  mediaAssets      MediaAsset[]
   authorName       String       @db.VarChar(120)
   rating           Int?
   body             String       @db.Text
@@ -489,12 +547,18 @@ model Review {
   consentGiven     Boolean      @default(false)
   consentAt        DateTime?
   status           ReviewStatus @default(PENDING)
-  /// [{ type: "photo"|"video", url }]
+  /// [{ type: "photo"|"video", url, mediaId?, role?: "before"|"after"|"poster" }]
   media            Json?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  /// "Skin" | "Hair" | "Pigmentation" | "De-Tan" | "General Experience" (admin-set)
+  category         String?         @db.VarChar(40)
+  city             String?         @db.VarChar(100)
+  /// string[] | null — where it may appear: "home" | "explore"
+  placements       Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([productId, status])
+  @@index([status, verifiedPurchase, consentGiven])
 }
 
 enum ConsentStatus {
@@ -514,6 +578,67 @@ model WhatsAppConsent {
   recordedAt DateTime      @default(now())
 
   @@index([phone, purpose, recordedAt])
+}
+
+// ─────────────────────────── Media (Hostinger disk + MySQL) ───────────────────────────
+
+enum MediaKind {
+  /// main packshot on a product card / page
+  PRODUCT_IMAGE
+  /// one of the four gallery slides
+  GALLERY_SLIDE
+  /// customer story photo
+  REVIEW_PHOTO
+  /// customer story video
+  REVIEW_VIDEO
+  /// still shown before a video plays
+  POSTER
+  /// image used by the website content screens (promo banner, about)
+  CONTENT_IMAGE
+}
+
+enum MediaStatus {
+  /// on disk and usable
+  ACTIVE
+  /// no longer shown; the file is kept until an admin purges it
+  ARCHIVED
+}
+
+/// Every uploaded file. The bytes live under MEDIA_ROOT on the Hostinger server; this row is the
+/// only thing that decides who may see them, so nothing is served straight from the folder.
+model MediaAsset {
+  id           String      @id @default(cuid())
+  kind         MediaKind
+  /// path relative to MEDIA_ROOT — generated by the server, never taken from the upload
+  storageKey   String      @unique @db.VarChar(255)
+  /// what the file was called on the uploader's computer (for the admin list only)
+  originalName String      @db.VarChar(200)
+  mime         String      @db.VarChar(80)
+  bytes        Int
+  /// SHA-256 of the stored bytes — detects a file that no longer matches its row
+  checksum     String      @db.Char(64)
+  width        Int?
+  height       Int?
+  /// seconds, for video
+  durationSec  Decimal?    @db.Decimal(8, 2)
+  alt          String?     @db.VarChar(300)
+  status       MediaStatus @default(ACTIVE)
+  /// derived copies (webp / thumbnail) as { webp?: key, thumb?: key }
+  variants     Json?
+  productId    String?     @db.VarChar(64)
+  product      Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  reviewId     String?
+  review       Review?     @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  /// who uploaded it (admin) — audit trail
+  uploadedBy   String?     @db.VarChar(30)
+  position     Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  archivedAt   DateTime?
+
+  @@index([productId, status, position])
+  @@index([reviewId, status])
+  @@index([status, kind])
 }
 
 // ─────────────────────────── Content & settings ───────────────────────────

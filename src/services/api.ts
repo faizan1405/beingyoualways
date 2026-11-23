@@ -43,6 +43,23 @@ export const API_ENDPOINTS = {
   settingsSection: "/api/admin/settings/:id",          // PUT shipping | cod | store
   discounts: "/api/admin/discounts",
   discount: "/api/admin/discounts/:id",
+  // ── Phase 3 (live on the server): shopper accounts, media, stories, website wording, approvals ──
+  customerRegister: "/api/customer/register",                  // POST { name, email, password, phone? } → shopper cookie
+  customerLogin: "/api/customer/login",                        // POST { email, password }
+  customerLogout: "/api/customer/logout",                      // POST — ends this shopper session
+  customerMe: "/api/customer/me",                              // GET current shopper (401 when signed out), PATCH profile
+  customerVerifyEmail: "/api/customer/verify-email",           // POST { token } from the confirmation email
+  customerResendVerification: "/api/customer/resend-verification", // POST
+  customerForgotPassword: "/api/customer/forgot-password",     // POST { email } — same answer either way
+  customerResetPassword: "/api/customer/reset-password",       // POST { token, password }
+  customerChangePassword: "/api/customer/change-password",     // POST { currentPassword, password }
+  customerAddresses: "/api/customer/addresses",                // GET list, POST add
+  customerAddressDelete: "/api/customer/addresses/:id/delete", // POST
+  customerOrders: "/api/customer/orders",                      // GET order history
+  customerClaimOrder: "/api/customer/orders/claim",            // POST { orderNumber, token } — token is the private link's key
+  googleStatus: "/api/auth/google/status",                     // GET { configured } — never starts a flow by itself
+  publicReviews: "/api/reviews",                               // GET published, consented customer stories
+  publicContent: "/api/content",                               // GET website wording
   // ── Later phases (not on the server yet) ──
   productMedia: "/api/admin/products/:id/media",
   reviews: "/api/admin/reviews",

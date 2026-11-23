@@ -44,6 +44,8 @@ export const csrfGuard = (config: Config): RequestHandler => (req, _res, next) =
   if (SAFE.has(req.method)) return next();
   const origin = req.get("origin");
   if (origin && !config.corsOrigins.includes(origin)) return next(new HttpError(403, "origin_not_allowed", "Requests from this website are not allowed."));
+  // file uploads carry their own content type; the origin check above still applies to them
+  if (req.is("multipart/form-data")) return next();
   if (!req.is("application/json")) return next(new HttpError(415, "json_required", "Send the request as JSON."));
   return next();
 };

@@ -1,6 +1,8 @@
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
+import { isBackendConfigured } from "@/services/api";
+import { customerAuthService } from "@/services/customerAuthService";
 
 export const Route = createFileRoute("/_site/account")({
   head: () => ({
@@ -24,6 +26,7 @@ const tabs = [
 ] as const;
 
 function AccountLayout() {
+  const navigate = useNavigate();
   return (
     <div className="container-lux py-12">
       <h1 className="text-5xl">My Account</h1>
@@ -33,7 +36,11 @@ function AccountLayout() {
           {tabs.map((t) => (
             <Link key={t.to} to={t.to} activeOptions={{ exact: "exact" in t }} className="shrink-0 rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground md:rounded-md" activeProps={{ className: "!bg-secondary !text-foreground font-semibold" }}>{t.label}</Link>
           ))}
-          <Link to="/login" className="shrink-0 px-4 py-2 text-sm text-muted-foreground">Sign out</Link>
+          {isBackendConfigured() ? (
+            <button type="button" onClick={async () => { await customerAuthService.logout(); navigate({ to: "/login" }); }} className="shrink-0 px-4 py-2 text-left text-sm text-muted-foreground hover:text-foreground">Sign out</button>
+          ) : (
+            <Link to="/login" className="shrink-0 px-4 py-2 text-sm text-muted-foreground">Sign out</Link>
+          )}
         </nav>
         <div><Outlet /></div>
       </div>

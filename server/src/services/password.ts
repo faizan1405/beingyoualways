@@ -21,9 +21,12 @@ export const dummyHash = () => (dummy ??= hashPassword("not-a-real-password-" + 
 
 const COMMON = ["password", "123456", "qwerty", "beingyou", "beingyoualways", "admin", "welcome", "letmein"];
 
-/** Admin password policy. Returns a reason when the password is not acceptable. */
-export function passwordProblem(pw: string, email?: string): string | null {
-  if (pw.length < 12) return "Use at least 12 characters.";
+/**
+ * Password policy. Returns a reason when the password is not acceptable.
+ * Staff accounts ask for 12 characters, shoppers for 10 — the checks themselves are the same.
+ */
+export function passwordProblem(pw: string, email?: string, minLength = 12): string | null {
+  if (pw.length < minLength) return `Use at least ${minLength} characters.`;
   if (pw.length > 200) return "Use at most 200 characters.";
   if (/^(.)\1+$/.test(pw)) return "Don't repeat a single character.";
   const lower = pw.toLowerCase();

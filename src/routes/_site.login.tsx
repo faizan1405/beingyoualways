@@ -5,6 +5,7 @@ import { useState } from "react";
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { authService } from "@/services/authService";
+import { customerAuthService } from "@/services/customerAuthService";
 import { toast } from "sonner";
 
 function GoogleIcon() {
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/_site/login")({
   head: () => ({
     meta: [
       { title: "Login or Register | Being You – Always" },
-      { name: "description", content: "Sign in to your Being You – Always account with Google or your WhatsApp mobile number." },
+      { name: "description", content: "Sign in to your Being You – Always account with your email and password, Google or your WhatsApp mobile number." },
       { property: "og:title", content: "Login | Being You – Always" },
       { property: "og:description", content: "Sign in with your mobile number." },
     ],
@@ -36,7 +37,40 @@ function Login() {
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   const [googleNote, setGoogleNote] = useState(false);
+  const [emailName, setEmailName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [emailErr, setEmailErr] = useState("");
+  const [emailNote, setEmailNote] = useState<string | null>(null);
+  const [emailBusy, setEmailBusy] = useState(false);
   const navigate = useNavigate();
+
+  const looksLikeEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim());
+
+  const submitEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailErr("");
+    setEmailNote(null);
+    if (!looksLikeEmail(email)) return setEmailErr("Enter a valid email address.");
+    if (mode === "register" && emailName.trim().length < 2) return setEmailErr("Please enter your name.");
+    if (mode === "register" && pw.length < 10) return setEmailErr("Use at least 10 characters.");
+    if (mode === "login" && !pw) return setEmailErr("Enter your password.");
+    setEmailBusy(true);
+    const r = mode === "register"
+      ? await customerAuthService.register({ name: emailName.trim(), email: email.trim(), password: pw })
+      : await customerAuthService.login({ email: email.trim(), password: pw });
+    setEmailBusy(false);
+    if (!r.ok) return setEmailErr(r.error);
+    toast(mode === "register" ? "Account created — check your email to confirm it." : "Signed in.");
+    navigate({ to: "/account" });
+  };
+
+  const sendReset = async () => {
+    setEmailErr("");
+    if (!looksLikeEmail(email)) return setEmailErr("Enter your email address first.");
+    const r = await customerAuthService.forgotPassword(email.trim());
+    setEmailNote(r.ok ? "If that address is with us, a reset link is on its way. It works once and expires in 45 minutes." : r.error);
+  };
 
   return (
     <div className="container-lux grid min-h-[70vh] place-items-center py-16">
@@ -90,8 +124,31 @@ function Login() {
           </div>
           <Button variant="lux" size="xl" className="w-full" type="submit"><MessageCircle /> Send OTP on WhatsApp</Button>
         </form>
+        <div className="my-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"><span className="h-px flex-1 bg-border" /> or use your email <span className="h-px flex-1 bg-border" /></div>
+        <form className="space-y-4" onSubmit={submitEmail}>
+          {mode === "register" && (
+            <div>
+              <label htmlFor="ename" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full name</label>
+              <input id="ename" value={emailName} onChange={(e) => setEmailName(e.target.value)} autoComplete="name" className="h-12 w-full rounded-md border border-input bg-card px-4 text-sm" />
+            </div>
+          )}
+          <div>
+            <label htmlFor="eaddr" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email address</label>
+            <input id="eaddr" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 w-full rounded-md border border-input bg-card px-4 text-sm" />
+          </div>
+          <div>
+            <label htmlFor="epw" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Password{mode === "register" ? " (at least 10 characters)" : ""}</label>
+            <input id="epw" type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} value={pw} onChange={(e) => setPw(e.target.value)} aria-invalid={!!emailErr} className="h-12 w-full rounded-md border border-input bg-card px-4 text-sm" />
+            {emailErr && <p className="mt-1.5 text-xs text-destructive">{emailErr}</p>}
+          </div>
+          <Button variant="lux" size="xl" className="w-full" type="submit" disabled={emailBusy}>{emailBusy ? "Please wait…" : mode === "register" ? "Create account" : "Sign in"}</Button>
+          {mode === "login" && (
+            <button type="button" onClick={sendReset} className="w-full text-center text-xs text-muted-foreground underline">Forgot password? Email me a reset link</button>
+          )}
+        </form>
+        {emailNote && <DemoNotice className="mt-3">{emailNote}</DemoNotice>}
         <p className="mt-5 text-center text-[11px] text-muted-foreground">By continuing you agree to our <Link to="/terms" className="underline">Terms & Conditions</Link> and <Link to="/privacy-policy" className="underline">Privacy Policy</Link>.</p>
-        <DemoNotice className="mt-6">Demo only — no OTP is sent. Live WhatsApp OTP verification will be enabled after backend integration.</DemoNotice>
+        <DemoNotice className="mt-6">Demo only — no OTP is sent and email sign-in is not available until the store server is connected. You are <strong>not signed in</strong>.</DemoNotice>
       </div>
     </div>
   );

@@ -11,7 +11,10 @@ export const PERMISSIONS = {
   "customers.read": "View customers and their order history",
   "customers.write": "Edit customer notes and block / unblock customers",
   "discounts.write": "Create, edit and switch discount codes on or off",
+  "content.read": "View website content and customer stories",
   "content.write": "Edit website content (later phase)",
+  "reviews.moderate": "Publish, hide and edit customer stories",
+  "media.write": "Upload, replace and remove files",
   "settings.write": "Change shipping, Cash on Delivery and store contact settings",
   "users.manage": "Manage admin users (later phase)",
 } as const;
@@ -19,7 +22,7 @@ export type PermissionKey = keyof typeof PERMISSIONS;
 
 export const ROLES: Record<string, { name: string; permissions: PermissionKey[] }> = {
   owner: { name: "Owner", permissions: Object.keys(PERMISSIONS) as PermissionKey[] },
-  admin: { name: "Admin", permissions: ["products.read", "products.write", "products.delete", "orders.read", "orders.write", "orders.cancel", "customers.read", "customers.write", "discounts.write", "content.write"] },
-  staff: { name: "Staff", permissions: ["products.read", "orders.read", "customers.read"] },
+  admin: { name: "Admin", permissions: ["products.read", "products.write", "products.delete", "orders.read", "orders.write", "orders.cancel", "customers.read", "customers.write", "discounts.write", "content.read", "content.write", "reviews.moderate", "media.write"] },
+  staff: { name: "Staff", permissions: ["products.read", "orders.read", "customers.read", "content.read"] },
 };
 export type RoleKey = keyof typeof ROLES;

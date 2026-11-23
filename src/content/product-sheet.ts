@@ -6,9 +6,9 @@
 import shampoo100 from "@/assets/products/review/shampoo-100ml.webp";
 import hairMask100 from "@/assets/products/review/hair-mask-100g.webp";
 import aloeTube from "@/assets/products/review/aloe-vera-gel-tube.webp";
-import origShampoo from "@/assets/products/originals/shampoo-100ml.png.asset.json";
-import origHairMask100 from "@/assets/products/originals/hair-mask-100g.png.asset.json";
-import origAloeTube from "@/assets/products/originals/aloe-vera-gel-tube-100g-plus-20g.png.asset.json";
+import origShampoo from "@/assets/products/originals/shampoo-100ml.png";
+import origHairMask100 from "@/assets/products/originals/hair-mask-100g.png";
+import origAloeTube from "@/assets/products/originals/aloe-vera-gel-tube-100g-plus-20g.png";
 
 export const PRODUCT_SHEET_SOURCE = "Being You Always - Product details.docx (supplied by the client, Nov 2026)";
 
@@ -123,10 +123,10 @@ export interface PendingPhoto {
 
 /** Supplied photos whose match is uncertain: never shown to shoppers until the admin adds them. */
 export const pendingPhotos: PendingPhoto[] = [
-  { id: "shampoo-100ml", slug: "shampoo", label: "Shampoo 100 ml (supplied photo)", src: shampoo100, originalUrl: origShampoo.url,
+  { id: "shampoo-100ml", slug: "shampoo", label: "Shampoo 100 ml (supplied photo)", src: shampoo100, originalUrl: origShampoo,
     reason: "Label reads \"plant based AHA clarifying Shampoo with provitamin B5, 100 ML\". The current listing photos show a different label (maple leaf) and the product sheet lists Canadian Maple Tree Extract — this may be a new formula, not just new packaging." },
-  { id: "hair-mask-100g", slug: "hair-mask", label: "Protein Bond Repair Hair Mask, red jar (file named 100 gm)", src: hairMask100, originalUrl: origHairMask100.url,
+  { id: "hair-mask-100g", slug: "hair-mask", label: "Protein Bond Repair Hair Mask, red jar (file named 100 gm)", src: hairMask100, originalUrl: origHairMask100,
     reason: "Different packaging from the 200 g \"Professional\" pack, no net quantity visible in the photo, and it lists Vegetable Keratin where the product sheet says Vegetable Carotene. Confirm it is the same formula and its price before adding a 100 g size." },
-  { id: "aloe-vera-gel-tube", slug: "aloe-vera-gel", label: "Aloe Vera Gel tube, 100 g + 20 g free", src: aloeTube, originalUrl: origAloeTube.url,
+  { id: "aloe-vera-gel-tube", slug: "aloe-vera-gel", label: "Aloe Vera Gel tube, 100 g + 20 g free", src: aloeTube, originalUrl: origAloeTube,
     reason: "Printed \"100g · 20g FREE\" (grams, not 120 ml) and labelled \"with Vitamin E & Tea Tree Oil\"; the current listing is the 200 g jar. Confirm it is the same gel and its price before adding it as a size." },
 ];

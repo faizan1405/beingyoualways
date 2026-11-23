@@ -59,3 +59,15 @@ Open (needs the client / Hostinger — cannot be done from here):
 - [ ] Client confirms shipping fee, free-shipping threshold, delivery estimate and the COD decision; enter them in Admin → Settings.
 - [ ] Stock counts for every orderable product.
 - [ ] Razorpay test keys + webhook on the Hostinger domain; real test payments; then live keys after approval.
+
+# Roadmap — Phase 3: real customer accounts, Google login & media (Hostinger)
+
+- [ ] Server: customer accounts — email/password sign-up + sign-in, Argon2id hashing, email verification, password recovery, httpOnly sessions, sign-out, rate limits, profile edit, saved addresses, order history, account deletion.
+- [ ] Server: Google sign-in — real OAuth (authorization code + PKCE), server-side verification, safe account linking, env-configured, honest "not configured" status.
+- [ ] Server: customer order access — signed-in order history, guest checkout still works, unguessable per-order access key, ownership-verified claiming of guest orders.
+- [ ] Server: media — upload product/gallery photos, testimonial photos/videos, thumbnails; type/size/content validation; WebP + thumbnails; video with seeking; MySQL metadata; no orphaned/unsafe deletes.
+- [ ] Server: customer stories (reviews) + website content + client approvals read/write the real database; public stories only when verified + consented + published.
+- [ ] Website: real sign-in/register, account pages, admin media upload, content + approvals screens.
+- [ ] Remove remaining Lovable-hosted media (28 files, ~47 MB) — keep the real files in the project.
+- [ ] Tests: real database integration tests + website suite; production build.
+- [ ] Blocked: Google OAuth credentials, SMTP for verification emails, Hostinger deploy.
