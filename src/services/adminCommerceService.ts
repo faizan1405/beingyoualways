@@ -17,7 +17,7 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   payments: { id: string; method: Method; status: string; amountPaise: number; providerOrderId: string | null; providerPaymentId: string | null; providerMethod: string | null; signatureVerified: boolean; capturedAt: string | null; failureReason: string | null; isTest: boolean; recordedBy: string | null; reference: string | null }[];
   timeline: { id: string; at: string; type: string; message: string; note: string | null; by: string | null }[];
   paymentEvents: { id: string; eventType: string; source: string; signatureValid: boolean; outcome: string; amountPaise: number | null; providerPaymentId: string | null; createdAt: string }[];
-  allowedNext: OrderStatusKey[]; canCancel: boolean; canRecordCod: boolean;
+  allowedNext: OrderStatusKey[]; canCancel: boolean; canRecordCod: boolean; canMarkOutForDelivery?: boolean;
 }
 export interface OrderFilters { q?: string; status?: OrderStatusKey | ""; paymentStatus?: PaymentStatusKey | ""; method?: Method | ""; from?: string; to?: string; includeTest?: boolean; page?: number }
 
@@ -61,6 +61,7 @@ export const adminCommerce = {
   exportOrders: (f: OrderFilters) => apiDownload(API_ENDPOINTS.ordersCsv + q(f), `orders-${new Date().toISOString().slice(0, 10)}.csv`),
   order: async (id: string) => (await apiRequest<{ order: AdminOrderDetail }>(withId(API_ENDPOINTS.order, id))).order,
   setStatus: async (id: string, to: OrderStatusKey, extra: { note?: string; restock?: boolean } = {}) => (await post<{ order: AdminOrderDetail }>(`${withId(API_ENDPOINTS.order, id)}/status`, { to, ...extra })).order,
+  outForDelivery: async (id: string) => (await post<{ order: AdminOrderDetail }>(`${withId(API_ENDPOINTS.order, id)}/out-for-delivery`, {})).order,
   addNote: async (id: string, text: string) => (await post<{ order: AdminOrderDetail }>(`${withId(API_ENDPOINTS.order, id)}/notes`, { text })).order,
   setShipment: async (id: string, s: { carrier: string; trackingNumber: string; trackingUrl: string }) => (await post<{ order: AdminOrderDetail }>(`${withId(API_ENDPOINTS.order, id)}/shipment`, s)).order,
   cancel: async (id: string, reason: string) => (await post<{ order: AdminOrderDetail }>(`${withId(API_ENDPOINTS.order, id)}/cancel`, { reason })).order,

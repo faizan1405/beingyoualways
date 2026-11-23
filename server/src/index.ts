@@ -23,7 +23,10 @@ const logger = createLogger(config.logLevel);
 const prisma = createPrisma(config.databaseUrl);
 const services = createServices({ config, prisma, logger });
 const app = createApp({ config, prisma, logger, services });
-const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, google: config.google ? "on" : "off", mail: config.mail ? "smtp" : "outbox", razorpay: config.razorpay?.mode ?? "off", testOrders: config.storeTestMode }));
+const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, google: config.google ? "on" : "off", mail: config.mail ? "smtp" : "outbox", razorpay: config.razorpay?.mode ?? "off", whatsapp: config.whatsapp ? "on" : "off", testOrders: config.storeTestMode }));
+
+// WhatsApp: sends queued messages, finishes webhook processing, bag reminders and campaigns (all stored in MySQL).
+if (config.whatsappWorker) services.worker.start();
 
 // Every 5 minutes: confirm unpaid online orders with Razorpay (missed webhooks, closed tabs) and release expired stock holds.
 const sweep = () => services.checkout.reconcileAll().then((r) => { if (r.paid || r.expired) logger.info("payment sweep", r); }).catch((e) => logger.error("payment sweep failed", { error: e instanceof Error ? e.message : String(e) }));
@@ -37,6 +40,7 @@ async function shutdown(signal: string) {
   closing = true;
   clearInterval(sweeper);
   logger.info("shutting down", { signal });
+  await services.worker.stop().catch(() => undefined);
   const force = setTimeout(() => { logger.error("forced shutdown after 10s"); process.exit(1); }, 10_000);
   force.unref();
   server.close(async () => {

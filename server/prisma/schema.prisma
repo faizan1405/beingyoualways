@@ -211,33 +211,35 @@ enum CustomerStatus {
 }
 
 model Customer {
-  id               String            @id @default(cuid())
-  name             String            @db.VarChar(120)
-  email            String?           @unique @db.VarChar(191)
-  phone            String?           @unique @db.VarChar(20)
-  status           CustomerStatus    @default(ACTIVE)
-  signInMethod     String?           @db.VarChar(20)
-  googleSub        String?           @unique @db.VarChar(64)
+  id                String            @id @default(cuid())
+  name              String            @db.VarChar(120)
+  email             String?           @unique @db.VarChar(191)
+  phone             String?           @unique @db.VarChar(20)
+  status            CustomerStatus    @default(ACTIVE)
+  signInMethod      String?           @db.VarChar(20)
+  googleSub         String?           @unique @db.VarChar(64)
   /// Argon2id hash — null for accounts that have never set a password (Google-only or guest-created).
-  passwordHash     String?           @db.VarChar(255)
+  passwordHash      String?           @db.VarChar(255)
   /// Set when the customer confirms the link sent to their address.
-  emailVerifiedAt  DateTime?
-  failedLoginCount Int               @default(0)
-  lockedUntil      DateTime?
-  lastLoginAt      DateTime?
+  emailVerifiedAt   DateTime?
+  /// Set when the customer proves the number with a WhatsApp sign-in code.
+  phoneVerifiedAt   DateTime?
+  failedLoginCount  Int               @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
   /// Sessions opened before this moment are refused (sign-out everywhere on password change).
-  passwordChangedAt DateTime         @default(now())
+  passwordChangedAt DateTime          @default(now())
   /// Personal-data removal: the row is anonymised and this is set; nothing is hard-deleted by the site.
-  deletedAt        DateTime?
-  notes            String?           @db.Text
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  addresses        ShippingAddress[]
-  orders           Order[]
-  reviews          Review[]
-  whatsappConsents WhatsAppConsent[]
-  sessions         CustomerSession[]
-  tokens           CustomerToken[]
+  deletedAt         DateTime?
+  notes             String?           @db.Text
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  addresses         ShippingAddress[]
+  orders            Order[]
+  reviews           Review[]
+  whatsappConsents  WhatsAppConsent[]
+  sessions          CustomerSession[]
+  tokens            CustomerToken[]
 
   @@index([deletedAt])
 }
@@ -550,12 +552,12 @@ model Review {
   /// [{ type: "photo"|"video", url, mediaId?, role?: "before"|"after"|"poster" }]
   media            Json?
   /// "Skin" | "Hair" | "Pigmentation" | "De-Tan" | "General Experience" (admin-set)
-  category         String?         @db.VarChar(40)
-  city             String?         @db.VarChar(100)
+  category         String?      @db.VarChar(40)
+  city             String?      @db.VarChar(100)
   /// string[] | null — where it may appear: "home" | "explore"
   placements       Json?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   @@index([productId, status])
   @@index([status, verifiedPurchase, consentGiven])
@@ -672,4 +674,204 @@ model AdminActivityLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@index([userId])
+}
+
+// ─────────────────────────── WhatsApp Business Cloud API (Phase 4) ───────────────────────────
+
+enum WaDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum WaMessageState {
+  /// waiting in the database queue (sent by the worker, survives restarts)
+  QUEUED
+  /// Meta accepted the request and returned a message id
+  ACCEPTED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  /// deliberately not sent (no consent, opted out, campaign cancelled, limit reached)
+  SKIPPED
+  /// a message the customer sent to the business
+  RECEIVED
+}
+
+/// Every WhatsApp message in and out. dedupeKey is unique per business event (order + step, cart,
+/// campaign + number, reply-to message), so retries and repeated status changes never send twice.
+/// OTP codes are never stored here.
+model WhatsAppMessage {
+  id            String         @id @default(cuid())
+  direction     WaDirection
+  /// otp | order | cart | campaign | chatbot | support | test | inbound
+  kind          String         @db.VarChar(20)
+  /// which template purpose (order_shipped, abandoned_cart …) or null for free-form text
+  purpose       String?        @db.VarChar(40)
+  dedupeKey     String?        @unique @db.VarChar(191)
+  waMessageId   String?        @unique @db.VarChar(191)
+  /// E.164 digits without "+", e.g. 919876543210
+  phone         String         @db.VarChar(20)
+  customerId    String?        @db.VarChar(30)
+  orderId       String?        @db.VarChar(30)
+  campaignId    String?        @db.VarChar(30)
+  templateName  String?        @db.VarChar(100)
+  language      String?        @db.VarChar(15)
+  /// template variables, in order
+  params        Json?
+  /// free-form text (chatbot / staff reply) or the customer's message, truncated
+  body          String?        @db.Text
+  state         WaMessageState
+  attempts      Int            @default(0)
+  nextAttemptAt DateTime?
+  errorCode     Int?
+  errorTitle    String?        @db.VarChar(300)
+  errors        Json?
+  acceptedAt    DateTime?
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  failedAt      DateTime?
+  /// inbound message the chatbot handed to a person
+  needsHuman    Boolean        @default(false)
+  handledAt     DateTime?
+  handledById   String?        @db.VarChar(30)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([state, nextAttemptAt])
+  @@index([kind, createdAt])
+  @@index([phone, createdAt])
+  @@index([orderId])
+  @@index([campaignId, state])
+  @@index([direction, needsHuman, handledAt])
+}
+
+/// Durable inbox of signed webhook deliveries from Meta. One row per change item (message, status,
+/// template update …); dedupeKey is unique so a retried delivery is stored and applied once.
+model WhatsAppWebhookEvent {
+  id              String    @id @default(cuid())
+  dedupeKey       String    @unique @db.VarChar(191)
+  /// messages.message | messages.status | messages.error | message_template_status_update | account_update …
+  field           String    @db.VarChar(60)
+  payload         Json
+  receivedAt      DateTime  @default(now())
+  attempts        Int       @default(0)
+  nextAttemptAt   DateTime  @default(now())
+  processedAt     DateTime?
+  /// applied | ignored | unmatched | failed
+  outcome         String?   @db.VarChar(30)
+  processingError String?   @db.VarChar(500)
+
+  @@index([processedAt, nextAttemptAt])
+  @@index([receivedAt])
+}
+
+/// WhatsApp sign-in codes: only an HMAC of the code is stored; single use; 5-minute life.
+model WhatsAppOtp {
+  id          String    @id @default(cuid())
+  phone       String    @db.VarChar(20)
+  codeHash    String    @db.Char(64)
+  expiresAt   DateTime
+  attempts    Int       @default(0)
+  consumedAt  DateTime?
+  /// set after too many wrong codes; blocks new codes and checks for this number until then
+  lockedUntil DateTime?
+  messageId   String?   @db.VarChar(30)
+  ip          String?   @db.VarChar(64)
+  createdAt   DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@index([ip, createdAt])
+}
+
+enum CartRecoveryStatus {
+  OPEN
+  CONVERTED
+  REMINDED
+  SKIPPED
+  EXPIRED
+}
+
+/// A checkout the shopper started (with consent to a reminder) but hasn't finished.
+/// Only the server decides when it is "abandoned" (six hours after the last activity).
+model AbandonedCheckout {
+  id             String             @id @default(cuid())
+  checkoutKey    String             @unique @db.VarChar(64)
+  /// SHA-256 of the bag-recovery token; the token itself exists only in the WhatsApp link
+  recoveryHash   String?            @unique @db.Char(64)
+  customerId     String?            @db.VarChar(30)
+  name           String             @db.VarChar(120)
+  /// E.164 digits without "+"
+  phone          String             @db.VarChar(20)
+  /// [{ productId, variantId, quantity }] — product ids only, never prices from the browser
+  lines          Json
+  subtotalPaise  Int
+  status         CartRecoveryStatus @default(OPEN)
+  lastActivityAt DateTime           @default(now())
+  remindAt       DateTime
+  orderId        String?            @db.VarChar(30)
+  messageId      String?            @db.VarChar(30)
+  skipReason     String?            @db.VarChar(200)
+  remindedAt     DateTime?
+  recoveredAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([status, remindAt])
+  @@index([phone])
+}
+
+enum CampaignStatus {
+  DRAFT
+  /// approved by a permitted admin: recipients are queued for the scheduled time
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+model WhatsAppCampaign {
+  id             String         @id @default(cuid())
+  name           String         @db.VarChar(120)
+  templateName   String         @db.VarChar(100)
+  language       String         @db.VarChar(15)
+  /// { kind: "all_opted_in" | "has_ordered" | "no_order_days" | "bought_category", days?, category? }
+  segment        Json
+  /// template variable values; "{name}" and "{store_url}" are filled per customer
+  params         Json
+  status         CampaignStatus @default(DRAFT)
+  scheduledAt    DateTime?
+  maxRecipients  Int
+  recipientCount Int?
+  createdById    String?        @db.VarChar(30)
+  approvedById   String?        @db.VarChar(30)
+  approvedAt     DateTime?
+  cancelledAt    DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([status, scheduledAt])
+}
+
+/// Errors Meta returned to the server (code + plain reason). Never holds a token.
+model WhatsAppApiError {
+  id         BigInt   @id @default(autoincrement())
+  operation  String   @db.VarChar(60)
+  httpStatus Int?
+  code       Int?
+  subcode    Int?
+  title      String   @db.VarChar(300)
+  detail     String?  @db.VarChar(500)
+  traceId    String?  @db.VarChar(80)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// A short lease so only one server process runs the background jobs at a time.
+model JobLease {
+  name       String   @id @db.VarChar(60)
+  owner      String   @db.VarChar(80)
+  leaseUntil DateTime
 }

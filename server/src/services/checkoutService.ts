@@ -15,6 +15,7 @@ import {
 } from "./orderShared.js";
 import { toGatewayPayment, type GatewayPayment, type PaymentGateway } from "./razorpay.js";
 import type { SettingsService } from "./settingsService.js";
+import type { OrderHooks } from "./whatsappOrders.js";
 
 type Db = PrismaClient | Tx;
 
@@ -93,8 +94,9 @@ const cartHashOf = (input: PlaceOrderInput) =>
     m: input.paymentMethod, d: input.discountCode ?? "", p: input.address.pincode, ph: input.contact.phone,
   })).digest("hex");
 
-export function createCheckoutService(deps: { prisma: PrismaClient; config: Config; settings: SettingsService; gateway: PaymentGateway | null; logger: Logger }) {
+export function createCheckoutService(deps: { prisma: PrismaClient; config: Config; settings: SettingsService; gateway: PaymentGateway | null; logger: Logger; hooks?: OrderHooks | null }) {
   const { prisma, config, settings, gateway, logger } = deps;
+  const hooks = deps.hooks ?? null;
 
   async function discountFor(db: Db, code: string | undefined, priced: PricedLine[], now: Date) {
     if (!code) return null;
@@ -211,6 +213,7 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
       include: orderInclude,
     });
     if (subtotal !== totals.subtotalPaise) throw new Error("subtotal drift"); // defensive
+    if (hooks) await hooks.orderPlaced(tx, order, input);
     return order;
   }
 
@@ -262,8 +265,9 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
       await tx.orderEvent.create({ data: { orderId, type: "payment", message: `Payment received online — ${formatInr(gp.amountPaise)}${gp.method ? ` by ${gp.method}` : ""}${o.isTest ? " (TEST mode, not a real sale)" : ""}. Verified by ${via}.` } });
       if (late) await tx.orderEvent.create({ data: { orderId, type: "status", message: "Payment arrived after the order had expired — the order was reopened." } });
       if (shortfall.length) await tx.orderEvent.create({ data: { orderId, type: "stock", message: `Needs attention: not enough stock for ${shortfall.join(", ")}. Contact the customer or refund.` } });
+      if (hooks) await hooks.orderEvent(tx, orderId, "payment_confirmation");
       return "applied";
-    }, { timeout: 20_000 }));
+    }, { timeout: 20_000 })).then((outcome) => { if (outcome === "applied") hooks?.kick(); return outcome; });
   }
 
   async function recordAttemptFailed(orderId: string, reason: string): Promise<string> {
@@ -380,6 +384,7 @@ export function createCheckoutService(deps: { prisma: PrismaClient; config: Conf
         }
       }
       logger.info("order placed", { orderNumber: order.orderNumber, method: order.paymentMethod, test: order.isTest });
+      hooks?.kick();
       if (order.paymentMethod === "RAZORPAY") {
         try { order = await ensureGatewayOrder(order); } catch (e) {
           logger.error("razorpay order create failed", { orderNumber: order.orderNumber, error: e instanceof Error ? e.message : String(e) });

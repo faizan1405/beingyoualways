@@ -10,6 +10,8 @@ import { inr, inrPaise } from "@/lib/format";
 import { useShop } from "@/lib/shop-store";
 import { isBackendConfigured } from "@/services/api";
 import { shopService, summaryFromServer, type Quote } from "@/services/shopService";
+import { whatsappShop } from "@/services/whatsappLiveService";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/cart")({
   head: () => ({
@@ -23,8 +25,32 @@ export const Route = createFileRoute("/_site/cart")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { recover?: string | undefined } =>
+    typeof s["recover"] === "string" && /^[A-Za-z0-9_-]{20,80}$/.test(s["recover"]) ? { recover: s["recover"] } : {},
   component: CartPage,
 });
+
+/** Opening the WhatsApp reminder link puts the remembered products back in the bag (current prices apply). */
+function useRecoverBag() {
+  const { recover } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { add, qtyInBag } = useShop();
+  useEffect(() => {
+    if (!recover || !isBackendConfigured()) return;
+    let done = false;
+    whatsappShop.recoverBag(recover)
+      .then((r) => {
+        if (done) return;
+        let added = 0;
+        for (const l of r.lines) { const need = l.quantity - qtyInBag(l.productId, l.variantId); if (need > 0 && add(l.productId, l.variantId, need, { openDrawer: false }).ok) added++; }
+        toast(added ? "Your bag is back — prices are checked again before you pay." : "Your bag already has these products.");
+      })
+      .catch((e) => toast.error(e instanceof Error ? e.message : "This bag link has expired."))
+      .finally(() => { if (!done) void navigate({ search: {}, replace: true }); });
+    return () => { done = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recover]);
+}
 
 /** Live shop: the store server re-checks every line (availability, stock, current price). */
 function useBagCheck() {
@@ -50,6 +76,7 @@ function CartPage() {
   const { lines, count, summary } = useShop();
   const live = isBackendConfigured();
   const { quote, offline } = useBagCheck();
+  useRecoverBag();
   const issues = (quote?.lines ?? []).filter((l) => l.status !== "ok" || l.priceChanged);
   return (
     <div className="container-lux py-10 pb-32 md:py-14 lg:pb-14">

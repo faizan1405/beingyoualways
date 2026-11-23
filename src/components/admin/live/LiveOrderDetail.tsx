@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { inrPaise } from "@/lib/format";
 import { adminCommerce, rupeesToPaise, type AdminOrderDetail } from "@/services/adminCommerceService";
 import type { OrderStatusKey } from "@/services/shopService";
+import { OrderWhatsAppPanel } from "./OrderWhatsAppPanel";
 import { LiveState, ORDER_STATUS_TEXT, StatusPill, TestTag, istDateTime, useLive } from "./shared";
 
 const NEXT_LABEL: Partial<Record<OrderStatusKey, string>> = { CONFIRMED: "Confirm order", PROCESSING: "Start packing", SHIPPED: "Mark shipped", DELIVERED: "Mark delivered", RETURNED: "Mark returned" };
@@ -71,6 +72,7 @@ export function LiveOrderDetail({ id }: { id: string }) {
               {o.allowedNext.map((s) => (
                 <Button key={s} variant={s === "RETURNED" ? "outline" : "lux"} disabled={busy} onClick={() => void run(() => adminCommerce.setStatus(o.id, s, s === "RETURNED" ? { restock } : {}), `Status: ${ORDER_STATUS_TEXT[s]}`)}>{NEXT_LABEL[s] ?? ORDER_STATUS_TEXT[s]}</Button>
               ))}
+              {o.canMarkOutForDelivery && <Button variant="outline" disabled={busy} onClick={() => void run(() => adminCommerce.outForDelivery(o.id), "Marked out for delivery")}>Out for delivery today</Button>}
               {o.allowedNext.includes("RETURNED") && <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={restock} onChange={(e) => setRestock(e.target.checked)} /> Put returned items back in stock</label>}
               {o.allowedNext.length === 0 && <p className="text-sm text-muted-foreground">{o.status === "PENDING_PAYMENT" ? "Waiting for the customer's online payment. It moves to New automatically once Razorpay confirms it." : "No further steps for this order."}</p>}
             </div>
@@ -118,6 +120,7 @@ export function LiveOrderDetail({ id }: { id: string }) {
         </div>
 
         <div className="space-y-6">
+          <OrderWhatsAppPanel orderId={o.id} version={`${o.status}:${o.timeline.length}`} />
           <Panel title="Customer">
             <p className="font-medium">{a.name}</p>
             <p className="text-sm">{o.phone}{o.email && <> · {o.email}</>}</p>

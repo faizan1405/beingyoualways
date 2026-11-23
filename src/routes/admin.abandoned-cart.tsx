@@ -12,12 +12,14 @@ import type { AbandonedCartSettings } from "@/lib/types";
 import { discountStore } from "@/services/discountService";
 import { REMINDER_LABEL, reminderDecision, type ReminderDecision } from "@/lib/whatsapp-cloud";
 import { abandonedStore, fillTemplate, reminderDueAt, whatsappService } from "@/services/whatsappService";
+import { LiveAbandonedCarts } from "@/components/admin/live/LiveAbandonedCarts";
+import { isBackendConfigured } from "@/services/api";
 
 // Carts already reminded come from the server's message log; nothing has been sent, so it is empty.
 const REMINDED = new Set<string>();
 const TONE: Record<ReminderDecision, "info" | "warn" | "muted"> = { due: "info", waiting: "warn", off: "muted", "checked-out": "muted", "no-consent": "muted", "already-sent": "muted", "invalid-number": "warn" };
 
-export const Route = createFileRoute("/admin/abandoned-cart")({ component: Abandoned });
+export const Route = createFileRoute("/admin/abandoned-cart")({ component: () => (isBackendConfigured() ? <LiveAbandonedCarts /> : <Abandoned />) });
 
 const fmt = (d: Date) => d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 

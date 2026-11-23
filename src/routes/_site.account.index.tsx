@@ -9,6 +9,8 @@ import { isBackendConfigured } from "@/services/api";
 import { DEMO_CUSTOMER_ID, customerService } from "@/services/customerService";
 import { customerAuthService, type ShopperAccount, type ShopperOrder } from "@/services/customerAuthService";
 import { orderService } from "@/services/orderService";
+import { whatsappShop } from "@/services/whatsappLiveService";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/account/")({
   loader: async () => {
@@ -54,7 +56,7 @@ function Dashboard() {
     return (
       <div>
         <h2 className="text-3xl">Hello, {shopper.name.split(" ")[0]}</h2>
-        {!shopper.emailVerified && (
+        {shopper.email && !shopper.emailVerified && (
           <DemoNotice className="mt-5">
             We haven't confirmed {shopper.email ?? "your email"} yet.{" "}
             <button
@@ -92,6 +94,7 @@ function Dashboard() {
             ))}
           </ul>
         )}
+        <WhatsAppPreferences />
       </div>
     );
   }
@@ -115,5 +118,29 @@ function Dashboard() {
         ))}
       </ul>
     </div>
+  );
+}
+
+/** The shopper's own WhatsApp choices, saved on the store server (STOP in WhatsApp also turns offers off). */
+function WhatsAppPreferences() {
+  const [prefs, setPrefs] = useState<{ orderUpdates: boolean; offers: boolean } | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { whatsappShop.preferences().then(setPrefs).catch((e) => setNote(e instanceof Error ? e.message : "Can't load your WhatsApp choices.")); }, []);
+  const save = async (p: { orderUpdates: boolean; offers: boolean }) => {
+    setBusy(true);
+    try { setPrefs(await whatsappShop.savePreferences(p)); toast("Saved"); } catch (e) { toast.error(e instanceof Error ? e.message : "Not saved."); } finally { setBusy(false); }
+  };
+  return (
+    <section className="mt-10">
+      <h3 className="text-2xl">WhatsApp messages</h3>
+      {!prefs ? <p className="mt-3 text-sm text-muted-foreground">{note ?? "Loading…"}</p> : (
+        <div className="mt-4 space-y-3 text-sm">
+          <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={prefs.orderUpdates} disabled={busy} onChange={(e) => void save({ ...prefs, orderUpdates: e.target.checked })} /> Order updates (confirmation, shipping and delivery)</label>
+          <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={prefs.offers} disabled={busy} onChange={(e) => void save({ ...prefs, offers: e.target.checked })} /> Offers and bag reminders</label>
+          <p className="text-xs text-muted-foreground">You can also reply STOP on WhatsApp at any time.</p>
+        </div>
+      )}
+    </section>
   );
 }

@@ -13,8 +13,10 @@ import type { ChatbotConfig, ChatbotMenu, ChatbotOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { replyToText } from "@/lib/whatsapp-cloud";
 import { chatbotStore, fillTemplate, whatsappService } from "@/services/whatsappService";
+import { LiveChatbot } from "@/components/admin/live/LiveChatbot";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/chatbot")({ component: Chatbot });
+export const Route = createFileRoute("/admin/chatbot")({ component: () => (isBackendConfigured() ? <LiveChatbot /> : <Chatbot />) });
 
 type Bubble = { from: "bot" | "user"; text: string; options?: ChatbotOption[] | undefined };
 const STORE = { store_url: "beingyoualways.com" };

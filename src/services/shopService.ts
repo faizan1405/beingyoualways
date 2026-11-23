@@ -45,6 +45,8 @@ export interface PlaceOrderInput {
   contact: { name: string; email: string; phone: string };
   address: { line1: string; line2: string; city: string; state: string; pincode: string; type: "home" | "work" | "other" };
   paymentMethod: "cod" | "razorpay"; discountCode?: string;
+  /** the shopper's own WhatsApp choices (both off unless ticked) */
+  whatsapp?: { orderUpdates: boolean; offers: boolean };
 }
 export interface RazorpaySuccess { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }
 type Access = { orderNumber: string; token: string };

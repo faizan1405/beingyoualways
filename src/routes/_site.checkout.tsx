@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { variantText } from "@/lib/variants";
 import { ApiError, BackendOfflineError, isBackendConfigured } from "@/services/api";
 import { shopService, summaryFromServer, type OrderResult, type Quote } from "@/services/shopService";
+import { whatsappShop } from "@/services/whatsappLiveService";
 
 export const Route = createFileRoute("/_site/checkout")({
   head: () => ({
@@ -79,6 +80,9 @@ function Checkout() {
   const [step, setStep] = useState<CheckoutStep>("contact");
   const [reached, setReached] = useState(0);
   const [code, setCode] = useState("");
+  // WhatsApp choices: never pre-ticked; "offers" also covers the single 6-hour bag reminder
+  const [waUpdates, setWaUpdates] = useState(false);
+  const [waOffers, setWaOffers] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const loaded = useRef(false);
 
@@ -135,6 +139,15 @@ function Checkout() {
     <input id={k} name={k} value={f[k]} onChange={set(k)} aria-invalid={!!errors[k]} aria-describedby={errors[k] ? `${k}-err` : undefined} className={inputCls(errors[k])} enterKeyHint="next" {...props} />
   );
 
+  /** Tells the store a checkout started, so the 6-hour reminder can be scheduled (only with consent) or cancelled. */
+  const pingReminder = (consent: boolean) => {
+    if (!live || lines.length === 0 || Object.keys(validateStep("contact", f, pay)).length) return;
+    void whatsappShop.checkoutStarted({
+      checkoutKey: currentCheckoutKey(), lines: lines.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.quantity })),
+      contact: { name: f.name.trim(), phone: normalisePhone(f.phone) }, reminderConsent: consent,
+    }).catch(() => { /* a missed reminder never blocks checkout */ });
+  };
+
   const next = () => {
     const errs = validateStep(step, f, pay);
     setErrors(errs);
@@ -144,6 +157,7 @@ function Checkout() {
       document.getElementById(keys[0]!)?.focus();
       return;
     }
+    if (step === "contact") pingReminder(waOffers);
     const n = CHECKOUT_STEPS[idx + 1];
     if (n) goTo(n.id);
   };
@@ -169,6 +183,7 @@ function Checkout() {
       contact: { name: f.name.trim(), email: f.email.trim(), phone: normalisePhone(f.phone) },
       address: { line1: f.line1.trim(), line2: f.line2.trim(), city: f.city.trim(), state: f.state, pincode: f.pincode.trim(), type: f.addressType },
       paymentMethod: pay, ...(appliedCode ? { discountCode: appliedCode } : {}),
+      whatsapp: { orderUpdates: waUpdates, offers: waOffers },
     });
     try {
       let r: OrderResult;
@@ -332,6 +347,13 @@ function Checkout() {
                       type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} placeholder="98765 43210" enterKeyHint="next" className={cn(inputCls(errors.phone), "rounded-l-none")} />
                   </div>
                 </Field>
+                {live && (
+                  <fieldset className="space-y-2.5 rounded-md border border-border p-4 text-sm">
+                    <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">WhatsApp (optional)</legend>
+                    <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={waUpdates} onChange={(e) => setWaUpdates(e.target.checked)} /> <span>Send my order updates on WhatsApp (confirmation, shipping and delivery).</span></label>
+                    <label className="flex items-start gap-2.5"><input type="checkbox" className="mt-1" checked={waOffers} onChange={(e) => { setWaOffers(e.target.checked); if (!e.target.checked) pingReminder(false); }} /> <span>Send me offers on WhatsApp, and one reminder if I leave without finishing this order. Reply STOP any time.</span></label>
+                  </fieldset>
+                )}
               </>
             )}
 

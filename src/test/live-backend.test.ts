@@ -27,8 +27,8 @@ describe("API address", () => {
 
 describe("live admin areas", () => {
   it("overview, products, orders, customers, discounts, settings, content, stories and approvals use the real database; the rest stay switched off", () => {
-    for (const p of ["/admin", "/admin/", "/admin/products", "/admin/products/bya-1069", "/admin/orders", "/admin/orders/abc", "/admin/customers", "/admin/customers/abc", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals"]) expect(isLiveAdminPath(p)).toBe(true);
-    for (const p of ["/admin/whatsapp", "/admin/whatsapp-api", "/admin/chatbot", "/admin/abandoned-cart", "/admin/products-old"]) expect(isLiveAdminPath(p)).toBe(false);
+    for (const p of ["/admin", "/admin/", "/admin/products", "/admin/products/bya-1069", "/admin/orders", "/admin/orders/abc", "/admin/customers", "/admin/customers/abc", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals", "/admin/whatsapp", "/admin/whatsapp-api", "/admin/chatbot", "/admin/abandoned-cart"]) expect(isLiveAdminPath(p)).toBe(true);
+    for (const p of ["/admin/products-old", "/admin/whatsapp-old", "/admin/analytics"]) expect(isLiveAdminPath(p)).toBe(false);
   });
 });
 

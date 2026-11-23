@@ -259,8 +259,38 @@ absolute folder outside the deploy folder (see step 2) and is backed up together
 tar -czf ~/backups/bya-media-$(date +%F).tar.gz -C ~ bya-media     # restore: tar -xzf … -C ~
 ```
 
-## Later phases (structure ready, not implemented)
-WhatsApp Cloud API + OTP (`docs/whatsapp-hostinger-backend.md`),
-order emails/WhatsApp notifications, 6-hour abandoned-cart reminders, refunds from the admin.
-Each needs its own endpoints, secrets in server environment
-variables and real tests before it is marked connected.
+## Phase 4 — WhatsApp Cloud API (built, needs the owner's Meta credentials)
+Everything WhatsApp runs on this server; the website only calls the store API. Nothing is sent while the
+`WHATSAPP_*` variables are missing, and a message counts as sent only when Meta returns a message id —
+"delivered"/"read" only when Meta's webhook says so.
+
+**1. Variables (hPanel → Node.js app → Environment):** see `.env.example` (Phase 4). Use a *System User* token
+(Business Settings → Users → System users → Generate token, never-expiring) with `whatsapp_business_messaging`
+and `whatsapp_business_management`. The server refuses to start if only some values are set or IDs look swapped.
+
+**2. Webhook (Meta App → WhatsApp → Configuration):** Callback URL `https://<api-domain>/api/whatsapp/webhook`,
+Verify token = `WHATSAPP_WEBHOOK_VERIFY_TOKEN`, then *Verify and save* and subscribe to **messages**,
+**message_template_status_update**, **account_update** and **phone_number_quality_update**. Subscribe the app to the
+business account once:
+```bash
+curl -X POST -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" "https://graph.facebook.com/v25.0/$WHATSAPP_WABA_ID/subscribed_apps"
+```
+Every delivery is checked against `X-Hub-Signature-256` (App Secret) before it is stored; duplicates are ignored.
+
+**3. Templates (WhatsApp Manager → Message templates):** create each template with the wording shown in
+Admin → WhatsApp API → Message templates (the variables must match exactly), wait for Meta's approval, then
+enter the exact names there. Sign-in codes need an *Authentication* template with a Copy code button. Unapproved
+or mismatched templates are never sent — the admin shows why.
+
+**4. Check:** Admin → WhatsApp API → *Check now* and *Integration checks* (the test message goes only to numbers in
+`WHATSAPP_TEST_RECIPIENTS`).
+
+What it does: WhatsApp sign-in codes (hashed, 5-minute expiry, single use, 60 s resend, 3/hour, 15-minute lock after
+5 wrong codes); order updates (confirmed, paid, COD placed, packed, shipped, out for delivery, delivered, cancelled)
+only with the shopper's consent and never twice; one 6-hour bag reminder with consent (cancelled when they order);
+marketing campaigns that send only after the owner approves the exact audience; a chatbot that answers from real
+orders, products, shipping settings and policy pages and hands anything else to Admin → Chatbot; STOP opt-outs;
+delivery receipts; retries with backoff; a revoked token pauses sending and shows a banner. The queue lives in MySQL
+(`WhatsAppMessage`), so restarts lose nothing; one server instance at a time runs the sender (database lease).
+
+Not built yet: refunds from the admin. Order emails reuse the account mailer later.

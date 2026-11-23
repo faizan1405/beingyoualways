@@ -12,8 +12,10 @@ import { KNOWN_META_ERRORS, OTP_POLICY, REQUIRED_TEMPLATES, toWhatsAppDigits } f
 import { API_ENDPOINTS, BackendNotConnectedError, HOSTINGER_API_BASE_URL } from "@/services/api";
 import { INTEGRATION_CHECKS, offlineStatus, whatsappCloudService, type CheckResult, type WhatsAppStatus } from "@/services/whatsappCloudService";
 import { abandonedStore, campaignStore, chatbotStore } from "@/services/whatsappService";
+import { LiveWhatsAppConnection } from "@/components/admin/live/LiveWhatsAppConnection";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/whatsapp-api")({ component: WhatsAppConnection });
+export const Route = createFileRoute("/admin/whatsapp-api")({ component: () => (isBackendConfigured() ? <LiveWhatsAppConnection /> : <WhatsAppConnection />) });
 
 const STATE_LABEL: Record<WhatsAppStatus["state"], string> = {
   "backend-missing": "Not connected — Hostinger server not available yet",

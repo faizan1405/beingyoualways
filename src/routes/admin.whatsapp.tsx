@@ -13,8 +13,10 @@ import { checkSendingLimit, fillPositional, templateByName } from "@/lib/whatsap
 import { customerStore } from "@/services/customerService";
 import { orderStore } from "@/services/orderService";
 import { CAMPAIGN_TEMPLATES, SEGMENTS, campaignStore, segmentRecipients, validateCampaign, whatsappService } from "@/services/whatsappService";
+import { LiveCampaigns } from "@/components/admin/live/LiveCampaigns";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/whatsapp")({ component: WhatsApp });
+export const Route = createFileRoute("/admin/whatsapp")({ component: () => (isBackendConfigured() ? <LiveCampaigns /> : <WhatsApp />) });
 
 interface Form { id?: string | undefined; name: string; template: string; segment: CampaignSegment; scheduledFor: string }
 const empty = (): Form => ({ name: "", template: CAMPAIGN_TEMPLATES[0] ?? "", segment: "all", scheduledFor: "" });

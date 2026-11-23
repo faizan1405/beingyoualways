@@ -17,12 +17,15 @@ export const PERMISSIONS = {
   "media.write": "Upload, replace and remove files",
   "settings.write": "Change shipping, Cash on Delivery and store contact settings",
   "users.manage": "Manage admin users (later phase)",
+  "whatsapp.read": "View the WhatsApp connection, message log, templates, bag reminders, campaigns and support inbox",
+  "whatsapp.write": "Map templates, change WhatsApp automations and the chatbot, save draft campaigns, run connection tests and reply to customers",
+  "whatsapp.approve": "Approve or cancel WhatsApp marketing campaigns (approval sends real messages)",
 } as const;
 export type PermissionKey = keyof typeof PERMISSIONS;
 
 export const ROLES: Record<string, { name: string; permissions: PermissionKey[] }> = {
   owner: { name: "Owner", permissions: Object.keys(PERMISSIONS) as PermissionKey[] },
-  admin: { name: "Admin", permissions: ["products.read", "products.write", "products.delete", "orders.read", "orders.write", "orders.cancel", "customers.read", "customers.write", "discounts.write", "content.read", "content.write", "reviews.moderate", "media.write"] },
-  staff: { name: "Staff", permissions: ["products.read", "orders.read", "customers.read", "content.read"] },
+  admin: { name: "Admin", permissions: ["products.read", "products.write", "products.delete", "orders.read", "orders.write", "orders.cancel", "customers.read", "customers.write", "discounts.write", "content.read", "content.write", "reviews.moderate", "media.write", "whatsapp.read", "whatsapp.write"] },
+  staff: { name: "Staff", permissions: ["products.read", "orders.read", "customers.read", "content.read", "whatsapp.read"] },
 };
 export type RoleKey = keyof typeof ROLES;

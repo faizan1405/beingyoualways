@@ -53,6 +53,8 @@ export const placeOrderSchema = cartSchema.extend({
   address: addressSchema,
   paymentMethod: paymentMethodSchema,
   discountCode: discountCodeSchema.optional(),
+  /** the shopper's own WhatsApp choices at checkout (unticked = no change to earlier choices) */
+  whatsapp: z.object({ orderUpdates: z.boolean().default(false), offers: z.boolean().default(false) }).optional(),
 });
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
 

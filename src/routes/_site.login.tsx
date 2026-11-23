@@ -1,6 +1,6 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { authService } from "@/services/authService";
 import { customerAuthService } from "@/services/customerAuthService";
 import { toast } from "sonner";
 import { googleFailureMessage } from "@/lib/google-signin";
+import { whatsappShop } from "@/services/whatsappLiveService";
 
 function GoogleIcon() {
   return (
@@ -49,6 +50,12 @@ function Login() {
   const [emailErr, setEmailErr] = useState("");
   const [emailNote, setEmailNote] = useState<string | null>(null);
   const [emailBusy, setEmailBusy] = useState(false);
+  // live store: ask the server whether WhatsApp codes can really be sent (approved template, token valid)
+  const [wa, setWa] = useState<{ available: boolean; reason: string | null } | null>(isBackendConfigured() ? null : { available: true, reason: null });
+  useEffect(() => {
+    if (!isBackendConfigured()) return;
+    whatsappShop.otpAvailability().then(setWa).catch(() => setWa({ available: false, reason: "Can't reach the store right now." }));
+  }, []);
   const navigate = useNavigate();
   const { google, reason } = Route.useSearch();
 
@@ -120,6 +127,7 @@ function Login() {
         {google === "connected" && <DemoNotice className="mt-3">Google sign-in finished — <Link to="/account" className="font-semibold underline">go to your account</Link>.</DemoNotice>}
         {google === "failed" && <DemoNotice className="mt-3">{googleFailureMessage(reason)}</DemoNotice>}
         {googleNote && <DemoNotice className="mt-3">Google sign-in is ready in the design but not connected yet. No Google account was accessed and you are <strong>not signed in</strong>.</DemoNotice>}
+        {wa?.available && <>
         <div className="my-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"><span className="h-px flex-1 bg-border" /> or continue with WhatsApp <span className="h-px flex-1 bg-border" /></div>
         <form
           className="space-y-4"
@@ -150,6 +158,7 @@ function Login() {
           </div>
           <Button variant="lux" size="xl" className="w-full" type="submit"><MessageCircle /> Send OTP on WhatsApp</Button>
         </form>
+        </>}
         <div className="my-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"><span className="h-px flex-1 bg-border" /> or use your email <span className="h-px flex-1 bg-border" /></div>
         <form className="space-y-4" onSubmit={submitEmail}>
           {mode === "register" && (
@@ -175,7 +184,7 @@ function Login() {
         {emailNote && <DemoNotice className="mt-3">{emailNote}</DemoNotice>}
         <p className="mt-5 text-center text-[11px] text-muted-foreground">By continuing you agree to our <Link to="/terms" className="underline">Terms & Conditions</Link> and <Link to="/privacy-policy" className="underline">Privacy Policy</Link>.</p>
         {isBackendConfigured()
-          ? <DemoNotice className="mt-6">WhatsApp sign-in codes aren't switched on yet — please use Google or your email and password.</DemoNotice>
+          ? wa && !wa.available && <DemoNotice className="mt-6">WhatsApp sign-in isn't available right now{wa.reason ? ` (${wa.reason.replace(/\.$/, "")})` : ""} — please use Google or your email and password.</DemoNotice>
           : <DemoNotice className="mt-6">Demo only — no OTP is sent and email sign-in is not available until the store server is connected. You are <strong>not signed in</strong>.</DemoNotice>}
       </div>
     </div>

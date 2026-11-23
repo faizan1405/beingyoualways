@@ -69,9 +69,9 @@ export const API_ENDPOINTS = {
   content: "/api/admin/content",                               // GET all, PUT bulk, POST one key
   contentKey: "/api/admin/content/:id",                        // POST /delete — back to built-in wording
   approvals: "/api/admin/approvals",                           // GET the pre-launch checklist from live data
-  // ── Later phases (not on the server yet) ──
+  // ── WhatsApp (Phase 4 — see src/services/whatsappLiveService.ts for the full list) ──
   campaigns: "/api/admin/whatsapp/campaigns",
-  abandonedCart: "/api/admin/whatsapp/abandoned-cart",
+  abandonedCart: "/api/admin/whatsapp/carts",
   chatbot: "/api/admin/whatsapp/chatbot",
   // WhatsApp Cloud API (all Meta calls happen on the server with the token from server env)
   otpRequest: "/api/auth/whatsapp/request-otp",       // POST { phone } → { expiresInSeconds, resendInSeconds }
@@ -82,7 +82,7 @@ export const API_ENDPOINTS = {
   waErrors: "/api/admin/whatsapp/errors",             // GET recent Meta API errors
   waTest: "/api/admin/whatsapp/tests",                // POST { check, recipient } — one authorized test number only
   waOrderNotify: "/api/admin/orders/:id/notify",      // POST (also sent automatically on status change)
-  waCampaignSchedule: "/api/admin/whatsapp/campaigns/:id/schedule", // POST — admin presses Schedule; never automatic
+  waCampaignSchedule: "/api/admin/whatsapp/campaigns/:id/approve",  // POST { confirmRecipients } — explicit approval; never automatic
   waOptOut: "/api/admin/whatsapp/opt-outs",           // GET / POST consent changes ("STOP" replies arrive via webhook)
   waWebhook: "/api/whatsapp/webhook",                 // GET verify handshake, POST Meta events (signature checked)
 } as const;
@@ -100,7 +100,7 @@ export const isDemoMode = () => DEMO_MODE;
 export const isUnconnectedProduction = () => !isBackendConfigured() && !DEMO_MODE;
 
 /** Admin areas that read and write the real database. Every other admin area stays disabled when connected. */
-export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/customers", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals"] as const;
+export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/customers", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals", "/admin/whatsapp-api", "/admin/whatsapp", "/admin/abandoned-cart", "/admin/chatbot"] as const;
 export const isLiveAdminPath = (pathname: string) => pathname.replace(/\/$/, "") === "/admin" || LIVE_ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 export class BackendNotConnectedError extends Error {

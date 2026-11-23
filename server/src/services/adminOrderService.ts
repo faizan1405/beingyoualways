@@ -5,7 +5,9 @@ import { HttpError, badRequest, notFound } from "../errors.js";
 import { formatInr, toPaise } from "../lib/money.js";
 import { CANCELLABLE, ORDER_TRANSITIONS, STATUS_LABEL, canTransition, type OrderStatusKey } from "../lib/orderStatus.js";
 import { logActivity, type Actor } from "./activity.js";
+import type { OrderPurpose } from "../lib/whatsapp.js";
 import type { CheckoutService } from "./checkoutService.js";
+import type { OrderHooks } from "./whatsappOrders.js";
 import { itemView, lockOrder, releaseDiscountUse, releaseStock, snapshotOf, totalsOf } from "./orderShared.js";
 
 const STATUSES = ["PENDING_PAYMENT", "NEW", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"] as const;
@@ -62,7 +64,9 @@ const summary = (o: Prisma.OrderGetPayload<{ include: { items: true } }>) => ({
   totals: totalsOf(o), itemCount: o.items.reduce((s, i) => s + i.quantity, 0), city: snapshotOf(o).city, isTest: o.isTest,
 });
 
-export function createAdminOrderService(prisma: PrismaClient, checkout: CheckoutService) {
+const STATUS_MESSAGE: Partial<Record<OrderStatusKey, OrderPurpose>> = { CONFIRMED: "order_confirmation", PROCESSING: "order_packed", SHIPPED: "order_shipped", DELIVERED: "order_delivered" };
+
+export function createAdminOrderService(prisma: PrismaClient, checkout: CheckoutService, hooks: OrderHooks | null = null) {
   const detailInclude = {
     items: true,
     payments: { orderBy: { createdAt: "asc" } },
@@ -96,6 +100,7 @@ export function createAdminOrderService(prisma: PrismaClient, checkout: Checkout
       allowedNext: ORDER_TRANSITIONS[o.status],
       canCancel: CANCELLABLE.includes(o.status),
       canRecordCod: o.paymentMethod === "COD" && o.paymentStatus === "COD_PENDING" && o.status !== "CANCELLED",
+      canMarkOutForDelivery: o.status === "SHIPPED" && !o.events.some((e) => e.type === "out_for_delivery"),
     };
   }
 
@@ -129,7 +134,27 @@ export function createAdminOrderService(prisma: PrismaClient, checkout: Checkout
         const msg = `Status changed: ${STATUS_LABEL[o.status]} → ${STATUS_LABEL[input.to]}${restocked ? " (items put back in stock)" : ""}${input.to === "DELIVERED" && o.paymentStatus === "COD_PENDING" ? " — cash not yet recorded as collected" : ""}`;
         await tx.orderEvent.create({ data: { orderId: id, type: "status", message: msg, actorUserId: actor.userId, note: input.note ?? null } });
         await logActivity(tx, actor, { action: "order.status", entityType: "order", entityId: id, summary: `${o.orderNumber}: ${msg}` });
+        const purpose = STATUS_MESSAGE[input.to];
+        if (hooks && purpose) await hooks.orderEvent(tx, id, purpose);
       });
+      hooks?.kick();
+      return detail(id);
+    },
+
+    /** Courier has the parcel on the van today: a timeline entry plus the customer's WhatsApp update (once). */
+    async outForDelivery(id: string, actor: Actor) {
+      await prisma.$transaction(async (tx) => {
+        await lockOrder(tx, id);
+        const o = await tx.order.findUnique({ where: { id } });
+        if (!o) throw notFound("Order not found.");
+        if (o.status !== "SHIPPED") throw new HttpError(409, "invalid_transition", "Only a shipped order can be marked out for delivery.");
+        const already = await tx.orderEvent.findFirst({ where: { orderId: id, type: "out_for_delivery" } });
+        if (already) return;
+        await tx.orderEvent.create({ data: { orderId: id, type: "out_for_delivery", message: "Out for delivery", actorUserId: actor.userId } });
+        await logActivity(tx, actor, { action: "order.out_for_delivery", entityType: "order", entityId: id, summary: `${o.orderNumber}: out for delivery` });
+        if (hooks) await hooks.orderEvent(tx, id, "order_out_for_delivery");
+      });
+      hooks?.kick();
       return detail(id);
     },
 
@@ -172,7 +197,9 @@ export function createAdminOrderService(prisma: PrismaClient, checkout: Checkout
         const msg = `Order cancelled by staff: ${reason}${stockState !== o.stockState ? " — items put back in stock" : ""}${paid ? `. The customer paid ${formatInr(toPaise(o.grandTotal))} online — issue the refund from the Razorpay dashboard (not automatic).` : ""}`;
         await tx.orderEvent.create({ data: { orderId: id, type: "cancel", message: msg.slice(0, 500), actorUserId: actor.userId } });
         await logActivity(tx, actor, { action: "order.cancel", entityType: "order", entityId: id, summary: `${o.orderNumber}: ${msg}` });
+        if (hooks) await hooks.orderEvent(tx, id, "order_cancelled");
       });
+      hooks?.kick();
       return detail(id);
     },
 

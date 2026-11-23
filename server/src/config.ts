@@ -56,6 +56,21 @@ const schema = z.object({
   SMTP_USER: z.string().trim().optional(),
   SMTP_PASSWORD: z.string().trim().optional(),
   MAIL_FROM: z.string().trim().default("Being You – Always <no-reply@beingyoualways.com>"),
+  // ── Phase 4: WhatsApp Business Cloud API (Meta). Older names from the first hand-over are accepted. ──
+  WHATSAPP_APP_ID: z.string().trim().optional(),
+  WHATSAPP_WABA_ID: z.string().trim().optional(),
+  WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().trim().optional(),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().trim().optional(),
+  WHATSAPP_ACCESS_TOKEN: z.string().trim().optional(),
+  WHATSAPP_APP_SECRET: z.string().trim().optional(),
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().trim().optional(),
+  WHATSAPP_VERIFY_TOKEN: z.string().trim().optional(),
+  WHATSAPP_GRAPH_API_VERSION: z.string().trim().optional(),
+  META_GRAPH_API_VERSION: z.string().trim().optional(),
+  /** comma-separated numbers allowed to receive the admin "send test message" check */
+  WHATSAPP_TEST_RECIPIENTS: z.string().default(""),
+  /** background sender / reminder / campaign jobs; turn off only on a second copy of the API */
+  WHATSAPP_WORKER: bool.optional(),
 });
 
 export interface Config {
@@ -83,6 +98,12 @@ export interface Config {
   mail: { transport: "outbox" | "smtp"; host: string; port: number; user: string; password: string; from: string } | null;
   /** the address shown on every message the store sends */
   mailFrom: string;
+  /** null until every WhatsApp credential is present — nothing is sent and status says "not configured". */
+  whatsapp: {
+    appId: string; wabaId: string; phoneNumberId: string; accessToken: string; appSecret: string; verifyToken: string;
+    graphVersion: string; testRecipients: string[];
+  } | null;
+  whatsappWorker: boolean;
 }
 
 export class ConfigError extends Error {}
@@ -183,6 +204,37 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     if (!host || !user || !password) throw new ConfigError("Invalid server configuration — MAIL_TRANSPORT=smtp requires SMTP_HOST, SMTP_USER and SMTP_PASSWORD");
     mail = { transport: "smtp", host, port: e.SMTP_PORT, user, password, from: e.MAIL_FROM };
   }
+  // WhatsApp is all-or-nothing as well: half a configuration would accept webhooks it can't verify.
+  const waId = pick(e.WHATSAPP_WABA_ID, e.WHATSAPP_BUSINESS_ACCOUNT_ID, "WHATSAPP_WABA_ID", "WHATSAPP_BUSINESS_ACCOUNT_ID");
+  const waVerify = pick(e.WHATSAPP_WEBHOOK_VERIFY_TOKEN, e.WHATSAPP_VERIFY_TOKEN, "WHATSAPP_WEBHOOK_VERIFY_TOKEN", "WHATSAPP_VERIFY_TOKEN");
+  const waVersion = pick(e.WHATSAPP_GRAPH_API_VERSION, e.META_GRAPH_API_VERSION, "WHATSAPP_GRAPH_API_VERSION", "META_GRAPH_API_VERSION") || "v25.0";
+  const waParts = { WHATSAPP_APP_ID: e.WHATSAPP_APP_ID?.trim() ?? "", WHATSAPP_WABA_ID: waId, WHATSAPP_PHONE_NUMBER_ID: e.WHATSAPP_PHONE_NUMBER_ID?.trim() ?? "", WHATSAPP_ACCESS_TOKEN: e.WHATSAPP_ACCESS_TOKEN?.trim() ?? "", WHATSAPP_APP_SECRET: e.WHATSAPP_APP_SECRET?.trim() ?? "", WHATSAPP_WEBHOOK_VERIFY_TOKEN: waVerify };
+  const waMissing = Object.entries(waParts).filter(([, v]) => !v).map(([k]) => k);
+  let whatsapp: Config["whatsapp"] = null;
+  if (waMissing.length > 0 && waMissing.length < Object.keys(waParts).length) {
+    throw new ConfigError(`Invalid server configuration — WhatsApp is partly configured; also set ${waMissing.join(", ")} (or remove the WhatsApp variables)`);
+  }
+  if (waMissing.length === 0) {
+    for (const k of ["WHATSAPP_APP_ID", "WHATSAPP_WABA_ID", "WHATSAPP_PHONE_NUMBER_ID"] as const) {
+      if (!/^\d{5,25}$/.test(waParts[k])) throw new ConfigError(`Invalid server configuration — ${k} must be the numeric id shown in Meta (digits only)`);
+    }
+    if (new Set([waParts.WHATSAPP_APP_ID, waParts.WHATSAPP_WABA_ID, waParts.WHATSAPP_PHONE_NUMBER_ID]).size !== 3) throw new ConfigError("Invalid server configuration — WHATSAPP_APP_ID, WHATSAPP_WABA_ID and WHATSAPP_PHONE_NUMBER_ID must be three different ids (are two swapped?)");
+    if (!/^v\d{2,3}\.0$/.test(waVersion)) throw new ConfigError("Invalid server configuration — WHATSAPP_GRAPH_API_VERSION must look like v25.0");
+    if (waParts.WHATSAPP_ACCESS_TOKEN.length < 40 || /\s/.test(waParts.WHATSAPP_ACCESS_TOKEN)) throw new ConfigError("Invalid server configuration — WHATSAPP_ACCESS_TOKEN doesn't look like a Meta access token");
+    if (waParts.WHATSAPP_APP_SECRET.length < 16 || waParts.WHATSAPP_APP_SECRET === waParts.WHATSAPP_ACCESS_TOKEN) throw new ConfigError("Invalid server configuration — WHATSAPP_APP_SECRET doesn't look like the Meta app secret (App settings → Basic)");
+    if (waVerify.length < 20) throw new ConfigError("Invalid server configuration — WHATSAPP_WEBHOOK_VERIFY_TOKEN must be at least 20 random characters");
+    if (waVerify === waParts.WHATSAPP_APP_SECRET || waVerify === waParts.WHATSAPP_ACCESS_TOKEN) throw new ConfigError("Invalid server configuration — WHATSAPP_WEBHOOK_VERIFY_TOKEN must be its own random value, not the app secret or token");
+    const testRecipients = e.WHATSAPP_TEST_RECIPIENTS.split(",").map((s) => s.trim()).filter(Boolean).map((n) => {
+      const d = n.replace(/\D/g, "");
+      const wa = /^[6-9]\d{9}$/.test(d) ? `91${d}` : /^91[6-9]\d{9}$/.test(d) ? d : null;
+      if (!wa) throw new ConfigError("Invalid server configuration — WHATSAPP_TEST_RECIPIENTS must be Indian mobile numbers separated by commas");
+      return wa;
+    });
+    whatsapp = {
+      appId: waParts.WHATSAPP_APP_ID, wabaId: waId, phoneNumberId: waParts.WHATSAPP_PHONE_NUMBER_ID, accessToken: waParts.WHATSAPP_ACCESS_TOKEN,
+      appSecret: waParts.WHATSAPP_APP_SECRET, verifyToken: waVerify, graphVersion: waVersion, testRecipients,
+    };
+  }
   return {
     env: e.NODE_ENV,
     port: e.PORT,
@@ -208,5 +260,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     media: { root: mediaRoot, maxImageBytes: e.MEDIA_MAX_IMAGE_BYTES, maxVideoBytes: e.MEDIA_MAX_VIDEO_BYTES },
     mail,
     mailFrom: e.MAIL_FROM,
+    whatsapp,
+    whatsappWorker: e.WHATSAPP_WORKER ?? e.NODE_ENV !== "test",
   };
 }

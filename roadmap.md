@@ -26,7 +26,7 @@
 - [x] Campaigns: consent/opt-out, approved templates, variables, limits, delivery reports (none until real).
 - [x] Chatbot: typed-message routing + human fallback.
 - [x] Webhook verify/signature/dedupe helpers + backend spec doc; tests.
-- [ ] Blocked: Hostinger backend, owner's access token, Meta template approval, authorized test number.
+- [x] Superseded by Phase 4 below (real server implementation).
 
 # Roadmap — Phase 1: production backend (Hostinger MySQL)
 
@@ -85,3 +85,16 @@ Open (needs the client / Hostinger — cannot be done from here):
 - [x] Docs: Hostinger GitHub deploy, migrations, media persistence/backups, Google Console settings.
 - [ ] Blocked (owner): set the variables in hPanel, create MySQL + media folder, deploy, then one real Google sign-in on the live domain.
 - [ ] Blocked (owner): SMTP mailbox; Razorpay test keys; shipping/COD confirmation.
+
+# Roadmap — Phase 4: real WhatsApp Cloud API on the Hostinger server
+
+- [x] Server: Meta Graph client (token only in the Authorization header), env validation, connection status + checks, template lookup/approval/variable checks.
+- [x] Server: signed webhook (raw-body HMAC), durable inbox, duplicate protection, delivery statuses in order (incl. early arrivals), template/account/quality events.
+- [x] Server: WhatsApp sign-in codes (hashed, expiry, single use, resend + hourly limits, lockout, no account enumeration).
+- [x] Server: order updates from real orders with consent, once per step; "Out for delivery" action; retries + permanent failures; revoked-token pause.
+- [x] Server: 6-hour bag reminder (consent, DB-priced, survives restarts, cancelled on order, one-time bag link).
+- [x] Server: campaigns (drafts send nothing; owner approves the exact audience; opt-outs excluded; daily limits; reports from Meta only).
+- [x] Server: chatbot from real records + human hand-off inbox; STOP opt-out.
+- [x] Website: live admin screens (WhatsApp API, campaigns, bag reminders, chatbot, order WhatsApp panel), checkout consent boxes, bag-link restore, account WhatsApp choices, sign-in shows WhatsApp only when the server can send codes.
+- [x] Tests: 30 WhatsApp database tests + unit tests (stand-in for Meta); full server and website suites.
+- [ ] Blocked (owner): System User access token + App Secret on Hostinger, webhook verification on the live API domain, approved templates, a test number — then one real send/receive.
