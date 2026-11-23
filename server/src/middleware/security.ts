@@ -30,7 +30,7 @@ export const corsPolicy = (config: Config) =>
   cors({
     origin: (origin, cb) => cb(null, !origin || config.corsOrigins.includes(origin) ? origin ?? false : false),
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
     maxAge: 600,
   });
@@ -57,3 +57,9 @@ export const apiLimiter = () => rateLimit({ windowMs: 5 * 60_000, limit: 600, st
 /** Per-IP sign-in limit (the per-account lockout lives in the auth service). */
 export const loginLimiter = () =>
   rateLimit({ windowMs: 15 * 60_000, limit: 20, skipSuccessfulRequests: true, standardHeaders: "draft-7", legacyHeaders: false, handler: limitHandler("Too many sign-in attempts from this network. Please wait 15 minutes.") });
+
+/** Per-IP limits for order placement and order look-ups (off in automated tests). */
+export const checkoutLimiter = (config: Config) =>
+  rateLimit({ windowMs: 15 * 60_000, limit: 40, skip: () => config.env === "test", standardHeaders: "draft-7", legacyHeaders: false, handler: limitHandler("Too many checkout attempts from this network. Please wait a few minutes and try again.") });
+export const lookupLimiter = (config: Config) =>
+  rateLimit({ windowMs: 5 * 60_000, limit: 300, skip: () => config.env === "test", standardHeaders: "draft-7", legacyHeaders: false, handler: limitHandler("Too many requests. Please wait a moment and try again.") });

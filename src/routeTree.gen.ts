@@ -53,6 +53,7 @@ import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.or
 import { Route as SiteAccountProfileRouteImport } from './routes/_site.account.profile'
 import { Route as SiteAccountWishlistRouteImport } from './routes/_site.account.wishlist'
 import { Route as SiteConcernSlugRouteImport } from './routes/_site.concern.$slug'
+import { Route as SiteOrderOrderNumberRouteImport } from './routes/_site.order.$orderNumber'
 import { Route as SiteProductSlugRouteImport } from './routes/_site.product.$slug'
 import { Route as AdminCustomersIdRouteImport } from './routes/admin.customers_.$id'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders_.$id'
@@ -278,6 +279,11 @@ const SiteConcernSlugRoute = SiteConcernSlugRouteImport.update({
   path: '/concern/$slug',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteOrderOrderNumberRoute = SiteOrderOrderNumberRouteImport.update({
+  id: '/order/$orderNumber',
+  path: '/order/$orderNumber',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteProductSlugRoute = SiteProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
   '/concern/$slug': typeof SiteConcernSlugRoute
+  '/order/$orderNumber': typeof SiteOrderOrderNumberRoute
   '/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -395,6 +402,7 @@ export interface FileRoutesByTo {
   '/account/profile': typeof SiteAccountProfileRoute
   '/account/wishlist': typeof SiteAccountWishlistRoute
   '/concern/$slug': typeof SiteConcernSlugRoute
+  '/order/$orderNumber': typeof SiteOrderOrderNumberRoute
   '/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_site/account/profile': typeof SiteAccountProfileRoute
   '/_site/account/wishlist': typeof SiteAccountWishlistRoute
   '/_site/concern/$slug': typeof SiteConcernSlugRoute
+  '/_site/order/$orderNumber': typeof SiteOrderOrderNumberRoute
   '/_site/product/$slug': typeof SiteProductSlugRoute
   '/admin/customers_/$id': typeof AdminCustomersIdRoute
   '/admin/orders_/$id': typeof AdminOrdersIdRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/wishlist'
     | '/concern/$slug'
+    | '/order/$orderNumber'
     | '/product/$slug'
     | '/admin/customers/$id'
     | '/admin/orders/$id'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/wishlist'
     | '/concern/$slug'
+    | '/order/$orderNumber'
     | '/product/$slug'
     | '/admin/customers/$id'
     | '/admin/orders/$id'
@@ -598,6 +609,7 @@ export interface FileRouteTypes {
     | '/_site/account/profile'
     | '/_site/account/wishlist'
     | '/_site/concern/$slug'
+    | '/_site/order/$orderNumber'
     | '/_site/product/$slug'
     | '/admin/customers_/$id'
     | '/admin/orders_/$id'
@@ -922,6 +934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteConcernSlugRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/order/$orderNumber': {
+      id: '/_site/order/$orderNumber'
+      path: '/order/$orderNumber'
+      fullPath: '/order/$orderNumber'
+      preLoaderRoute: typeof SiteOrderOrderNumberRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/product/$slug': {
       id: '/_site/product/$slug'
       path: '/product/$slug'
@@ -1004,6 +1023,7 @@ interface SiteRouteChildren {
   SiteWishlistRoute: typeof SiteWishlistRoute
   SiteIndexRoute: typeof SiteIndexRoute
   SiteConcernSlugRoute: typeof SiteConcernSlugRoute
+  SiteOrderOrderNumberRoute: typeof SiteOrderOrderNumberRoute
   SiteProductSlugRoute: typeof SiteProductSlugRoute
   SiteAccountOrdersIdRoute: typeof SiteAccountOrdersIdRoute
 }
@@ -1032,6 +1052,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteWishlistRoute: SiteWishlistRoute,
   SiteIndexRoute: SiteIndexRoute,
   SiteConcernSlugRoute: SiteConcernSlugRoute,
+  SiteOrderOrderNumberRoute: SiteOrderOrderNumberRoute,
   SiteProductSlugRoute: SiteProductSlugRoute,
   SiteAccountOrdersIdRoute: SiteAccountOrdersIdRoute,
 }

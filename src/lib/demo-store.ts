@@ -1,3 +1,4 @@
+import { DEMO_MODE } from "@/services/api";
 // Versioned demo persistence for the admin prototype.
 //
 // - "local" stores (non-personal: content, settings, campaigns, discounts, chatbot…) use
@@ -47,8 +48,9 @@ export class StorageFullError extends Error {
 const registry: DemoStore<unknown>[] = [];
 export const demoStores = () => registry;
 
+// Production builds never read or write demo data in the browser (see DEMO_MODE in services/api).
 const area = (scope: StoreScope): Storage | null => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined" || !DEMO_MODE) return null;
   try { return scope === "local" ? window.localStorage : window.sessionStorage; } catch { return null; }
 };
 

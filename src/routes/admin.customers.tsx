@@ -8,8 +8,10 @@ import { inr, shortDate } from "@/lib/format";
 import type { Customer } from "@/lib/types";
 import { customerStore, withStats } from "@/services/customerService";
 import { orderStore } from "@/services/orderService";
+import { LiveCustomers } from "@/components/admin/live/LiveCustomers";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/customers")({ component: Customers });
+export const Route = createFileRoute("/admin/customers")({ component: () => (isBackendConfigured() ? <LiveCustomers /> : <Customers />) });
 
 function Customers() {
   const orders = useDemoStore(orderStore);

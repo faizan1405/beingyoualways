@@ -2,7 +2,7 @@
   "name": "being-you-always-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Being You \u2013 Always production API (Express + Prisma + MySQL) for Hostinger Node.js hosting.",
+  "description": "Being You – Always production API (Express + Prisma + MySQL) for Hostinger Node.js hosting.",
   "type": "module",
   "main": "dist/src/index.js",
   "engines": {
@@ -36,6 +36,7 @@
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.3.0",
     "prisma": "^6.19.3",
+    "razorpay": "^2.9.8",
     "typescript": "^5.9.3",
     "zod": "^3.25.76"
   },

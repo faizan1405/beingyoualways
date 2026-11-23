@@ -14,8 +14,10 @@ import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/pricing";
 import { buildBackup, exportableStores, importBackup, resetAllDemoData, sessionOnlyStores } from "@/services/backupService";
 import { contentService, contentStore } from "@/services/contentService";
 import { INTEGRATIONS, settingsService, settingsStore, type StoreSettings } from "@/services/settingsService";
+import { LiveSettings } from "@/components/admin/live/LiveSettings";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/settings")({ component: Settings });
+export const Route = createFileRoute("/admin/settings")({ component: () => (isBackendConfigured() ? <LiveSettings /> : <Settings />) });
 
 const money = (v: string) => (v === "" ? null : Number(v));
 const Status = ({ on, label }: { on: boolean; label?: string }) => on

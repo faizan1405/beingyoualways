@@ -49,19 +49,22 @@ const variantBase = (v: ProductVariant) => ({
   ...(v.swatch ? { swatch: v.swatch } : {}),
 });
 
+/** Units that can still be ordered: counted stock minus units held by unpaid online orders. Uncounted = 0. */
+export const orderableUnits = (inv: Inventory | null) => (inv?.quantity == null ? 0 : Math.max(0, inv.quantity - inv.reserved));
+
 /**
  * Public shape. Stock counts are never exposed: `stock` is 1 when the size/shade can be
- * ordered and 0 when it is sold out (uncounted stock counts as orderable).
+ * ordered and 0 when it can't (sold out, or stock not counted yet — uncounted stock is not orderable).
  */
 export const toPublicProduct = (p: ProductRow) => ({
   ...base(p),
-  variants: p.variants.map((v) => ({ ...variantBase(v), stock: v.inventory?.quantity == null || v.inventory.quantity > 0 ? 1 : 0 })),
+  variants: p.variants.map((v) => ({ ...variantBase(v), stock: orderableUnits(v.inventory) > 0 ? 1 : 0, ...(v.inventory?.quantity == null ? { notStocked: true } : {}) })),
 });
 
-/** Admin shape: real counted quantity plus whether it has been counted at all. */
+/** Admin shape: real counted quantity, whether it has been counted, and units held by unpaid online orders. */
 export const toAdminProduct = (p: ProductRow) => ({
   ...base(p),
   createdAt: p.createdAt.toISOString(),
   updatedAt: p.updatedAt.toISOString(),
-  variants: p.variants.map((v) => ({ ...variantBase(v), stock: v.inventory?.quantity ?? 0, stockTracked: v.inventory?.quantity != null })),
+  variants: p.variants.map((v) => ({ ...variantBase(v), stock: v.inventory?.quantity ?? 0, stockTracked: v.inventory?.quantity != null, reserved: v.inventory?.reserved ?? 0 })),
 });

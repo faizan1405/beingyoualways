@@ -15,7 +15,7 @@ import { categories } from "@/lib/mock-data";
 import { inr } from "@/lib/format";
 import type { CategorySlug, Product, ProductStatus } from "@/lib/types";
 import { minPrice, productService, totalStock } from "@/services/productService";
-import { isBackendConfigured } from "@/services/api";
+import { isBackendConfigured, isDemoMode } from "@/services/api";
 
 type Show = "low-stock" | "best-seller";
 export const Route = createFileRoute("/admin/products")({
@@ -47,7 +47,7 @@ function Products() {
 
   return (
     <AdminPage title="Products" subtitle={live ? "Saved in the store database. Changes show in the shop straight away; stock shows only after it has been counted." : "Real catalogue from beingyoualways.com. Demo edits are saved in this browser (they survive a refresh); stock numbers are demo values."}
-      actions={<div className="flex flex-wrap gap-2">{!live && <Button variant="luxOutline" size="xl" onClick={() => setResetting(true)}><RotateCcw /> Reset catalogue</Button>}<Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
+      actions={<div className="flex flex-wrap gap-2">{isDemoMode() && <Button variant="luxOutline" size="xl" onClick={() => setResetting(true)}><RotateCcw /> Reset catalogue</Button>}<Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
       <Panel>
         <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <input aria-label="Search products" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className={adminInput} />

@@ -23,20 +23,33 @@ export const API_ENDPOINTS = {
   categories: "/api/categories",
   adminProducts: "/api/admin/products",    // GET all (incl. hidden), POST create
   adminProduct: "/api/admin/products/:id", // GET, PATCH, DELETE (archive; ?permanent=true for unused drafts)
-  // ── Later phases (not on the server yet) ──
-  productMedia: "/api/admin/products/:id/media",
+  // ── Phase 2 (live on the server): shop checkout + admin orders, customers, dashboard, discounts, settings ──
+  checkoutConfig: "/api/checkout/config",              // GET shipping / COD / online-payment availability (no secrets)
+  checkoutQuote: "/api/checkout/quote",                // POST bag → database prices, stock, discount, totals in paise
+  checkoutOrders: "/api/checkout/orders",              // POST place order (checkoutKey makes repeats safe)
+  checkoutLookup: "/api/checkout/orders/lookup",       // POST { orderNumber, token } → shopper's order status
+  checkoutRetry: "/api/checkout/orders/retry-payment", // POST reopen Razorpay for the same order
+  razorpayVerify: "/api/checkout/razorpay/verify",     // POST Razorpay Checkout result → verified on the server
+  razorpayProblem: "/api/checkout/razorpay/problem",   // POST payment window closed / failed (informational)
+  razorpayWebhook: "/api/webhooks/razorpay",           // Razorpay → server only (signed)
+  dashboard: "/api/admin/dashboard",
   orders: "/api/admin/orders",
   order: "/api/admin/orders/:id",
+  ordersCsv: "/api/admin/orders/export.csv",
+  paymentsReconcile: "/api/admin/payments/reconcile",
   customers: "/api/admin/customers",
   customer: "/api/admin/customers/:id",
+  settings: "/api/admin/settings",
+  settingsSection: "/api/admin/settings/:id",          // PUT shipping | cod | store
+  discounts: "/api/admin/discounts",
+  discount: "/api/admin/discounts/:id",
+  // ── Later phases (not on the server yet) ──
+  productMedia: "/api/admin/products/:id/media",
   reviews: "/api/admin/reviews",
   media: "/api/admin/media",
   campaigns: "/api/admin/whatsapp/campaigns",
   abandonedCart: "/api/admin/whatsapp/abandoned-cart",
   chatbot: "/api/admin/whatsapp/chatbot",
-  settings: "/api/admin/settings",
-  discounts: "/api/admin/discounts",
-  discountCheck: "/api/discounts/validate",
   content: "/api/admin/content",
   // WhatsApp Cloud API (all Meta calls happen on the server with the token from server env)
   otpRequest: "/api/auth/whatsapp/request-otp",       // POST { phone } → { expiresInSeconds, resendInSeconds }
@@ -54,9 +67,19 @@ export const API_ENDPOINTS = {
 
 export const isBackendConfigured = () => HOSTINGER_API_BASE_URL !== null;
 
-/** Admin areas that read and write the real database in Phase 1. Every other admin area stays disabled when connected. */
-export const LIVE_ADMIN_PATHS = ["/admin/products"] as const;
-export const isLiveAdminPath = (pathname: string) => LIVE_ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+/**
+ * Demo data (sample orders, browser-saved admin edits, demo reset) exists ONLY in the development
+ * preview with no store server. A production build never falls back to it: without
+ * VITE_API_BASE_URL it shows "store not connected" instead.
+ */
+export const DEMO_MODE: boolean = !isBackendConfigured() && import.meta.env.DEV;
+export const isDemoMode = () => DEMO_MODE;
+/** Production build without a store server: browsing works, ordering and admin are switched off. */
+export const isUnconnectedProduction = () => !isBackendConfigured() && !DEMO_MODE;
+
+/** Admin areas that read and write the real database. Every other admin area stays disabled when connected. */
+export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/customers", "/admin/discounts", "/admin/settings"] as const;
+export const isLiveAdminPath = (pathname: string) => pathname.replace(/\/$/, "") === "/admin" || LIVE_ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 export class BackendNotConnectedError extends Error {
   constructor() { super("The Hostinger backend is not connected yet."); }
@@ -68,7 +91,7 @@ export class BackendOfflineError extends Error {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string, public details?: { field: string; message: string }[]) { super(message); }
+  constructor(public status: number, public code: string, message: string, public details?: { field: string; message: string }[], public data?: unknown) { super(message); }
 }
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -90,14 +113,35 @@ export async function apiRequest<T>(path: string, init: { method?: Method; body?
     throw new BackendOfflineError();
   }
   if (res.ok) return (await res.json()) as T;
-  let body: { error?: { code?: string; message?: string; details?: { field: string; message: string }[] } } = {};
+  let body: { error?: { code?: string; message?: string; details?: unknown } } = {};
   try { body = await res.json(); } catch { /* not JSON (e.g. a proxy error page) */ }
   const e = body.error;
   if (res.status === 401) throw new ApiError(401, e?.code ?? "unauthorized", e?.code === "invalid_credentials" ? e.message ?? "Email or password is incorrect." : "Your admin session has ended — please sign in again.");
   if (res.status === 403) throw new ApiError(403, e?.code ?? "forbidden", e?.message ?? "You don't have permission to do that.");
-  const detail = e?.details?.length ? ` (${e.details.map((d) => `${d.field}: ${d.message}`).join("; ")})` : "";
-  throw new ApiError(res.status, e?.code ?? "server_error", (e?.message ?? (res.status >= 500 ? "The store server had a problem. Nothing was saved." : `Request failed (${res.status}).`)) + detail, e?.details);
+  const list = Array.isArray(e?.details) ? (e.details as { field: string; message: string }[]) : undefined;
+  const detail = list?.length && e?.code === "validation_failed" ? ` (${list.map((d) => `${d.field}: ${d.message}`).join("; ")})` : "";
+  throw new ApiError(res.status, e?.code ?? "server_error", (e?.message ?? (res.status >= 500 ? "The store server had a problem. Nothing was saved." : `Request failed (${res.status}).`)) + detail, list, e?.details);
 }
 
 /** Path with :id filled in (URL-encoded). */
 export const withId = (path: string, id: string) => path.replace(":id", encodeURIComponent(id));
+
+/** Query string from defined values only. */
+export const toQuery = (q: Record<string, string | number | boolean | undefined | null>) => {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(q)) if (v !== undefined && v !== null && v !== "") p.set(k, String(v));
+  const s = p.toString();
+  return s ? `?${s}` : "";
+};
+
+/** Authenticated file download (e.g. the orders CSV) — same cookie rules as apiRequest. */
+export async function apiDownload(path: string, filename: string): Promise<void> {
+  if (!HOSTINGER_API_BASE_URL) throw new BackendNotConnectedError();
+  let res: Response;
+  try { res = await fetch(`${HOSTINGER_API_BASE_URL}${path}`, { credentials: "include", cache: "no-store" }); } catch { throw new BackendOfflineError(); }
+  if (!res.ok) throw new ApiError(res.status, "download_failed", res.status === 401 ? "Your admin session has ended — please sign in again." : "The export couldn't be created. Nothing was downloaded.");
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1_000);
+}

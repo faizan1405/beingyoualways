@@ -12,6 +12,7 @@ import "./discountService";
 import "./settingsService";
 import "./contentService";
 import "./testimonialService";
+import { isDemoMode } from "./api";
 
 export const BACKUP_FORMAT = "being-you-always-demo-backup";
 export const BACKUP_VERSION = 1;
@@ -60,6 +61,7 @@ export async function importBackup(raw: string): Promise<ImportResult> {
 
 /** Restores the original catalogue and every demo store (this browser). */
 export async function resetAllDemoData() {
+  if (!isDemoMode()) throw new Error("Demo reset is switched off in production.");
   await productService.resetDemo();
   for (const s of demoStores()) s.reset();
 }

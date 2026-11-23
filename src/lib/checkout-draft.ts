@@ -50,3 +50,21 @@ export function clearCheckoutDraft() {
   session()?.removeItem(CHECKOUT_DRAFT_KEY);
   purgeLegacy();
 }
+
+// One random id per checkout attempt. The server uses it so a double-click, a refresh or a retry
+// after a dropped connection returns the SAME order instead of creating a second one.
+const KEY_KEY = "bya.checkout.key.v1";
+const newKey = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (Number(c) ^ (Math.random() * 16) >> (Number(c) / 4)).toString(16)));
+export function currentCheckoutKey(): string {
+  const s = session();
+  const existing = s?.getItem(KEY_KEY);
+  if (existing && /^[0-9a-f-]{36}$/i.test(existing)) return existing;
+  const k = newKey();
+  s?.setItem(KEY_KEY, k);
+  return k;
+}
+/** Start a fresh checkout attempt (after an order is placed, or when the bag changed since the last attempt). */
+export function resetCheckoutKey(): string {
+  session()?.removeItem(KEY_KEY);
+  return currentCheckoutKey();
+}

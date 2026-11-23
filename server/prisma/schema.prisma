@@ -59,8 +59,8 @@ model RolePermission {
 model UserRole {
   userId String
   roleId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
   @@index([roleId])
@@ -164,26 +164,29 @@ model Product {
 
 /// A size or shade. Prices are INR.
 model ProductVariant {
-  id             String     @id @db.VarChar(64)
-  productId      String     @db.VarChar(64)
-  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  label          String     @db.VarChar(120)
+  id             String      @id @db.VarChar(64)
+  productId      String      @db.VarChar(64)
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label          String      @db.VarChar(120)
   kind           VariantKind
-  price          Decimal    @db.Decimal(10, 2)
-  compareAtPrice Decimal?   @db.Decimal(10, 2)
-  swatch         String?    @db.VarChar(60)
-  position       Int        @default(0)
+  price          Decimal     @db.Decimal(10, 2)
+  compareAtPrice Decimal?    @db.Decimal(10, 2)
+  swatch         String?     @db.VarChar(60)
+  position       Int         @default(0)
   inventory      Inventory?
   orderItems     OrderItem[]
 
   @@index([productId])
 }
 
-/// quantity = null means stock has not been counted yet (shop treats it as orderable, shows no counts).
+/// quantity = counted units on hand; null = not counted yet, so it cannot be ordered.
+/// reserved = units held by unpaid online-payment orders (released on failure/expiry).
+/// Orderable = quantity - reserved.
 model Inventory {
   variantId String         @id @db.VarChar(64)
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   quantity  Int?
+  reserved  Int            @default(0)
   updatedAt DateTime       @updatedAt
 }
 
@@ -243,6 +246,8 @@ model ShippingAddress {
 }
 
 enum OrderStatus {
+  /// online payment not completed yet (stock reserved, not committed)
+  PENDING_PAYMENT
   NEW
   CONFIRMED
   PROCESSING
@@ -252,34 +257,101 @@ enum OrderStatus {
   RETURNED
 }
 
+enum OrderPaymentStatus {
+  /// online payment started but not verified yet
+  PENDING
+  /// cash on delivery, not collected yet
+  COD_PENDING
+  /// verified provider payment or audited cash collection
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum StockState {
+  NONE
+  /// held for an unpaid online payment
+  RESERVED
+  /// deducted from stock
+  COMMITTED
+  /// reservation released (payment failed / expired / cancelled before payment)
+  RELEASED
+  /// deducted stock put back (qualifying cancellation / return)
+  RESTORED
+}
+
+/// Money columns are INR rupees with 2 decimals; every calculation is done in integer paise on the server.
 model Order {
-  id                String           @id @default(cuid())
-  orderNumber       String           @unique @db.VarChar(30)
-  customerId        String?
-  customer          Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  email             String?          @db.VarChar(191)
-  phone             String?          @db.VarChar(20)
-  status            OrderStatus      @default(NEW)
-  subtotal          Decimal          @db.Decimal(10, 2)
-  discountTotal     Decimal          @default(0) @db.Decimal(10, 2)
-  /// null until shipping charges are confirmed by the store
-  shippingTotal     Decimal?         @db.Decimal(10, 2)
-  grandTotal        Decimal          @db.Decimal(10, 2)
-  currency          String           @default("INR") @db.Char(3)
-  discountId        String?
-  discount          Discount?        @relation(fields: [discountId], references: [id], onDelete: SetNull)
-  shippingAddressId String?
-  shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  id                   String             @id @default(cuid())
+  orderNumber          String             @unique @db.VarChar(30)
+  customerId           String?
+  customer             Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName         String             @default("") @db.VarChar(120)
+  email                String?            @db.VarChar(191)
+  phone                String?            @db.VarChar(20)
+  status               OrderStatus        @default(NEW)
+  paymentMethod        PaymentMethod      @default(COD)
+  paymentStatus        OrderPaymentStatus @default(PENDING)
+  subtotal             Decimal            @db.Decimal(10, 2)
+  discountTotal        Decimal            @default(0) @db.Decimal(10, 2)
+  /// null only on rows from before shipping was configured
+  shippingTotal        Decimal?           @db.Decimal(10, 2)
+  codFee               Decimal            @default(0) @db.Decimal(10, 2)
+  grandTotal           Decimal            @db.Decimal(10, 2)
+  currency             String             @default("INR") @db.Char(3)
+  discountId           String?
+  discount             Discount?          @relation(fields: [discountId], references: [id], onDelete: SetNull)
+  discountCode         String?            @db.VarChar(40)
+  shippingAddressId    String?
+  shippingAddress      ShippingAddress?   @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
   /// address as it was when the order was placed
-  shippingSnapshot  Json
-  notes             Json?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  items             OrderItem[]
-  payments          Payment[]
+  shippingSnapshot     Json
+  notes                Json?
+  stockState           StockState         @default(NONE)
+  reservationExpiresAt DateTime?
+  /// browser-generated idempotency key: the same checkout submitted twice returns the same order
+  checkoutKey          String?            @unique @db.VarChar(64)
+  /// SHA-256 of the priced lines, so a reused checkout key with a different bag is refused
+  cartHash             String?            @db.Char(64)
+  /// placed while Razorpay test keys were configured — never counted as sales
+  isTest               Boolean            @default(false)
+  paidAt               DateTime?
+  carrier              String?            @db.VarChar(80)
+  trackingNumber       String?            @db.VarChar(80)
+  trackingUrl          String?            @db.VarChar(500)
+  shippedAt            DateTime?
+  deliveredAt          DateTime?
+  cancelledAt          DateTime?
+  cancelReason         String?            @db.VarChar(300)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  items                OrderItem[]
+  payments             Payment[]
+  events               OrderEvent[]
+  paymentEvents        PaymentEvent[]
 
   @@index([customerId])
   @@index([status, createdAt])
+  @@index([paymentStatus, createdAt])
+  @@index([createdAt])
+}
+
+/// Order timeline (system events, status changes, staff notes).
+model OrderEvent {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// created | status | payment | note | shipment | stock | cancel | cod_collected
+  type        String   @db.VarChar(30)
+  message     String   @db.VarChar(500)
+  actorUserId String?
+  /// staff note text lives here (internal only)
+  note        String?  @db.Text
+  meta        Json?
+  createdAt   DateTime @default(now())
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {
@@ -313,21 +385,58 @@ enum PaymentStatus {
   REFUNDED
 }
 
-/// A payment is only marked PAID after a verified provider signature/webhook (later phase).
+/// A payment is only PAID after verified Razorpay data (checkout signature + fetched payment, or a signed
+/// webhook) — or, for COD, an audited cash-collection entry by a permitted admin.
 model Payment {
-  id                  String        @id @default(cuid())
+  id                  String         @id @default(cuid())
   orderId             String
-  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order               Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   method              PaymentMethod
-  status              PaymentStatus @default(PENDING)
-  amount              Decimal       @db.Decimal(10, 2)
-  providerOrderId     String?       @unique @db.VarChar(100)
-  providerPaymentId   String?       @unique @db.VarChar(100)
+  status              PaymentStatus  @default(PENDING)
+  amount              Decimal        @db.Decimal(10, 2)
+  currency            String         @default("INR") @db.Char(3)
+  providerOrderId     String?        @unique @db.VarChar(100)
+  providerPaymentId   String?        @unique @db.VarChar(100)
+  /// e.g. upi, card, netbanking (from Razorpay); never card numbers
+  providerMethod      String?        @db.VarChar(30)
   signatureVerifiedAt DateTime?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  capturedAt          DateTime?
+  failureReason       String?        @db.VarChar(255)
+  isTest              Boolean        @default(false)
+  /// manual COD collection: who recorded it and their reference
+  recordedById        String?
+  reference           String?        @db.VarChar(120)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  events              PaymentEvent[]
 
   @@index([orderId])
+}
+
+/// Every payment signal received (webhooks, checkout callbacks, reconciliation). eventId is unique,
+/// so a webhook delivered twice is stored and processed once.
+model PaymentEvent {
+  id                String   @id @default(cuid())
+  provider          String   @db.VarChar(20)
+  eventId           String   @unique @db.VarChar(120)
+  eventType         String   @db.VarChar(60)
+  /// webhook | checkout | reconcile | admin
+  source            String   @db.VarChar(20)
+  signatureValid    Boolean
+  orderId           String?
+  order             Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  paymentId         String?
+  payment           Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  providerOrderId   String?  @db.VarChar(100)
+  providerPaymentId String?  @db.VarChar(100)
+  amountPaise       Int?
+  /// what the server did: applied | ignored_duplicate | ignored_stale | rejected_mismatch | recorded
+  outcome           String   @db.VarChar(40)
+  detail            String?  @db.VarChar(500)
+  createdAt         DateTime @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([providerOrderId])
 }
 
 enum DiscountType {
@@ -336,20 +445,26 @@ enum DiscountType {
 }
 
 model Discount {
-  id          String       @id @default(cuid())
-  code        String       @unique @db.VarChar(40)
-  type        DiscountType
-  value       Decimal      @db.Decimal(10, 2)
-  minOrder    Decimal?     @db.Decimal(10, 2)
-  maxDiscount Decimal?     @db.Decimal(10, 2)
-  startsAt    DateTime?
-  endsAt      DateTime?
-  usageLimit  Int?
-  usedCount   Int          @default(0)
-  active      Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  orders      Order[]
+  id            String       @id @default(cuid())
+  code          String       @unique @db.VarChar(40)
+  type          DiscountType
+  value         Decimal      @db.Decimal(10, 2)
+  minOrder      Decimal?     @db.Decimal(10, 2)
+  maxDiscount   Decimal?     @db.Decimal(10, 2)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  usageLimit    Int?
+  /// counts placed orders; given back if an unpaid order is cancelled or expires
+  usedCount     Int          @default(0)
+  active        Boolean      @default(false)
+  description   String?      @db.VarChar(200)
+  /// string[] | null — product ids the code applies to (null = all)
+  productIds    Json?
+  /// string[] | null — category slugs the code applies to (null = all)
+  categorySlugs Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  orders        Order[]
 }
 
 // ─────────────────────────── Reviews & consent ───────────────────────────

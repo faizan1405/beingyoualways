@@ -1,7 +1,8 @@
-# Being You – Always — API server (Phase 1)
+# Being You – Always — API server (Phases 1–2)
 
-Express + TypeScript + Prisma on **Hostinger MySQL/MariaDB**. Serves the product catalogue to the
-website and secure admin sign-in + product management to `/admin`.
+Express + TypeScript + Prisma on **Hostinger MySQL/MariaDB**. Serves the product catalogue, real
+checkout (Cash on Delivery + Razorpay), private order-status pages, and the admin: sign-in, products,
+orders, customers, discounts, store settings and the sales dashboard.
 
 | | |
 |---|---|
@@ -31,11 +32,48 @@ Every product change is written to `AdminActivityLog` (e.g. "30 ml ₹680 → �
 
 Roles: **owner** (everything), **admin** (products, later orders/content), **staff** (view products).
 
+## Endpoints (Phase 2 — checkout and store operations)
+
+All money is integer **paise**; the server recalculates every price, discount, shipping and COD charge
+from the database — the browser's totals are never trusted.
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/checkout/config` | public — which payment methods are switched on (no secrets, no PIN lists) |
+| POST | `/api/checkout/quote` (alias `/cart`) | public, rate-limited — server-priced bag: stock, discount, shipping, COD charge, `canPlaceOrder` |
+| POST | `/api/checkout/orders` | public, rate-limited (40/15 min per IP) — places the order; `checkoutKey` makes repeat clicks return the same order |
+| POST | `/api/checkout/orders/lookup` | order number + private token → order status page data |
+| POST | `/api/checkout/orders/retry-payment` | re-opens payment for an unpaid online order |
+| POST | `/api/checkout/razorpay/verify` | checks Razorpay's signature **and** fetches the payment from Razorpay before marking paid |
+| POST | `/api/checkout/razorpay/problem` | logs a shopper-side payment failure (never changes status) |
+| POST | `/api/webhooks/razorpay` | Razorpay webhook — HMAC signature on the raw body, each event processed once |
+| GET | `/api/admin/dashboard` | `orders.read` — paid revenue (by payment date, India time), COD to collect, top products |
+| GET | `/api/admin/orders`, `/orders/:id`, `/orders/export.csv` | `orders.read` |
+| POST | `/api/admin/orders/:id/status` · `/notes` · `/shipment` | `orders.write` — only allowed status steps; every change is in the order timeline |
+| POST | `/api/admin/orders/:id/cancel` | `orders.cancel` — releases or restocks items |
+| POST | `/api/admin/orders/:id/cod-collected` | `payments.record` — full amount + reference only |
+| POST | `/api/admin/payments/reconcile` | `orders.write` — re-checks unpaid online orders with Razorpay, releases expired holds |
+| GET / PATCH | `/api/admin/customers`, `/customers/:id` | `customers.read` / `customers.write` |
+| GET / POST / PATCH / DELETE | `/api/admin/discounts[/:id]` | `discounts.write` for changes |
+| GET / PUT | `/api/admin/settings`, `/settings/:kind` (`shipping`, `cod`, `payments`, `store`) | `settings.write` for changes |
+
+Rules enforced on the server:
+- **No orders until the owner sets shipping** in Admin → Settings (fee, free-shipping threshold, delivery
+  estimate). COD is off until switched on with its charge and limits. Nothing is pre-filled.
+- **Stock**: a product without a counted stock figure can't be ordered. COD orders deduct stock at once;
+  online orders hold it for `PAYMENT_HOLD_MINUTES` and release it if unpaid. Cancelling restocks.
+- **Paid** only after Razorpay's signature check + payment fetch (or a verified webhook). Amount or
+  currency mismatches are refused and logged. COD counts as revenue only once cash is recorded.
+- **Test orders** (`STORE_TEST_MODE=true` or `rzp_test_` keys) are labelled and excluded from sales.
+- Order-status links are `/order/<number>#t=<token>` (HMAC of the order number with `ORDER_LINK_SECRET`).
+
 ## Tables (migration `prisma/migrations/*_init`)
 User, Role, Permission, RolePermission, UserRole, Session, PasswordResetToken, Category, Product,
 ProductVariant, Inventory, ProductImage, Customer, ShippingAddress, Order, OrderItem, Payment, Discount,
 Review, WhatsAppConsent, SiteContent, StoreSetting, AdminActivityLog.
-Only users/sessions and the catalogue are used by Phase 1 endpoints; the other tables are ready for later phases.
+Phase 2 migration (`*_phase2_commerce`) adds order/payment statuses, stock holds (`InventoryReservation`),
+`OrderEvent`, `PaymentEvent`, shipping/tracking and discount rules. Reviews, WhatsApp consent and site
+content tables are ready for later phases.
 
 ## Local development
 ```bash
@@ -126,9 +164,26 @@ move those files to Hostinger media before switching off the Lovable deployment.
 - Prisma "query engine library not found": run `npm run build` on the server itself (it runs `prisma generate`
   for the server's OS).
 
+## Razorpay setup (do this with **test keys first**)
+1. Razorpay Dashboard → Account & Settings → API Keys → generate **Test** keys. Set `RAZORPAY_KEY_ID=rzp_test_…`
+   and `RAZORPAY_KEY_SECRET` in the API app's environment variables (never in the website).
+2. Webhooks → add `https://api.beingyoualways.com/api/webhooks/razorpay`, choose a strong secret →
+   `RAZORPAY_WEBHOOK_SECRET`. Events: `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid` (refunds are handled in the Razorpay Dashboard for now).
+3. Restart the API, switch on "Pay online" in Admin → Settings → Payments, and place a few test orders
+   (success, failure, closing the window). They are labelled **Test** and never counted as sales.
+4. Only after the client approves: swap to `rzp_live_…` keys (allowed only with `NODE_ENV=production`)
+   and a live webhook secret. The server refuses live keys outside production and test keys are flagged.
+5. Run "Re-check payments" in Admin → Orders after any outage; the webhook also catches late payments.
+
+## Before taking real orders (checklist)
+- [ ] `ORDER_LINK_SECRET` set (32+ random characters; changing it breaks old order links).
+- [ ] Admin → Settings: shipping fee, free-shipping threshold and delivery estimate confirmed by the client.
+- [ ] COD decision (on/off, charge, limits, PIN codes) confirmed by the client.
+- [ ] Stock counts entered for every product that should be orderable.
+- [ ] Razorpay test orders pass end-to-end on the Hostinger domain; then live keys.
+
 ## Later phases (structure ready, not implemented)
-Razorpay (orders + webhook signature verification; `Payment` only becomes `PAID` after verification),
-Cash on Delivery, Google sign-in (`Customer.googleSub`), WhatsApp Cloud API + OTP
-(`docs/whatsapp-hostinger-backend.md`), order notifications, 6-hour abandoned-cart reminders, review
-photo/video uploads to Hostinger storage, discounts, real sales analytics. Each needs its own endpoints,
-secrets in server environment variables and real tests before it is marked connected.
+Google sign-in (`Customer.googleSub`), WhatsApp Cloud API + OTP (`docs/whatsapp-hostinger-backend.md`),
+order emails/WhatsApp notifications, 6-hour abandoned-cart reminders, refunds from the admin, review
+photo/video uploads to Hostinger storage. Each needs its own endpoints, secrets in server environment
+variables and real tests before it is marked connected.

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { adminInput, adminLabel } from "@/components/admin/AdminUI";
 import { Button } from "@/components/ui/button";
 import { adminAuthService, isSecureAdmin } from "@/services/adminAuthService";
+import { StoreNotConnected } from "@/components/admin/StoreNotConnected";
+import { isUnconnectedProduction } from "@/services/api";
 
 export const Route = createFileRoute("/admin_/login")({
   head: () => ({
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/admin_/login")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: AdminLogin,
+  component: () => (isUnconnectedProduction() ? <StoreNotConnected /> : <AdminLogin />),
 });
 
 function AdminLogin() {

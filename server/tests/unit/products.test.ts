@@ -28,17 +28,21 @@ describe("product input rules", () => {
 });
 
 describe("public product shape", () => {
-  it("never exposes stock counts — only whether a size or shade can be ordered", () => {
+  it("never exposes stock counts — only whether a size or shade can be ordered (uncounted or fully held = not orderable)", () => {
     const row = {
       id: "p1", slug: "s", name: "N", categoryId: 1, category: { id: 1, slug: "skincare", name: "", tagline: "", description: "", position: 0 },
       collection: null, shortDescription: "", description: "", directions: "", ingredients: [], keyIngredients: null, details: [], benefits: null, concerns: null, relatedSlugs: null,
       shape: "jar", tint: "t", featured: false, bestSeller: false, status: "ACTIVE", isSample: false, sortOrder: 0, sourceUrl: null, createdAt: new Date(), updatedAt: new Date(), archivedAt: null, images: [],
       variants: [
-        { id: "a", productId: "p1", label: "A", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 0, inventory: { variantId: "a", quantity: 37, updatedAt: new Date() } },
-        { id: "b", productId: "p1", label: "B", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 1, inventory: { variantId: "b", quantity: 0, updatedAt: new Date() } },
-        { id: "c", productId: "p1", label: "C", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 2, inventory: { variantId: "c", quantity: null, updatedAt: new Date() } },
+        { id: "a", productId: "p1", label: "A", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 0, inventory: { variantId: "a", quantity: 37, reserved: 2, updatedAt: new Date() } },
+        { id: "b", productId: "p1", label: "B", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 1, inventory: { variantId: "b", quantity: 0, reserved: 0, updatedAt: new Date() } },
+        { id: "c", productId: "p1", label: "C", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 2, inventory: { variantId: "c", quantity: null, reserved: 0, updatedAt: new Date() } },
+        { id: "d", productId: "p1", label: "D", kind: "SIZE", price: new Prisma.Decimal(499), compareAtPrice: null, swatch: null, position: 3, inventory: { variantId: "d", quantity: 3, reserved: 3, updatedAt: new Date() } },
       ],
     } as unknown as ProductRow;
-    expect(toPublicProduct(row).variants.map((v) => v.stock)).toEqual([1, 0, 1]);
+    const pub = toPublicProduct(row).variants;
+    expect(pub.map((v) => v.stock)).toEqual([1, 0, 0, 0]);
+    expect(pub.map((v) => "notStocked" in v)).toEqual([false, false, true, false]);
+    expect(JSON.stringify(pub)).not.toContain("37");
   });
 });

@@ -25,11 +25,32 @@ describe("API address", () => {
   });
 });
 
-describe("Phase 1 admin areas", () => {
-  it("only Products (list and editor) use the real database", () => {
-    expect(isLiveAdminPath("/admin/products")).toBe(true);
-    expect(isLiveAdminPath("/admin/products/bya-1069")).toBe(true);
-    for (const p of ["/admin", "/admin/orders", "/admin/customers", "/admin/settings", "/admin/products-old"]) expect(isLiveAdminPath(p)).toBe(false);
+describe("Phase 2 admin areas", () => {
+  it("overview, products, orders, customers, discounts and settings use the real database; the rest stay switched off", () => {
+    for (const p of ["/admin", "/admin/", "/admin/products", "/admin/products/bya-1069", "/admin/orders", "/admin/orders/abc", "/admin/customers", "/admin/customers/abc", "/admin/discounts", "/admin/settings"]) expect(isLiveAdminPath(p)).toBe(true);
+    for (const p of ["/admin/whatsapp", "/admin/whatsapp-api", "/admin/testimonials", "/admin/content", "/admin/chatbot", "/admin/abandoned-cart", "/admin/approvals", "/admin/products-old"]) expect(isLiveAdminPath(p)).toBe(false);
+  });
+});
+
+describe("production builds never use demo data", () => {
+  afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); localStorage.clear(); });
+  it("a production build without a store server has demo mode, demo storage and demo reset switched off", async () => {
+    vi.resetModules();
+    vi.stubEnv("DEV", false);
+    vi.stubEnv("PROD", true);
+    localStorage.setItem("bya.products.v2", JSON.stringify([{ id: "fake", slug: "fake", name: "Fake demo edit", variants: [{ id: "v", price: 1 }] }]));
+    const api = await import("@/services/api");
+    expect(api.DEMO_MODE).toBe(false);
+    expect(api.isUnconnectedProduction()).toBe(true);
+    const { productService } = await import("@/services/productService");
+    expect(productService.peekAll().some((p) => p.id === "fake")).toBe(false);
+    await expect(productService.resetDemo()).rejects.toThrow(/switched off/);
+    const { resetAllDemoData } = await import("@/services/backupService");
+    await expect(resetAllDemoData()).rejects.toThrow(/switched off/);
+  });
+  it("the development preview (no server) is the only place demo mode is on", async () => {
+    const api = await import("@/services/api");
+    expect(api.DEMO_MODE).toBe(true);
   });
 });
 

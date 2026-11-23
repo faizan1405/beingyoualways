@@ -39,3 +39,23 @@
 - [x] Deployment guide `server/README.md`.
 - [ ] Blocked: Hostinger plan with Node.js apps, MySQL credentials, domains — deploy + verify on Hostinger (owner).
 - [ ] Later phases: orders/checkout, Razorpay, COD, Google sign-in, WhatsApp OTP/notifications, cart reminders, media uploads, reviews, discounts, analytics.
+
+# Roadmap — Phase 2: real e-commerce operations (Hostinger)
+
+- [x] Database migration 2: stock reservations, order payment/fulfilment fields, order timeline, payment events, discount eligibility.
+- [x] Server: settings (shipping, COD, store contact) in paise; public checkout config.
+- [x] Server: bag validation + quote (database prices, stock, discounts) — never trusts browser prices.
+- [x] Server: place order (guest), idempotent checkout key, stock reservation, discount redemption, COD orders.
+- [x] Server: Razorpay orders, signature verification, webhook (raw body, dedupe, out-of-order), failure/cancel, retry, expiry + reconciliation.
+- [x] Server: admin orders (filters, detail, timeline, notes, safe status changes, cancel + restock, shipment, COD collection, CSV), customers, dashboard, discounts, settings.
+- [x] Real-database tests for the 20 end-to-end checks; existing tests still pass.
+- [x] Website: bag + checkout use the server when connected (quote, COD, Razorpay Checkout, confirmation, errors); no simulated order in preview.
+- [x] Website admin: orders, customers, dashboard, discounts, settings read/write the server when connected.
+- [x] Production rules: no demo fallback or demo reset in production builds.
+- [x] Hostinger docs: env template, Razorpay setup, webhook URL, backup/restore, deployment checklist.
+
+Open (needs the client / Hostinger — cannot be done from here):
+- [ ] Hostinger Node.js plan + MySQL database, deploy API and website, run migrations/seed/admin:create.
+- [ ] Client confirms shipping fee, free-shipping threshold, delivery estimate and the COD decision; enter them in Admin → Settings.
+- [ ] Stock counts for every orderable product.
+- [ ] Razorpay test keys + webhook on the Hostinger domain; real test payments; then live keys after approval.

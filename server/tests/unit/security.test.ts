@@ -14,9 +14,9 @@ describe("configuration", () => {
     try { loadConfig({ DATABASE_URL: "postgres://user:S3cret@x/y" }); } catch (e) { expect(String(e)).not.toContain("S3cret"); }
   });
   it("requires https CORS origins in production", () => {
-    expect(() => loadConfig({ ...base, NODE_ENV: "production" })).toThrow(/CORS_ORIGINS/);
-    expect(() => loadConfig({ ...base, NODE_ENV: "production", CORS_ORIGINS: "http://beingyoualways.com" })).toThrow(/https/);
-    const c = loadConfig({ ...base, NODE_ENV: "production", CORS_ORIGINS: "https://beingyoualways.com/" });
+    expect(() => loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32) })).toThrow(/CORS_ORIGINS/);
+    expect(() => loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32), CORS_ORIGINS: "http://beingyoualways.com" })).toThrow(/https/);
+    const c = loadConfig({ ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "x".repeat(32), CORS_ORIGINS: "https://beingyoualways.com/" });
     expect(c.corsOrigins).toEqual(["https://beingyoualways.com"]);
     expect(c.cookie.secure).toBe(true);
   });
@@ -57,5 +57,22 @@ describe("session tokens", () => {
     expect(Buffer.from(a, "base64url").length).toBe(32);
     expect(hashToken(a)).toMatch(/^[0-9a-f]{64}$/);
     expect(hashToken(a)).not.toContain(a);
+  });
+});
+
+describe("browser cross-site rules", () => {
+  it("lets the website's own address send every kind of request the admin uses (incl. saving settings)", async () => {
+    const express = (await import("express")).default;
+    const request = (await import("supertest")).default;
+    const { corsPolicy } = await import("../../src/middleware/security.js");
+    const app = express();
+    app.use(corsPolicy(loadConfig({ ...base, CORS_ORIGINS: "http://localhost:8090" })));
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      const res = await request(app).options("/api/admin/settings/cod").set("Origin", "http://localhost:8090").set("Access-Control-Request-Method", method).set("Access-Control-Request-Headers", "content-type");
+      expect(res.headers["access-control-allow-methods"]).toContain(method);
+      expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:8090");
+    }
+    const other = await request(app).options("/api/admin/settings/cod").set("Origin", "https://evil.example").set("Access-Control-Request-Method", "PUT");
+    expect(other.headers["access-control-allow-origin"]).toBeUndefined();
   });
 });

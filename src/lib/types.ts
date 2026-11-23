@@ -73,6 +73,8 @@ export interface OrderSummary {
   /** Final payable amount, or null while any part of it (e.g. shipping) is unknown. */
   total: number | null;
   itemCount: number;
+  /** Cash on Delivery charge set by the store (server totals only). */
+  codFee?: number;
 }
 
 export type AddressType = "home" | "work" | "other";

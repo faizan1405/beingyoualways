@@ -12,8 +12,10 @@ import { inr, shortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { customerStore } from "@/services/customerService";
 import { orderStore } from "@/services/orderService";
+import { LiveDashboard } from "@/components/admin/live/LiveDashboard";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/")({ component: Overview });
+export const Route = createFileRoute("/admin/")({ component: () => (isBackendConfigured() ? <LiveDashboard /> : <Overview />) });
 
 const RANGES: { key: RangeKey; label: string }[] = [
   { key: "today", label: "Today" },

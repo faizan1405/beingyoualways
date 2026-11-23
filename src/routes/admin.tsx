@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { adminAuthService, type AdminSession } from "@/services/adminAuthService";
-import { isBackendConfigured, isLiveAdminPath } from "@/services/api";
+import { isBackendConfigured, isLiveAdminPath, isUnconnectedProduction } from "@/services/api";
+import { StoreNotConnected } from "@/components/admin/StoreNotConnected";
 import { productService } from "@/services/productService";
 
 export const Route = createFileRoute("/admin")({
@@ -37,6 +38,10 @@ const nav = [
 ] as const;
 
 function AdminLayout() {
+  return isUnconnectedProduction() ? <StoreNotConnected /> : <AdminShell />;
+}
+
+function AdminShell() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -109,7 +114,7 @@ function AdminLayout() {
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur md:px-8">
           <button className="lg:hidden" aria-label="Open admin menu" onClick={() => setOpen(true)}><Menu /></button>
           {live
-            ? <p className="min-w-0 px-2 text-xs text-muted-foreground">Signed in as <strong>{session.name ?? session.email}</strong> · product changes are saved to the store database.</p>
+            ? <p className="min-w-0 px-2 text-xs text-muted-foreground">Signed in as <strong>{session.name ?? session.email}</strong> · changes are saved to the store database.</p>
             : <p className="min-w-0 px-2 text-xs text-muted-foreground">Demo mode only — admin is <strong>not secured</strong> until server sign-in is added.</p>}
           <div className="flex items-center gap-4">
             <Link to="/" className="hidden text-xs font-semibold text-primary hover:underline sm:block">View store →</Link>
@@ -128,7 +133,7 @@ function NotConnectedYet() {
     <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-8 text-center shadow-soft">
       <CloudOff className="mx-auto size-8 text-muted-foreground" />
       <h1 className="mt-3 font-serif text-3xl">Not connected yet</h1>
-      <p className="mt-2 text-sm text-muted-foreground">This area will read real store data once it is connected to the database in a later phase. Until then it stays switched off, so no sample orders, customers or figures are shown.</p>
+      <p className="mt-2 text-sm text-muted-foreground">This area will read real store data once it is connected to the database in a later phase. Until then it stays switched off, so no sample data or figures are shown.</p>
       <Button className="mt-5" variant="lux" asChild><Link to="/admin/products">Go to Products</Link></Button>
     </div>
   );

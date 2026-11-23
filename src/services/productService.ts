@@ -3,7 +3,7 @@
 // - live (VITE_API_BASE_URL set): every read and write goes to the Hostinger API / MySQL.
 import { categories, products as seed } from "@/lib/mock-data";
 import { resolveImageRefs, toImageRef } from "@/lib/image-refs";
-import { API_ENDPOINTS, ApiError, apiRequest, isBackendConfigured, withId } from "./api";
+import { API_ENDPOINTS, ApiError, DEMO_MODE, apiRequest, isBackendConfigured, withId } from "./api";
 import type { CategorySlug, Product } from "@/lib/types";
 import { bestSellerSlugs, productConcerns, type ConcernSlug } from "@/lib/concerns";
 import { BEST_SELLER_PICKS, CATALOGUE_REVISION, applyBestSellerPicks, reviseStored } from "@/lib/catalogue-revision";
@@ -34,8 +34,10 @@ const load = (): Product[] => {
     return list;
   } catch { return structuredClone(seed); }
 };
-let store: Product[] = isBackendConfigured() ? [] : load();
-const persist = () => { if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(store)); };
+// Browser-saved demo edits exist only in the development preview; a production build without a
+// store server shows the verified catalogue as shipped (never someone's demo edits).
+let store: Product[] = isBackendConfigured() ? [] : DEMO_MODE ? load() : structuredClone(seed);
+const persist = () => { if (typeof window !== "undefined" && DEMO_MODE) localStorage.setItem(KEY, JSON.stringify(store)); };
 
 // Live updates: pages showing admin-controlled lists (e.g. homepage High Demand) re-read on change,
 // including edits made in another tab of this browser.
@@ -197,6 +199,7 @@ const demoProductService = {
   },
   /** Restore the imported catalogue and discard demo edits. */
   resetDemo: () => {
+    if (!DEMO_MODE) return Promise.reject(new Error("Demo reset is switched off in production."));
     store = structuredClone(seed);
     if (typeof window !== "undefined") { localStorage.removeItem(KEY); localStorage.setItem(REV_KEY, CATALOGUE_REVISION); }
     notify();

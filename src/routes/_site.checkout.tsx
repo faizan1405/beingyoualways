@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, Pencil, ShieldCheck } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, ChevronDown, CloudOff, Loader2, Pencil, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
@@ -12,20 +12,24 @@ import {
   CHECKOUT_STEPS, INDIAN_STATES, emptyCheckout, firstInvalidStep, normalisePhone, validateStep,
   type CheckoutErrors, type CheckoutForm, type CheckoutStep,
 } from "@/lib/checkout-validation";
-import { clearCheckoutDraft, loadCheckoutDraft, saveCheckoutDraft } from "@/lib/checkout-draft";
-import { inr } from "@/lib/format";
+import { clearCheckoutDraft, currentCheckoutKey, loadCheckoutDraft, resetCheckoutKey, saveCheckoutDraft } from "@/lib/checkout-draft";
+import { inr, inrPaise } from "@/lib/format";
+import { orderHash, rememberOrderLink } from "@/lib/order-links";
+import { openRazorpay } from "@/lib/razorpay-checkout";
 import { useShop } from "@/lib/shop-store";
 import type { AddressType, PaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { variantText } from "@/lib/variants";
+import { ApiError, BackendOfflineError, isBackendConfigured } from "@/services/api";
+import { shopService, summaryFromServer, type OrderResult, type Quote } from "@/services/shopService";
 
 export const Route = createFileRoute("/_site/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout | Being You – Always" },
-      { name: "description", content: "Enter your contact, delivery and payment preferences for your Being You – Always order (demo checkout)." },
+      { name: "description", content: "Enter your contact, delivery and payment details to place your Being You – Always order." },
       { property: "og:title", content: "Checkout | Being You – Always" },
-      { property: "og:description", content: "Demo checkout — no payment is taken and no order is placed." },
+      { property: "og:description", content: "Secure checkout for Being You – Always plant-based beauty." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -54,14 +58,26 @@ const inputCls = (err?: string) =>
 
 const ADDRESS_TYPES: { v: AddressType; l: string }[] = [{ v: "home", l: "Home" }, { v: "work", l: "Work" }, { v: "other", l: "Other" }];
 
+// Maps server field names to the checkout form's fields.
+const FIELD_MAP: Record<string, keyof CheckoutForm> = {
+  "contact.name": "name", "contact.email": "email", "contact.phone": "phone", "address.line1": "line1", "address.line2": "line2",
+  "address.city": "city", "address.state": "state", "address.pincode": "pincode",
+};
+
 function Checkout() {
-  const { lines, summary } = useShop();
+  const { lines, summary, clear } = useShop();
+  const navigate = useNavigate();
+  const live = isBackendConfigured();
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteProblem, setQuoteProblem] = useState<string | null>(null);
+  const [appliedCode, setAppliedCode] = useState("");
+  const [placing, setPlacing] = useState(false);
+  const [quoteTick, setQuoteTick] = useState(0);
   const [f, setF] = useState<CheckoutForm>(emptyCheckout);
   const [pay, setPay] = useState<PaymentMethod | null>(null);
   const [errors, setErrors] = useState<CheckoutErrors>({});
   const [step, setStep] = useState<CheckoutStep>("contact");
   const [reached, setReached] = useState(0);
-  const [done, setDone] = useState(false);
   const [code, setCode] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
   const loaded = useRef(false);
@@ -73,7 +89,27 @@ function Checkout() {
     if (d) { setF(d.form); setPay(d.pay); }
     loaded.current = true;
   }, []);
-  useEffect(() => { if (loaded.current && !done) saveCheckoutDraft(f, pay); }, [f, pay, done]);
+  useEffect(() => { if (loaded.current) saveCheckoutDraft(f, pay); }, [f, pay]);
+
+  // Live: the server prices the bag (database prices, stock, discount, shipping, COD charge).
+  const destination = /^[1-9]\d{5}$/.test(f.pincode.trim()) && f.state ? { state: f.state, pincode: f.pincode.trim() } : undefined;
+  const quoteKey = JSON.stringify([lines.map((l) => [l.productId, l.variantId, l.quantity, l.variant.price]), destination, pay, appliedCode, quoteTick]);
+  useEffect(() => {
+    if (!live || lines.length === 0) return;
+    let stale = false;
+    const t = setTimeout(() => {
+      shopService.quote({
+        lines: lines.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.quantity, seenUnitPrice: l.variant.price })),
+        ...(destination ? { destination } : {}), ...(pay ? { paymentMethod: pay } : {}), ...(appliedCode ? { discountCode: appliedCode } : {}),
+      }).then((q) => { if (!stale) { setQuote(q); setQuoteProblem(null); } })
+        .catch((e) => { if (!stale) setQuoteProblem(e instanceof Error ? e.message : "Can't reach the store right now."); });
+    }, 250);
+    return () => { stale = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live, quoteKey]);
+  const shownSummary = useMemo(() => (live && quote?.totals ? summaryFromServer(quote.totals, summary.itemCount) : summary), [live, quote, summary]);
+  const lineIssues = live ? (quote?.lines ?? []).filter((l) => l.status !== "ok") : [];
+  const priceNotes = live ? (quote?.lines ?? []).filter((l) => l.priceChanged) : [];
 
   const forgetDetails = () => {
     clearCheckoutDraft();
@@ -112,28 +148,62 @@ function Checkout() {
     if (n) goTo(n.id);
   };
 
-  const submit = () => {
-    const bad = firstInvalidStep(f, pay);
-    if (bad) { setErrors(validateStep(bad, f, pay)); goTo(bad); toast.error("Some details need attention"); return; }
-    clearCheckoutDraft();
-    setDone(true);
-    window.scrollTo({ top: 0 });
+  const openOrder = (r: OrderResult) => {
+    rememberOrderLink(r.order.orderNumber, r.accessToken);
+    void navigate({ to: "/order/$orderNumber", params: { orderNumber: r.order.orderNumber }, hash: orderHash(r.accessToken) });
+  };
+  const finishPlaced = (r: OrderResult) => {
+    // The order now exists on the server: start a fresh checkout next time, and empty the bag once it's paid or COD.
+    if (r.order.paymentStatus !== "PENDING" || r.order.status === "CANCELLED") { clear(); clearCheckoutDraft(); resetCheckoutKey(); }
+    openOrder(r);
   };
 
-  if (done)
-    return (
-      <div className="container-lux max-w-xl py-24 text-center">
-        <CheckCircle2 className="mx-auto size-12 text-success" strokeWidth={1.3} />
-        <h1 className="mt-6 text-4xl">Your details are ready</h1>
-        <p className="mt-4 leading-relaxed text-muted-foreground">
-          This is a <strong>demo checkout</strong>. You chose <strong>{pay ? paymentLabel(pay) : "—"}</strong>, but <strong>no payment was taken and no order has been placed</strong>. Live ordering will be switched on once Razorpay, Cash on Delivery rules, shipping charges and the store backend are confirmed and connected.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button variant="lux" size="xl" asChild><Link to="/shop">Continue browsing</Link></Button>
-          <Button variant="luxOutline" size="xl" onClick={() => { setDone(false); setStep("review"); }}>Back to review</Button>
-        </div>
-      </div>
-    );
+  const submit = async () => {
+    const bad = firstInvalidStep(f, pay);
+    if (bad) { setErrors(validateStep(bad, f, pay)); goTo(bad); toast.error("Some details need attention"); return; }
+    if (!live || !pay || placing) return;
+    setPlacing(true);
+    const body = (key: string) => ({
+      checkoutKey: key,
+      lines: lines.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.quantity, seenUnitPrice: l.variant.price })),
+      contact: { name: f.name.trim(), email: f.email.trim(), phone: normalisePhone(f.phone) },
+      address: { line1: f.line1.trim(), line2: f.line2.trim(), city: f.city.trim(), state: f.state, pincode: f.pincode.trim(), type: f.addressType },
+      paymentMethod: pay, ...(appliedCode ? { discountCode: appliedCode } : {}),
+    });
+    try {
+      let r: OrderResult;
+      try { r = await shopService.placeOrder(body(currentCheckoutKey())); }
+      catch (e) { if (e instanceof ApiError && e.code === "checkout_reused") r = await shopService.placeOrder(body(resetCheckoutKey())); else throw e; }
+      if (r.order.paymentMethod === "cod" || r.order.paymentStatus !== "PENDING") { finishPlaced(r); return; }
+      if (!r.payment) { toast.error("Your order is saved, but online payment couldn't start. You can try again from the order page."); openOrder(r); return; }
+      const access = { orderNumber: r.order.orderNumber, token: r.accessToken };
+      const outcome = await openRazorpay(r.payment, { name: "Being You – Always", color: "#263B31" });
+      if (outcome.kind === "success") {
+        try { finishPlaced(await shopService.verifyRazorpay(access, outcome.result)); }
+        catch (e) { toast.error(e instanceof Error ? e.message : "We couldn't confirm the payment yet."); openOrder(r); }
+        return;
+      }
+      const after = await shopService.reportProblem(access, outcome.kind === "failed" ? { kind: "failed", reason: outcome.reason, ...(outcome.paymentId ? { razorpay_payment_id: outcome.paymentId } : {}) } : { kind: "cancelled" }).catch(() => r);
+      toast(outcome.kind === "failed" ? "The payment didn't go through. Your order is saved — you can try again." : "Payment window closed. Your order is saved — you can complete payment from the order page.");
+      openOrder(after);
+    } catch (e) {
+      if (e instanceof ApiError && e.code === "validation_failed" && e.details?.length) {
+        const errs: CheckoutErrors = {};
+        for (const d of e.details) { const k = FIELD_MAP[d.field]; if (k) errs[k] = d.message; }
+        setErrors(errs);
+        const first = firstInvalidStep({ ...f }, pay) ?? (errs.name || errs.email || errs.phone ? "contact" : "address");
+        goTo(first);
+        toast.error("Some details need attention");
+      } else if (e instanceof ApiError && ["cart_changed", "insufficient_stock", "discount_invalid", "cod_unavailable", "no_delivery"].includes(e.code)) {
+        setQuoteTick((n) => n + 1);
+        toast.error(e.message);
+      } else {
+        toast.error(e instanceof BackendOfflineError || e instanceof ApiError ? e.message : "Something went wrong. Nothing was charged — please try again.");
+      }
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   if (lines.length === 0)
     return (
@@ -169,9 +239,26 @@ function Checkout() {
     <div className="flex gap-2">
       <label htmlFor="code" className="sr-only">Discount code</label>
       <input id="code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Discount code" className="h-11 min-w-0 flex-1 rounded-md border border-input bg-card px-3 text-base sm:text-sm" />
-      <Button type="button" variant="outline" className="h-11" onClick={() => toast("Discount codes will work once the store backend is connected. No discount has been applied.")}>Apply</Button>
+      <Button type="button" variant="outline" className="h-11" onClick={() => {
+        if (!live) { toast("Discount codes work once the shop is connected to the store server. No discount has been applied."); return; }
+        setAppliedCode(code.trim().toUpperCase());
+      }}>Apply</Button>
     </div>
   );
+  const discountNote = live && quote?.discount ? (
+    <p role="status" className={cn("-mt-3 text-xs", quote.discount.ok ? "text-success" : "text-destructive")}>
+      {quote.discount.ok ? `${quote.discount.code} applied — you save ${inrPaise(quote.discount.amountPaise)}.` : quote.discount.message ?? "This code can't be used."}
+      {" "}<button type="button" className="underline" onClick={() => { setAppliedCode(""); setCode(""); }}>Remove</button>
+    </p>
+  ) : null;
+  const bagNotices = (lineIssues.length > 0 || priceNotes.length > 0 || quoteProblem) ? (
+    <div role="alert" className="space-y-1.5 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs leading-relaxed">
+      {quoteProblem && <p className="flex gap-1.5"><CloudOff className="size-3.5 shrink-0" /> {quoteProblem}</p>}
+      {lineIssues.map((l) => <p key={l.variantId} className="flex gap-1.5"><AlertTriangle className="size-3.5 shrink-0 text-destructive" /> {l.message}</p>)}
+      {priceNotes.map((l) => <p key={`p-${l.variantId}`}>The price of {l.name}{l.variantLabel ? ` (${l.variantLabel})` : ""} is now {inrPaise(l.priceChanged!.toPaise)} (was {inrPaise(l.priceChanged!.fromPaise)}). Totals use the current price.</p>)}
+      {lineIssues.length > 0 && <p><Link to="/cart" className="font-semibold underline">Update your bag</Link> to continue.</p>}
+    </div>
+  ) : null;
 
   const edit = (s: CheckoutStep) => (
     <button type="button" onClick={() => goTo(s)} className="btn-motion inline-flex h-9 items-center gap-1.5 rounded-btn border border-transparent px-3 text-xs font-medium text-primary hover:border-primary/30 hover:bg-primary/5"><Pencil className="size-3" /> Edit</button>
@@ -183,7 +270,11 @@ function Checkout() {
         <h1 className="text-4xl md:text-5xl">Checkout</h1>
         <Link to="/cart" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">Back to bag</Link>
       </div>
-      <DemoNotice className="mt-5">Demo checkout — no payment is taken and no order is placed. Your contact and delivery details are kept only in this browser tab, and are cleared when you finish, close the tab or press “Clear my details”. We never store card or payment details.</DemoNotice>
+      {live ? (
+        <p className="mt-5 flex items-start gap-2 text-sm text-muted-foreground"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" /> Your contact and delivery details stay in this browser tab until you place the order or press “Clear my details”. Card and UPI details are entered with Razorpay only — never on this site.</p>
+      ) : (
+        <DemoNotice className="mt-5"><strong>Development preview — not connected to the store server.</strong> You can try every step, but orders can't be placed and nothing is charged here. Ordering works on the live shop once it is connected to the Hostinger store server. Details you type stay in this browser tab only.</DemoNotice>
+      )}
       <div className="mt-2 flex justify-end">
         <button type="button" onClick={forgetDetails} className="press text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">Clear my details</button>
       </div>
@@ -194,7 +285,7 @@ function Checkout() {
           <span className="flex items-center gap-2">Order summary <ChevronDown className="size-4 transition-transform group-open:rotate-180" /></span>
           <span className="tabular-nums">{summary.itemCount} {summary.itemCount === 1 ? "item" : "items"} · {inr(summary.subtotal)}</span>
         </summary>
-        <div className="space-y-5 border-t border-border p-4">{summaryList}{discountBox}<OrderTotals /></div>
+        <div className="space-y-5 border-t border-border p-4">{summaryList}{bagNotices}{discountBox}{discountNote}<OrderTotals summary={shownSummary} /></div>
       </details>
 
       {/* Stepper */}
@@ -221,7 +312,7 @@ function Checkout() {
       </ol>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-12">
-        <form noValidate className="min-w-0" onSubmit={(e) => { e.preventDefault(); if (step === "review") submit(); else next(); }}>
+        <form noValidate className="min-w-0" onSubmit={(e) => { e.preventDefault(); if (step === "review") void submit(); else next(); }}>
           <h2 ref={headingRef} tabIndex={-1} className="scroll-mt-28 text-2xl outline-none md:text-3xl">
             {step === "contact" && "Contact information"}
             {step === "address" && "Delivery address"}
@@ -272,8 +363,9 @@ function Checkout() {
 
             {step === "payment" && (
               <>
-                <PaymentMethods value={pay} onChange={(m) => { setPay(m); setErrors((e) => ({ ...e, payment: undefined })); }} error={errors.payment} />
-                <p className="flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" /> Your choice is saved for review only. Nothing is charged here.</p>
+                <PaymentMethods value={pay} onChange={(m) => { setPay(m); setErrors((e) => ({ ...e, payment: undefined })); }} error={errors.payment}
+                  live={live ? (quote ? { cod: { available: quote.methods.cod.available, feePaise: quote.methods.cod.feePaise, reason: quote.methods.cod.reason }, razorpay: quote.methods.razorpay } : quoteProblem ? { cod: { available: false, feePaise: null, reason: quoteProblem }, razorpay: { available: false, testMode: false, reason: quoteProblem } } : "loading") : undefined} />
+                <p className="flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" /> {live ? "You'll be charged only after you confirm on the next step. Online payments are verified by our server with Razorpay." : "Development preview: nothing is charged and no order is placed."}</p>
               </>
             )}
 
@@ -287,15 +379,25 @@ function Checkout() {
                 </ReviewBlock>
                 <ReviewBlock title="Payment" action={edit("payment")}>
                   <p>{pay ? paymentLabel(pay) : "Not chosen"}</p>
-                  <p className="text-xs text-muted-foreground">{pay === "cod" ? "COD availability and charges are pending client approval." : "Razorpay is not connected yet."}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {!live ? "Not connected in this preview — nothing is charged."
+                      : pay === "cod" ? (quote?.methods.cod.available ? `Pay in cash when your order arrives${quote.methods.cod.feePaise ? ` (COD charge ${inrPaise(quote.methods.cod.feePaise)})` : ""}.` : quote?.methods.cod.reason ?? "Checking…")
+                      : quote?.methods.razorpay.available ? `UPI, cards, netbanking or wallets in the secure Razorpay window${quote.methods.razorpay.testMode ? " — TEST MODE, no real money is taken" : ""}.` : quote?.methods.razorpay.reason ?? "Checking…"}
+                  </p>
                 </ReviewBlock>
                 <ReviewBlock title={`Items (${summary.itemCount})`} action={<Link to="/cart" className="btn-motion inline-flex h-9 items-center gap-1.5 rounded-btn border border-transparent px-3 text-xs font-medium text-primary hover:border-primary/30 hover:bg-primary/5"><Pencil className="size-3" /> Edit bag</Link>}>
                   {summaryList}
                 </ReviewBlock>
+                {bagNotices}
                 <div className="rounded-xl border border-border p-5">
-                  <OrderTotals />
-                  <p className="mt-3 text-xs text-muted-foreground">Discounts: none applied.</p>
+                  <OrderTotals summary={shownSummary} />
+                  <p className="mt-3 text-xs text-muted-foreground">{live && quote?.discount?.ok ? `Discount: ${quote.discount.code}` : "Discounts: none applied."}</p>
                 </div>
+                {live && quote && quote.blockers.length > 0 && (
+                  <div role="alert" className="space-y-1 rounded-md border border-accent/50 bg-accent/10 p-4 text-sm">
+                    {quote.blockers.filter((b) => b.code !== "cart_changed").map((b) => <p key={b.code}>{b.message}</p>)}
+                  </div>
+                )}
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   By continuing you agree to our <Link to="/terms" className="underline">Terms & Conditions</Link>, <Link to="/shipping-policy" className="underline">Shipping Policy</Link> and <Link to="/refund-policy" className="underline">Refund & Returns</Link> policy.
                 </p>
@@ -307,21 +409,31 @@ function Checkout() {
             {idx > 0 ? (
               <Button type="button" variant="ghost" className="h-12" onClick={() => goTo(CHECKOUT_STEPS[idx - 1]!.id)}><ArrowLeft /> Back</Button>
             ) : <span />}
-            <Button type="submit" variant="lux" size="xl" className="w-full sm:w-auto">
+            <Button type="submit" variant="lux" size="xl" className="w-full sm:w-auto" aria-busy={placing}
+              disabled={step === "review" && (!live || placing || !quote?.canPlaceOrder)}>
               {step === "contact" && <>Continue to delivery <ArrowRight /></>}
               {step === "address" && <>Continue to payment <ArrowRight /></>}
               {step === "payment" && <>Review order <ArrowRight /></>}
-              {step === "review" && "Confirm details (demo)"}
+              {step === "review" && (!live ? "Ordering not connected" : placing ? <><Loader2 className="animate-spin" /> Placing order…</> : pay === "razorpay" ? <>Place order &amp; pay {quote?.totals ? inrPaise(quote.totals.totalPaise) : ""}</> : <>Place order {quote?.totals ? `· ${inrPaise(quote.totals.totalPaise)}` : ""}</>)}
             </Button>
           </div>
-          {step === "review" && <p className="mt-3 text-center text-xs text-muted-foreground sm:text-right">No payment will be taken and no order will be placed.</p>}
+          {step === "review" && (
+            <p className="mt-3 text-center text-xs text-muted-foreground sm:text-right">
+              {!live ? "Development preview: the store server isn't connected, so no order can be placed and nothing is charged."
+                : !quote ? "Checking prices and stock with the store…"
+                : pay === "razorpay" ? "The secure Razorpay window opens next. Your order is confirmed only after the payment is verified."
+                : "Your order is placed when you press the button — you pay in cash on delivery."}
+            </p>
+          )}
         </form>
 
         <aside className="hidden h-fit space-y-5 rounded-xl bg-secondary p-6 lg:sticky lg:top-24 lg:block">
           <h2 className="text-2xl">Order summary</h2>
           {summaryList}
+          {bagNotices}
           {discountBox}
-          <OrderTotals />
+          {discountNote}
+          <OrderTotals summary={shownSummary} />
         </aside>
       </div>
     </div>

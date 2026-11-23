@@ -12,12 +12,14 @@ import { downloadText } from "@/lib/download";
 import { inr, shortDate } from "@/lib/format";
 import { ORDER_STATUSES, type OrderStatus, type PaymentStatus } from "@/lib/types";
 import { orderStore, ordersToCsv } from "@/services/orderService";
+import { LiveOrders } from "@/components/admin/live/LiveOrders";
+import { isBackendConfigured } from "@/services/api";
 
 type StatusFilter = OrderStatus | "pending" | "";
 export const Route = createFileRoute("/admin/orders")({
   validateSearch: (s: Record<string, unknown>): { status?: StatusFilter | undefined } =>
     typeof s["status"] === "string" && (s["status"] === "pending" || ORDER_STATUSES.includes(s["status"] as OrderStatus)) ? { status: s["status"] as StatusFilter } : {},
-  component: Orders,
+  component: () => (isBackendConfigured() ? <LiveOrders /> : <Orders />),
 });
 
 function Orders() {

@@ -13,6 +13,8 @@ import { evaluateDiscount, validateDiscount } from "@/lib/discounts";
 import { inr } from "@/lib/format";
 import type { Discount } from "@/lib/types";
 import { blankDiscount, discountService, discountStore } from "@/services/discountService";
+import { LiveDiscounts } from "@/components/admin/live/LiveDiscounts";
+import { isBackendConfigured } from "@/services/api";
 
 export const Route = createFileRoute("/admin/discounts")({
   head: () => ({
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/admin/discounts")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: Discounts,
+  component: () => (isBackendConfigured() ? <LiveDiscounts /> : <Discounts />),
 });
 
 const num = (v: string) => (v === "" ? undefined : Number(v));

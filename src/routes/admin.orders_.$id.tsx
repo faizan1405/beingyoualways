@@ -11,8 +11,15 @@ import { inr, shortDate } from "@/lib/format";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/types";
 import { orderNotification } from "@/lib/whatsapp-cloud";
 import { orderService, orderStore } from "@/services/orderService";
+import { LiveOrderDetail } from "@/components/admin/live/LiveOrderDetail";
+import { isBackendConfigured } from "@/services/api";
 
-export const Route = createFileRoute("/admin/orders_/$id")({ component: OrderAdmin });
+export const Route = createFileRoute("/admin/orders_/$id")({ component: OrderRoute });
+
+function OrderRoute() {
+  const { id } = Route.useParams();
+  return isBackendConfigured() ? <LiveOrderDetail id={id} /> : <OrderAdmin />;
+}
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 

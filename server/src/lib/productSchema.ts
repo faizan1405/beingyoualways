@@ -24,7 +24,7 @@ export const variantInput = z.object({
   price: money,
   compareAtPrice: money.nullable().optional(),
   stock: z.number().int().min(0).max(1_000_000).nullable().optional(),
-  /** false = stock not counted yet (orderable, no counts shown). */
+  /** false = stock not counted yet (cannot be ordered until counted). */
   stockTracked: z.boolean().optional(),
   swatch: text(60).nullable().optional(),
 });
