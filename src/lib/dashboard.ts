@@ -33,7 +33,9 @@ export const inRange = (orders: Order[], r: DateRange) =>
 
 export const countsAsSale = (o: Order) => !NON_SALE_STATUSES.includes(o.status);
 export const totalStockOf = (p: Product) => p.variants.reduce((s, v) => s + v.stock, 0);
-export const isLowStock = (p: Product) => p.status === "active" && totalStockOf(p) < LOW_STOCK_AT;
+/** Live mode: no size/shade has a counted stock figure yet (never treated as low or sold out). */
+export const isStockUncounted = (p: Product) => p.variants.length > 0 && p.variants.every((v) => v.stockTracked === false);
+export const isLowStock = (p: Product) => p.status === "active" && !isStockUncounted(p) && totalStockOf(p) < LOW_STOCK_AT;
 
 export interface DashboardMetrics {
   orders: number;

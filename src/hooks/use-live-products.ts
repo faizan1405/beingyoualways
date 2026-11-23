@@ -13,6 +13,7 @@ export function useLiveProducts(initial: Product[], select?: (all: Product[]) =>
   const ids = initial.map((p) => p.id).join("|");
   useEffect(() => {
     const sync = () => {
+      if (!productService.hasLiveData()) return; // live mode: keep loader data until the server list arrives
       const all = productService.peekAll();
       setList(select ? select(all) : initial.flatMap((p) => all.filter((x) => x.id === p.id && x.status === "active")));
     };

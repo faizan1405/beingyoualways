@@ -1,0 +1,435 @@
+// Being You – Always — production database (Hostinger MySQL / MariaDB).
+// Money is stored as DECIMAL(10,2) in INR. Ids of migrated catalogue rows keep the
+// ids the storefront already uses (e.g. "bya-1069") so existing links keep working.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Admin users, roles, sessions ─────────────────────────
+
+model User {
+  id                String               @id @default(cuid())
+  email             String               @unique @db.VarChar(191)
+  name              String               @db.VarChar(120)
+  passwordHash      String               @db.VarChar(255)
+  isActive          Boolean              @default(true)
+  failedLoginCount  Int                  @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime             @default(now())
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  roles             UserRole[]
+  sessions          Session[]
+  resetTokens       PasswordResetToken[]
+  activity          AdminActivityLog[]
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  key         String           @unique @db.VarChar(40)
+  name        String           @db.VarChar(80)
+  permissions RolePermission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  key         String           @unique @db.VarChar(80)
+  description String           @db.VarChar(255)
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId String
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+/// Server-side admin sessions. Only a SHA-256 hash of the cookie token is stored.
+model Session {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique @db.Char(64)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  ip         String?   @db.VarChar(64)
+  userAgent  String?   @db.VarChar(255)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Account-recovery groundwork (single-use, hashed, short-lived). Delivery by email is a later phase.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @db.Char(64)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ───────────────────────────────── Catalogue ─────────────────────────────────
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique @db.VarChar(80)
+  name        String    @db.VarChar(120)
+  tagline     String    @db.VarChar(200)
+  description String    @db.Text
+  position    Int       @default(0)
+  products    Product[]
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum VariantKind {
+  SIZE
+  SHADE
+}
+
+model Product {
+  id               String           @id @db.VarChar(64)
+  slug             String           @unique @db.VarChar(191)
+  name             String           @db.VarChar(200)
+  categoryId       Int
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  collection       String?          @db.VarChar(120)
+  shortDescription String           @db.Text
+  description      String           @db.Text
+  directions       String           @db.Text
+  /// string[] — full ingredient list, only as printed on the pack
+  ingredients      Json
+  /// string[] | null — hero ingredients named by the brand
+  keyIngredients   Json?
+  /// { label, value }[]
+  details          Json
+  /// string[] | null
+  benefits         Json?
+  /// string[] | null — admin-set concern tags (null = storefront default mapping)
+  concerns         Json?
+  /// string[] | null — hand-picked related product slugs
+  relatedSlugs     Json?
+  shape            String           @db.VarChar(20)
+  tint             String           @db.VarChar(60)
+  featured         Boolean          @default(false)
+  bestSeller       Boolean          @default(false)
+  status           ProductStatus    @default(DRAFT)
+  isSample         Boolean          @default(false)
+  /// catalogue order (lower first)
+  sortOrder        Int              @default(0)
+  sourceUrl        String?          @db.VarChar(500)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  archivedAt       DateTime?
+  variants         ProductVariant[]
+  images           ProductImage[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+
+  @@index([status, sortOrder])
+  @@index([categoryId])
+}
+
+/// A size or shade. Prices are INR.
+model ProductVariant {
+  id             String     @id @db.VarChar(64)
+  productId      String     @db.VarChar(64)
+  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label          String     @db.VarChar(120)
+  kind           VariantKind
+  price          Decimal    @db.Decimal(10, 2)
+  compareAtPrice Decimal?   @db.Decimal(10, 2)
+  swatch         String?    @db.VarChar(60)
+  position       Int        @default(0)
+  inventory      Inventory?
+  orderItems     OrderItem[]
+
+  @@index([productId])
+}
+
+/// quantity = null means stock has not been counted yet (shop treats it as orderable, shows no counts).
+model Inventory {
+  variantId String         @id @db.VarChar(64)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int?
+  updatedAt DateTime       @updatedAt
+}
+
+/// url is either "asset:<path under src/assets>" (bundled catalogue photo) or an https URL (Hostinger media).
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String  @db.VarChar(64)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String  @db.VarChar(1024)
+  alt       String? @db.VarChar(300)
+  position  Int     @default(0)
+
+  @@index([productId, position])
+}
+
+// ─────────────────────── Customers, orders, payments ───────────────────────
+
+enum CustomerStatus {
+  ACTIVE
+  BLOCKED
+}
+
+model Customer {
+  id               String            @id @default(cuid())
+  name             String            @db.VarChar(120)
+  email            String?           @unique @db.VarChar(191)
+  phone            String?           @unique @db.VarChar(20)
+  status           CustomerStatus    @default(ACTIVE)
+  signInMethod     String?           @db.VarChar(20)
+  googleSub        String?           @unique @db.VarChar(64)
+  notes            String?           @db.Text
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  addresses        ShippingAddress[]
+  orders           Order[]
+  reviews          Review[]
+  whatsappConsents WhatsAppConsent[]
+}
+
+model ShippingAddress {
+  id         String    @id @default(cuid())
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  label      String    @db.VarChar(40)
+  name       String    @db.VarChar(120)
+  phone      String    @db.VarChar(20)
+  line1      String    @db.VarChar(255)
+  line2      String?   @db.VarChar(255)
+  city       String    @db.VarChar(100)
+  state      String    @db.VarChar(100)
+  pincode    String    @db.VarChar(10)
+  isDefault  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  orders     Order[]
+
+  @@index([customerId])
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model Order {
+  id                String           @id @default(cuid())
+  orderNumber       String           @unique @db.VarChar(30)
+  customerId        String?
+  customer          Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  email             String?          @db.VarChar(191)
+  phone             String?          @db.VarChar(20)
+  status            OrderStatus      @default(NEW)
+  subtotal          Decimal          @db.Decimal(10, 2)
+  discountTotal     Decimal          @default(0) @db.Decimal(10, 2)
+  /// null until shipping charges are confirmed by the store
+  shippingTotal     Decimal?         @db.Decimal(10, 2)
+  grandTotal        Decimal          @db.Decimal(10, 2)
+  currency          String           @default("INR") @db.Char(3)
+  discountId        String?
+  discount          Discount?        @relation(fields: [discountId], references: [id], onDelete: SetNull)
+  shippingAddressId String?
+  shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  /// address as it was when the order was placed
+  shippingSnapshot  Json
+  notes             Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  items             OrderItem[]
+  payments          Payment[]
+
+  @@index([customerId])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id           String          @id @default(cuid())
+  orderId      String
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?         @db.VarChar(64)
+  product      Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId    String?         @db.VarChar(64)
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productName  String          @db.VarChar(200)
+  variantLabel String          @db.VarChar(120)
+  unitPrice    Decimal         @db.Decimal(10, 2)
+  quantity     Int
+  lineTotal    Decimal         @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+/// A payment is only marked PAID after a verified provider signature/webhook (later phase).
+model Payment {
+  id                  String        @id @default(cuid())
+  orderId             String
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method              PaymentMethod
+  status              PaymentStatus @default(PENDING)
+  amount              Decimal       @db.Decimal(10, 2)
+  providerOrderId     String?       @unique @db.VarChar(100)
+  providerPaymentId   String?       @unique @db.VarChar(100)
+  signatureVerifiedAt DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([orderId])
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model Discount {
+  id          String       @id @default(cuid())
+  code        String       @unique @db.VarChar(40)
+  type        DiscountType
+  value       Decimal      @db.Decimal(10, 2)
+  minOrder    Decimal?     @db.Decimal(10, 2)
+  maxDiscount Decimal?     @db.Decimal(10, 2)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  usageLimit  Int?
+  usedCount   Int          @default(0)
+  active      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  orders      Order[]
+}
+
+// ─────────────────────────── Reviews & consent ───────────────────────────
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  HIDDEN
+}
+
+/// Shown publicly only when verified + consented + published.
+model Review {
+  id               String       @id @default(cuid())
+  customerId       String?
+  customer         Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  productId        String?      @db.VarChar(64)
+  product          Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  authorName       String       @db.VarChar(120)
+  rating           Int?
+  body             String       @db.Text
+  verifiedPurchase Boolean      @default(false)
+  consentGiven     Boolean      @default(false)
+  consentAt        DateTime?
+  status           ReviewStatus @default(PENDING)
+  /// [{ type: "photo"|"video", url }]
+  media            Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([productId, status])
+}
+
+enum ConsentStatus {
+  OPTED_IN
+  OPTED_OUT
+}
+
+/// Append-only WhatsApp consent history; the latest row per phone + purpose wins.
+model WhatsAppConsent {
+  id         String        @id @default(cuid())
+  customerId String?
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  phone      String        @db.VarChar(20)
+  purpose    String        @db.VarChar(30)
+  status     ConsentStatus
+  source     String        @db.VarChar(60)
+  recordedAt DateTime      @default(now())
+
+  @@index([phone, purpose, recordedAt])
+}
+
+// ─────────────────────────── Content & settings ───────────────────────────
+
+model SiteContent {
+  key         String   @id @db.VarChar(100)
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+/// Non-secret store settings only. Integration secrets live in server environment variables.
+model StoreSetting {
+  key       String   @id @db.VarChar(100)
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AdminActivityLog {
+  id         BigInt   @id @default(autoincrement())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String   @db.VarChar(60)
+  entityType String   @db.VarChar(40)
+  entityId   String?  @db.VarChar(64)
+  summary    String   @db.VarChar(500)
+  meta       Json?
+  ip         String?  @db.VarChar(64)
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([userId])
+}

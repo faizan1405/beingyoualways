@@ -15,6 +15,7 @@ import { categories } from "@/lib/mock-data";
 import { concerns as concernList, productConcerns } from "@/lib/concerns";
 import type { Product, ProductVariant } from "@/lib/types";
 import { productService, validateProduct } from "@/services/productService";
+import { isBackendConfigured } from "@/services/api";
 import { galleryImages, infographicImages, originalImages, withExtraImage } from "@/lib/product-images";
 import { infographicFor } from "@/content/infographics";
 import { isUnconfirmed } from "@/lib/variants";
@@ -50,7 +51,7 @@ function EditProduct() {
 
   const save = useMutation({
     mutationFn: (x: Product) => productService.save(x),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin"] }); toast(isNew ? "Product created (demo state)" : "Product saved (demo state)"); navigate({ to: "/admin/products" }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin"] }); toast(isBackendConfigured() ? (isNew ? "Product created in the store database" : "Saved to the store database") : isNew ? "Product created (demo state)" : "Product saved (demo state)"); navigate({ to: "/admin/products" }); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't save the product"),
   });
 
@@ -66,7 +67,7 @@ function EditProduct() {
   const upV = (i: number, patch: Partial<ProductVariant>) => up({ variants: p.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
 
   return (
-    <AdminPage title={isNew ? "Add product" : `Edit: ${p.name}`} subtitle="Demo — saved in this browser only. Use Reset catalogue on the products list to restore the original products.">
+    <AdminPage title={isNew ? "Add product" : `Edit: ${p.name}`} subtitle={isBackendConfigured() ? "Saved to the store database when you press Save." : "Demo — saved in this browser only. Use Reset catalogue on the products list to restore the original products."}>
       <form
         className="grid gap-4 xl:grid-cols-[1fr_340px]"
         onSubmit={(e) => {
@@ -142,7 +143,7 @@ function EditProduct() {
                   <div><label className={adminLabel} htmlFor={`vk${i}`}>Type</label><select id={`vk${i}`} className={adminInput} value={v.kind} onChange={(e) => upV(i, { kind: e.target.value as "size" })}><option value="size">Size</option><option value="shade">Shade</option></select></div>
                   <div><label className={adminLabel} htmlFor={`vp${i}`}>Selling ₹</label><input id={`vp${i}`} type="number" min={0} className={adminInput} value={v.price} onChange={(e) => upV(i, { price: Number(e.target.value) })} /></div>
                   <div><label className={adminLabel} htmlFor={`vm${i}`}>MRP ₹</label><input id={`vm${i}`} type="number" min={0} className={adminInput} value={v.compareAtPrice ?? ""} onChange={(e) => upV(i, { compareAtPrice: e.target.value ? Number(e.target.value) : undefined })} /></div>
-                  <div><label className={adminLabel} htmlFor={`vs${i}`}>Stock (demo)</label><input id={`vs${i}`} type="number" min={0} className={adminInput} value={v.stock} onChange={(e) => upV(i, { stock: Number(e.target.value) })} /></div>
+                  <div><label className={adminLabel} htmlFor={`vs${i}`}>{isBackendConfigured() ? "Stock" : "Stock (demo)"}</label><input id={`vs${i}`} type="number" min={0} className={adminInput} value={v.stock} onChange={(e) => upV(i, { stock: Number(e.target.value), stockTracked: true })} />{v.stockTracked === false && <p className={hint}>Not counted yet — the shop shows it as available. Enter the real count to start tracking.</p>}</div>
                   <Button type="button" variant="ghost" size="icon" aria-label="Remove this size or shade" disabled={p.variants.length === 1} onClick={() => up({ variants: p.variants.filter((_, j) => j !== i) })}><Trash2 /></Button>
                 </div>
               ))}

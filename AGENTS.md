@@ -30,7 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
-- Storefront is frontend-only; pages read data via `src/services/*Service.ts`, never mock arrays directly — so services can be swapped for Hostinger REST calls.
+- Pages read data only via `src/services/*Service.ts` (never mock arrays): browser demo store while `VITE_API_BASE_URL` is unset, Hostinger API via `apiRequest` (`api.ts`) when set. In live mode only `LIVE_ADMIN_PATHS` admin areas render; others show "Not connected yet" — no demo figures in production.
+- `server/` is a separate npm package (Express + Prisma/MySQL, own tsconfig/tests, outside root lint/tsc): schema changes = new migration in `server/prisma/migrations`; the seed `server/prisma/seed/catalogue.json` is regenerated from the storefront via `src/test/catalogue-snapshot.test.ts`; DB photos are `asset:` refs (`src/lib/image-refs.ts`) or https URLs.
 - Storefront routes live under the `_site` pathless layout (header/footer); `/admin/*` has its own shell — keeps admin chrome separate.
 - Homepage hero: scroll-controlled crossfade of two aligned Before/After photos in `Hero.tsx` (no slider, bar, autoplay or 3D). AI images only there and in `/explore-concerns` (`src/assets/concerns/`), by user approval; no disclosure caption.
 - Scroll-linked scenes (`Hero`, `ScrollStory`, `ConcernStory`) use a bounded CSS-sticky inner panel inside a fixed-height wrapper (hero shortest) with progress from the wrapper position; never intercept wheel/touch, lock body scroll or autoplay — the scene releases naturally.
@@ -53,4 +54,4 @@ use the editor.
 - Homepage Best Seller = `selectHighDemand` (active + `bestSeller`, `bestSellerSlugs` first; picks applied once per version, then admin toggles persist); category tabs = `homeCategoryGroups` in `concerns.ts` — never pad either.
 - The header and every main page section paint `bg-page` (`--surface-page`, an alias of `--background` in `styles.css`); only intentional storytelling/brand bands (colour-shift scenes, policy banners, footer) use their own colours — keeps header and page visually seamless in any theme.
 - Storefront product views use `useLiveProduct(s)` so browser-saved admin edits replace SSR data after mount; `getBySlug` returns active products only (drafts unreachable).
-- Admin-editable storefront text comes via `useSiteContent()` (defaults from `business.ts`); the admin demo gate (`adminAuthService`) is not security.
+- Admin-editable storefront text comes via `useSiteContent()` (defaults from `business.ts`); admin security is server-side (sessions + permissions in `server/`); the demo gate is not security.

@@ -1,6 +1,9 @@
-// Product repository. Today it reads in-memory sample data; later swap the
-// bodies for fetch(`${API_BASE_URL}/products...`) without touching pages.
+// Product repository. Two implementations with the same functions:
+// - demo (no VITE_API_BASE_URL): imported catalogue + admin edits saved in this browser;
+// - live (VITE_API_BASE_URL set): every read and write goes to the Hostinger API / MySQL.
 import { categories, products as seed } from "@/lib/mock-data";
+import { resolveImageRefs, toImageRef } from "@/lib/image-refs";
+import { API_ENDPOINTS, ApiError, apiRequest, isBackendConfigured, withId } from "./api";
 import type { CategorySlug, Product } from "@/lib/types";
 import { bestSellerSlugs, productConcerns, type ConcernSlug } from "@/lib/concerns";
 import { BEST_SELLER_PICKS, CATALOGUE_REVISION, applyBestSellerPicks, reviseStored } from "@/lib/catalogue-revision";
@@ -31,7 +34,7 @@ const load = (): Product[] => {
     return list;
   } catch { return structuredClone(seed); }
 };
-let store: Product[] = load();
+let store: Product[] = isBackendConfigured() ? [] : load();
 const persist = () => { if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(store)); };
 
 // Live updates: pages showing admin-controlled lists (e.g. homepage High Demand) re-read on change,
@@ -39,7 +42,7 @@ const persist = () => { if (typeof window !== "undefined") localStorage.setItem(
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((fn) => fn());
 if (typeof window !== "undefined") {
-  window.addEventListener("storage", (e) => { if (e.key === KEY) { store = load(); notify(); } });
+  if (!isBackendConfigured()) window.addEventListener("storage", (e) => { if (e.key === KEY) { store = load(); notify(); } });
 }
 const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
@@ -132,7 +135,7 @@ export function validateProduct(p: Product, all: Product[]): string[] {
   return e;
 }
 
-export const productService = {
+const demoProductService = {
   list: (query: ProductQuery = {}) => delay(filterProducts(store, query)),
   featured: () => delay(store.filter((p) => p.featured && p.status === "active")),
   /** Products marked "High Demand" in admin (later: GET /products?high_demand=1). */
@@ -203,4 +206,126 @@ export const productService = {
   peekAll: () => store,
   /** Imported catalogue (server render / first hydration pass). */
   seedAll: () => seed,
+  /** True once the browser copy can replace loader data (always, in demo mode). */
+  hasLiveData: () => true,
+  /** Demo mode has nothing to fetch. */
+  loadAdmin: () => Promise.resolve(),
+  clearAdmin: () => undefined,
 };
+
+// ───────────────────────── Live (Hostinger API) implementation ─────────────────────────
+
+type ApiProduct = Product;
+const isServer = typeof window === "undefined";
+const fromApi = (p: ApiProduct): Product => ({ ...p, images: resolveImageRefs(p.images) });
+const toApi = (p: Product) => ({
+  id: p.id,
+  slug: p.slug || slugify(p.name),
+  name: p.name,
+  category: p.category,
+  collection: p.collection ?? null,
+  shortDescription: p.shortDescription,
+  description: p.description,
+  directions: p.directions,
+  ingredients: p.ingredients,
+  keyIngredients: p.keyIngredients ?? null,
+  details: p.details,
+  benefits: p.benefits ?? null,
+  concerns: p.concerns ?? null,
+  relatedSlugs: p.relatedSlugs ?? null,
+  shape: p.shape,
+  tint: p.tint,
+  images: (p.images ?? []).map(toImageRef),
+  featured: p.featured,
+  bestSeller: p.bestSeller ?? false,
+  status: p.status,
+  sourceUrl: p.sourceUrl ?? null,
+  variants: p.variants.map((v) => ({ id: v.id, label: v.label, kind: v.kind, price: v.price, compareAtPrice: v.compareAtPrice ?? null, stock: v.stock, stockTracked: v.stockTracked ?? true, swatch: v.swatch ?? null })),
+});
+
+// Browser cache of the last list the server returned. Server rendering never caches (fresh per request).
+let liveLoadedAt = 0;
+let adminScope = false;
+const serverIds = new Set<string>();
+const FRESH_MS = 30_000;
+const setLive = (list: Product[]) => { store = list; liveLoadedAt = Date.now(); list.forEach((p) => serverIds.add(p.id)); notify(); };
+const upsertLive = (p: Product) => { serverIds.add(p.id); store = store.some((x) => x.id === p.id) ? store.map((x) => (x.id === p.id ? p : x)) : [p, ...store]; notify(); };
+
+const fetchPublic = async () => (await apiRequest<{ products: ApiProduct[] }>(API_ENDPOINTS.products)).products.map(fromApi);
+const fetchAdmin = async () => (await apiRequest<{ products: ApiProduct[] }>(API_ENDPOINTS.adminProducts)).products.map(fromApi);
+
+async function liveAll(): Promise<Product[]> {
+  if (isServer) return fetchPublic();
+  if (liveLoadedAt && Date.now() - liveLoadedAt < FRESH_MS) return store;
+  setLive(adminScope ? await fetchAdmin() : await fetchPublic());
+  return store;
+}
+const notConnectedHere = () => Promise.reject(new Error("Not available while the shop is connected to the store database."));
+const active = (list: Product[]) => list.filter((p) => p.status === "active");
+
+const liveProductService: typeof demoProductService = {
+  list: async (query: ProductQuery = {}) => filterProducts(query.includeInactive && !isServer ? (setLive(await fetchAdmin()), store) : await liveAll(), query),
+  featured: async () => active(await liveAll()).filter((p) => p.featured),
+  highDemand: async () => selectHighDemand(await liveAll()),
+  setHighDemand: async (id: string, on: boolean) => {
+    const r = await apiRequest<{ product: ApiProduct }>(withId(API_ENDPOINTS.adminProduct, id), { method: "PATCH", body: { bestSeller: on } });
+    const p = fromApi(r.product); upsertLive(p); return p;
+  },
+  subscribe: (fn: () => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; },
+  getBySlug: async (slug: string) => {
+    try {
+      const p = fromApi((await apiRequest<{ product: ApiProduct }>(withId(API_ENDPOINTS.product, slug))).product);
+      if (!isServer && liveLoadedAt) upsertLive(p);
+      return p;
+    } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e; }
+  },
+  getById: async (id: string) => {
+    try {
+      const p = fromApi((await apiRequest<{ product: ApiProduct }>(withId(isServer ? API_ENDPOINTS.product : API_ENDPOINTS.adminProduct, id))).product);
+      if (!isServer) upsertLive(p);
+      return p;
+    } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e; }
+  },
+  related: async (p: Product) => relatedFor(await liveAll(), p),
+  alsoLike: async (p: Product, exclude: string[] = []) => recommendByConcern(await liveAll(), p, exclude),
+  categories: () => delay(categories),
+  byConcern: async (c: ConcernSlug) => active(await liveAll()).filter((p) => concernsOf(p).includes(c)),
+  bySlugs: async (slugs: string[]) => active(await liveAll()).filter((p) => slugs.includes(p.slug)),
+  getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
+  /** Saves to MySQL. Shows the server's reason when it refuses; nothing is kept locally on failure. */
+  save: async (input: Product) => {
+    const product = { ...input, slug: input.slug || slugify(input.name) };
+    const errors = validateProduct(product, store);
+    if (errors.length) throw new Error(errors.join(" "));
+    const body = toApi(product);
+    const r = serverIds.has(product.id)
+      ? await apiRequest<{ product: ApiProduct }>(withId(API_ENDPOINTS.adminProduct, product.id), { method: "PATCH", body: { ...body, id: undefined } })
+      : await apiRequest<{ product: ApiProduct }>(API_ENDPOINTS.adminProducts, { method: "POST", body });
+    const saved = fromApi(r.product); upsertLive(saved); return saved;
+  },
+  duplicate: async (id: string) => {
+    const p = store.find((x) => x.id === id) ?? (await liveProductService.getById(id));
+    if (!p) throw new Error("Product not found");
+    return liveProductService.save(duplicateOf(p, store));
+  },
+  importAll: () => notConnectedHere(),
+  /** Archives on the server (hidden from the shop, kept for order history). */
+  remove: async (id: string) => {
+    const r = await apiRequest<{ product: ApiProduct }>(withId(API_ENDPOINTS.adminProduct, id), { method: "DELETE" });
+    upsertLive(fromApi(r.product)); return true;
+  },
+  resetDemo: () => notConnectedHere(),
+  peekAll: () => store,
+  seedAll: () => store,
+  hasLiveData: () => liveLoadedAt > 0,
+  /** Admin signed in: load every product (incl. hidden) and keep using the admin list. */
+  loadAdmin: async () => { setLive(await fetchAdmin()); adminScope = true; },
+  /** Signed out: forget hidden products and go back to the public list. */
+  clearAdmin: () => { adminScope = false; liveLoadedAt = 0; store = active(store); notify(); },
+};
+
+export const productService = isBackendConfigured() ? liveProductService : demoProductService;
+
+// First page load in live mode: fetch the public list in the background so the bag and
+// live product hooks can follow server prices (pages already have their loader data).
+if (isBackendConfigured() && !isServer) void liveAll().catch(() => undefined);

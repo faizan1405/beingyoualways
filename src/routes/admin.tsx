@@ -1,8 +1,11 @@
-import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ClipboardCheck, PlugZap, Quote, BarChart3, Bot, LayoutTemplate, LogOut, Menu, MessageCircle, Package, Settings, ShoppingCart, Tag, Timer, Users, X } from "lucide-react";
+import { Link, Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { ClipboardCheck, CloudOff, PlugZap, Quote, BarChart3, Bot, LayoutTemplate, LogOut, Menu, MessageCircle, Package, Settings, ShoppingCart, Tag, Timer, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { adminAuthService, type AdminSession } from "@/services/adminAuthService";
+import { isBackendConfigured, isLiveAdminPath } from "@/services/api";
+import { productService } from "@/services/productService";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -36,12 +39,30 @@ const nav = [
 function AdminLayout() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  // Demo gate only (not security): sends the tab to the sign-in screen first.
+  const { pathname } = useLocation();
+  const live = isBackendConfigured();
+  // Demo: a convenience gate (not security). Live: the server confirms the session, and
+  // every admin API call is checked again on the server.
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    const s = adminAuthService.current();
-    if (s) setSession(s); else navigate({ to: "/admin/login", replace: true });
-  }, [navigate]);
+    let cancelled = false;
+    setProblem(null);
+    (async () => {
+      try {
+        const s = await adminAuthService.check();
+        if (cancelled) return;
+        if (!s) { navigate({ to: "/admin/login", replace: true }); return; }
+        if (live) await productService.loadAdmin();
+        if (!cancelled) setSession(s);
+      } catch (e) {
+        if (!cancelled) setProblem(e instanceof Error ? e.message : "Can't reach the store server.");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [navigate, live, attempt]);
+  const signOut = async () => { await adminAuthService.signOut(); productService.clearAdmin(); navigate({ to: "/admin/login" }); };
   const side = (
     <nav aria-label="Admin" className="flex flex-col gap-1 p-4">
       {nav.map(({ to, label, I, ...rest }) => (
@@ -49,9 +70,20 @@ function AdminLayout() {
           className="flex items-center gap-3 rounded-md border-l-2 border-transparent px-3 py-2.5 text-sm text-sidebar-foreground/75 transition-all duration-200 hover:translate-x-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           activeProps={{ className: "!bg-sidebar-accent !text-sidebar-accent-foreground !border-sidebar-primary font-semibold" }}>
           <I className="size-4" />{label}
+          {live && !isLiveAdminPath(to) && <span className="ml-auto rounded border border-sidebar-border px-1.5 py-0.5 text-[9px] uppercase tracking-wider opacity-60">Later</span>}
         </Link>
       ))}
     </nav>
+  );
+  if (problem) return (
+    <div data-admin className="grid min-h-screen place-items-center bg-secondary/50 p-4">
+      <div role="alert" className="max-w-md rounded-xl border border-border bg-card p-6 text-center shadow-soft">
+        <CloudOff className="mx-auto size-8 text-destructive" />
+        <p className="mt-3 font-serif text-2xl">Store server unavailable</p>
+        <p className="mt-2 text-sm text-muted-foreground">{problem}</p>
+        <Button className="mt-5" variant="lux" onClick={() => setAttempt((n) => n + 1)}>Try again</Button>
+      </div>
+    </div>
   );
   if (!session) return <div data-admin className="grid min-h-screen place-items-center bg-secondary/50 text-sm text-muted-foreground">Opening admin…</div>;
   return (
@@ -59,7 +91,7 @@ function AdminLayout() {
       <aside className="hidden bg-sidebar lg:sticky lg:top-0 lg:block lg:h-screen">
         <div className="border-b border-sidebar-border px-6 py-6 text-sidebar-foreground">
           <p className="font-serif text-2xl">Being You</p>
-          <p className="text-[10px] uppercase tracking-[0.3em] opacity-60">Admin · Demo</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] opacity-60">{live ? "Admin" : "Admin · Demo"}</p>
         </div>
         {side}
       </aside>
@@ -76,14 +108,28 @@ function AdminLayout() {
       <div className="min-w-0">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur md:px-8">
           <button className="lg:hidden" aria-label="Open admin menu" onClick={() => setOpen(true)}><Menu /></button>
-          <p className="min-w-0 px-2 text-xs text-muted-foreground">Demo mode only — admin is <strong>not secured</strong> until server sign-in is added.</p>
+          {live
+            ? <p className="min-w-0 px-2 text-xs text-muted-foreground">Signed in as <strong>{session.name ?? session.email}</strong> · product changes are saved to the store database.</p>
+            : <p className="min-w-0 px-2 text-xs text-muted-foreground">Demo mode only — admin is <strong>not secured</strong> until server sign-in is added.</p>}
           <div className="flex items-center gap-4">
             <Link to="/" className="hidden text-xs font-semibold text-primary hover:underline sm:block">View store →</Link>
-            <button type="button" onClick={() => { adminAuthService.signOut(); navigate({ to: "/admin/login" }); }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><LogOut className="size-3.5" /> Exit demo</button>
+            <button type="button" onClick={() => void signOut()} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><LogOut className="size-3.5" /> {live ? "Sign out" : "Exit demo"}</button>
           </div>
         </header>
-        <main className="p-4 md:p-8"><Outlet /></main>
+        <main className="p-4 md:p-8">{live && !isLiveAdminPath(pathname) ? <NotConnectedYet /> : <Outlet />}</main>
       </div>
+    </div>
+  );
+}
+
+/** Live mode: admin areas without a real database connection stay switched off (no demo figures). */
+function NotConnectedYet() {
+  return (
+    <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-8 text-center shadow-soft">
+      <CloudOff className="mx-auto size-8 text-muted-foreground" />
+      <h1 className="mt-3 font-serif text-3xl">Not connected yet</h1>
+      <p className="mt-2 text-sm text-muted-foreground">This area will read real store data once it is connected to the database in a later phase. Until then it stays switched off, so no sample orders, customers or figures are shown.</p>
+      <Button className="mt-5" variant="lux" asChild><Link to="/admin/products">Go to Products</Link></Button>
     </div>
   );
 }

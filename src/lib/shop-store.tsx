@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { cartService } from "@/services/cartService";
@@ -54,14 +54,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (hydrated) cartService.saveCart(items); }, [items, hydrated]);
   useEffect(() => { if (hydrated) cartService.saveWishlist(wishlist); }, [wishlist, hydrated]);
 
+  // Follows the product list, so bag prices update when live (server) prices load or change.
+  const all = useSyncExternalStore(productService.subscribe, productService.peekAll, productService.seedAll);
   const lines = useMemo<CartLine[]>(() => {
-    const all = productService.peekAll();
     return items.flatMap((i) => {
       const product = all.find((p) => p.id === i.productId);
       const variant = product?.variants.find((v) => v.id === i.variantId);
       return product && variant ? [{ ...i, product, variant, lineTotal: lineTotal(variant.price, i.quantity) }] : [];
     });
-  }, [items]);
+  }, [items, all]);
 
   const qtyInBag = useCallback(
     (productId: string, variantId: string) =>

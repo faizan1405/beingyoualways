@@ -6,6 +6,7 @@ import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
+import { isBackendConfigured } from "@/services/api";
 import { infographicImages, movedImage, originalImages, slotLabel, withExtraImage, withImageAt, withoutImageAt } from "@/lib/product-images";
 import type { Product } from "@/lib/types";
 
@@ -25,6 +26,8 @@ export function ProductImageManager({ product, onChange }: { product: Product; o
   const pick = (slot: number | null) => { target.current = slot; file.current?.click(); };
   const onFile = async (f: File | undefined) => {
     if (!f) return;
+    // Live mode: browser-only photos can't be saved to the database; Hostinger media uploads come in a later phase.
+    if (isBackendConfigured()) { toast.error("Photo uploads to Hostinger storage aren't connected yet. You can reorder or remove existing catalogue photos."); return; }
     const bad = checkImageFile(f); if (bad) { toast.error(bad); return; }
     try {
       const src = await fileToDemoImage(f);

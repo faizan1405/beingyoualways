@@ -12,7 +12,7 @@ export function useHighDemand(initial: Product[]) {
   const [list, setList] = useState(initial);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const sync = () => setList(selectHighDemand(productService.peekAll()));
+    const sync = () => { if (productService.hasLiveData()) setList(selectHighDemand(productService.peekAll())); };
     sync();
     setReady(true);
     return productService.subscribe(sync);

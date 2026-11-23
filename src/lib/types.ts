@@ -20,6 +20,8 @@ export interface ProductVariant {
   price: number; // INR
   compareAtPrice?: number | undefined;
   stock: number;
+  /** Live mode only: false = stock not counted yet (orderable, no counts shown). */
+  stockTracked?: boolean | undefined;
   swatch?: string | undefined; // css colour for shade chips
 }
 

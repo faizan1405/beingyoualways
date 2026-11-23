@@ -10,11 +10,12 @@ import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAllProducts } from "@/hooks/use-demo-store";
-import { LOW_STOCK_AT, isLowStock } from "@/lib/dashboard";
+import { LOW_STOCK_AT, isLowStock, isStockUncounted } from "@/lib/dashboard";
 import { categories } from "@/lib/mock-data";
 import { inr } from "@/lib/format";
 import type { CategorySlug, Product, ProductStatus } from "@/lib/types";
 import { minPrice, productService, totalStock } from "@/services/productService";
+import { isBackendConfigured } from "@/services/api";
 
 type Show = "low-stock" | "best-seller";
 export const Route = createFileRoute("/admin/products")({
@@ -33,6 +34,7 @@ function Products() {
   const [vis, setVis] = useState<ProductStatus | "">("");
   const [del, setDel] = useState<Product | null>(null);
   const [resetting, setResetting] = useState(false);
+  const live = isBackendConfigured();
 
   const data = [...all].sort((a, b) => a.name.localeCompare(b.name)).filter((p) =>
     (!q || `${p.name} ${p.slug} ${p.shortDescription}`.toLowerCase().includes(q.toLowerCase())) && (!cat || p.category === cat) && (!vis || p.status === vis) &&
@@ -44,8 +46,8 @@ function Products() {
   const duplicate = (p: Product) => productService.duplicate(p.id).then((c) => { toast(`Copied as a hidden draft: ${c.name}`); navigate({ to: "/admin/products/$id", params: { id: c.id } }); }, err);
 
   return (
-    <AdminPage title="Products" subtitle="Real catalogue from beingyoualways.com. Demo edits are saved in this browser (they survive a refresh); stock numbers are demo values."
-      actions={<div className="flex flex-wrap gap-2"><Button variant="luxOutline" size="xl" onClick={() => setResetting(true)}><RotateCcw /> Reset catalogue</Button><Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
+    <AdminPage title="Products" subtitle={live ? "Saved in the store database. Changes show in the shop straight away; stock shows only after it has been counted." : "Real catalogue from beingyoualways.com. Demo edits are saved in this browser (they survive a refresh); stock numbers are demo values."}
+      actions={<div className="flex flex-wrap gap-2">{!live && <Button variant="luxOutline" size="xl" onClick={() => setResetting(true)}><RotateCcw /> Reset catalogue</Button>}<Button variant="lux" size="xl" asChild><Link to="/admin/products/$id" params={{ id: "new" }}><Plus /> Add product</Link></Button></div>}>
       <Panel>
         <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <input aria-label="Search products" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className={adminInput} />
@@ -63,7 +65,7 @@ function Products() {
                   <Td><div className="flex items-center gap-3"><ProductVisual src={p.images?.[0]} shape={p.shape} tint={p.tint} label="" className="w-10 shrink-0 rounded" tag={false} /><Link to="/admin/products/$id" params={{ id: p.id }} className="font-semibold hover:underline">{p.name}</Link></div></Td>
                   <Td>{categories.find((c) => c.slug === p.category)?.name}</Td>
                   <Td>{minPrice(p) > 0 ? inr(minPrice(p)) : <span className="text-muted-foreground">No price</span>}</Td>
-                  <Td><span className={stock === 0 ? "text-destructive" : stock < LOW_STOCK_AT ? "text-warning" : ""}>{stock}</span></Td>
+                  <Td>{isStockUncounted(p) ? <span className="text-xs text-muted-foreground">Not counted</span> : <span className={stock === 0 ? "text-destructive" : stock < LOW_STOCK_AT ? "text-warning" : ""}>{stock}</span>}</Td>
                   <Td>
                     <label className="sr-only" htmlFor={`vis-${p.id}`}>Visibility of {p.name}</label>
                     <select id={`vis-${p.id}`} className="h-8 rounded-md border border-input bg-background px-2 text-xs" value={p.status} onChange={(e) => setStatus(p, e.target.value as ProductStatus)}>
@@ -83,9 +85,9 @@ function Products() {
         ) : <p className="py-10 text-center text-sm text-muted-foreground">No products match these filters.</p>}
         <p className="mt-3 text-[11px] text-muted-foreground"><Pill t="muted">Tip</Pill> Hidden products never appear in the shop, search, categories or recommendations.</p>
       </Panel>
-      <ConfirmDialog open={!!del} onOpenChange={(o) => !o && setDel(null)} title={`Delete ${del?.name ?? "product"}?`} confirmLabel="Delete"
-        description="This removes it from the demo catalogue in this browser. Use Reset catalogue to bring the original products back."
-        onConfirm={() => del && productService.remove(del.id).then(() => toast("Product deleted (demo)"))} />
+      <ConfirmDialog open={!!del} onOpenChange={(o) => !o && setDel(null)} title={live ? `Archive ${del?.name ?? "product"}?` : `Delete ${del?.name ?? "product"}?`} confirmLabel={live ? "Archive" : "Delete"}
+        description={live ? "It is hidden from the shop and kept in the database (so past orders still show it). You can make it visible again later." : "This removes it from the demo catalogue in this browser. Use Reset catalogue to bring the original products back."}
+        onConfirm={() => del && productService.remove(del.id).then(() => toast(live ? `${del.name} archived — hidden from the shop` : "Product deleted (demo)"), err)} />
       <ConfirmDialog open={resetting} onOpenChange={setResetting} title="Reset the catalogue?" confirmLabel="Reset catalogue"
         description="All product edits, uploaded photos and new products saved in this browser are discarded and the imported catalogue is restored."
         onConfirm={() => productService.resetDemo().then(() => toast("Catalogue restored to the imported products"))} />

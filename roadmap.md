@@ -27,3 +27,15 @@
 - [x] Chatbot: typed-message routing + human fallback.
 - [x] Webhook verify/signature/dedupe helpers + backend spec doc; tests.
 - [ ] Blocked: Hostinger backend, owner's access token, Meta template approval, authorized test number.
+
+# Roadmap — Phase 1: production backend (Hostinger MySQL)
+
+- [x] `server/`: Express + Prisma (MySQL) API — health, auth, public + admin products, validation, errors, logs, rate limits, CORS/CSRF, graceful shutdown.
+- [x] Database schema + first migration (users/roles/sessions, catalogue, customers, orders, payments, discounts, reviews, WhatsApp consent, content, settings, activity log).
+- [x] Catalogue seed (22 products: 20 visible, 2 hidden drafts) — no fake customers/orders/payments.
+- [x] Real admin sign-in (Argon2id, httpOnly session cookie, lockout, roles) + console admin bootstrap / password reset.
+- [x] Website switches to the API when `VITE_API_BASE_URL` is set: admin sign-in/out, product list/create/edit/prices/visibility/archive; other admin areas switched off.
+- [x] Unit tests + real MySQL integration tests; browser end-to-end against a local API; Node (Hostinger) website build checked.
+- [x] Deployment guide `server/README.md`.
+- [ ] Blocked: Hostinger plan with Node.js apps, MySQL credentials, domains — deploy + verify on Hostinger (owner).
+- [ ] Later phases: orders/checkout, Razorpay, COD, Google sign-in, WhatsApp OTP/notifications, cart reminders, media uploads, reviews, discounts, analytics.
