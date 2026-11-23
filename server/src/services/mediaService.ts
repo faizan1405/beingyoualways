@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
-import { createReadStream, existsSync } from "node:fs";
-import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { createReadStream, createWriteStream, existsSync } from "node:fs";
+import { mkdir, readFile, readdir, rename, rm, stat } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 import Busboy from "busboy";
@@ -14,6 +14,13 @@ import { logActivity } from "./activity.js";
 
 const IMAGE_KINDS = new Set<MediaKind>(["PRODUCT_IMAGE", "GALLERY_SLIDE", "CONTENT_IMAGE"]);
 
+/** Kinds that must say which product they belong to, and which must say which customer story. */
+const PRODUCT_KINDS = new Set<MediaKind>(["PRODUCT_IMAGE", "GALLERY_SLIDE"]);
+const REVIEW_KINDS = new Set<MediaKind>(["REVIEW_PHOTO", "REVIEW_VIDEO", "POSTER"]);
+
+/** Shop imagery a visitor may fetch without any story being published. */
+const PUBLIC_KINDS = new Set<MediaKind>(["PRODUCT_IMAGE", "GALLERY_SLIDE", "CONTENT_IMAGE"]);
+
 /** What a file really is, decided by its first bytes — never by the name or the browser's label. */
 const SIGNATURES = [
   { mime: "image/jpeg", ext: ".jpg", kind: "image" as const, test: (b: Buffer) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
@@ -24,9 +31,13 @@ const SIGNATURES = [
 ];
 
 export interface UploadedFile {
-  buffer: Buffer;
+  /** Where the bytes were streamed to while the request was read. */
+  tempPath: string;
   filename: string;
   mime: string;
+  bytes: number;
+  /** The file's first bytes — enough to tell a JPEG from an MP4. */
+  head: Buffer;
 }
 
 export interface MediaActor {
@@ -36,8 +47,11 @@ export interface MediaActor {
 
 export type MediaRow = MediaAsset & { review?: { status: string; consentGiven: boolean; verifiedPurchase: boolean } | null };
 
-/** Reads exactly one file out of a multipart request, with a hard size ceiling. */
-function readUpload(req: Request, maxBytes: number): Promise<UploadedFile> {
+/**
+ * Reads exactly one file out of a multipart request straight onto the disk, with a hard size ceiling.
+ * Nothing is held in memory: an 80 MB video streams through and out to a temporary file.
+ */
+function readUpload(req: Request, maxBytes: number, tempPath: string): Promise<UploadedFile> {
   return new Promise((resolve, reject) => {
     if (!/multipart\/form-data/i.test(String(req.headers["content-type"] ?? ""))) {
       return reject(badRequest("Send the file as a form upload."));
@@ -45,34 +59,46 @@ function readUpload(req: Request, maxBytes: number): Promise<UploadedFile> {
     const bb = Busboy({ headers: req.headers, limits: { fileSize: maxBytes, files: 1, fields: 4 } });
     let file: UploadedFile | null = null;
     let failed = false;
+    // the file is written asynchronously, so "finish" on the request can arrive before the disk does
+    let writeDone: Promise<void> = Promise.resolve();
     const fail = (e: unknown) => {
       if (failed) return;
       failed = true;
+      void rm(tempPath, { force: true });
       reject(e instanceof Error ? e : badRequest("That upload couldn't be read."));
     };
     bb.on("file", (_field, stream, info) => {
-      const chunks: Buffer[] = [];
+      const out = createWriteStream(tempPath);
       let total = 0;
+      let head = Buffer.alloc(0);
       stream.on("data", (chunk: Buffer) => {
+        if (head.length < 16) head = Buffer.concat([head, chunk]).subarray(0, 16);
         total += chunk.length;
         if (total > maxBytes) {
           stream.destroy();
+          out.destroy();
           fail(badRequest("That file is too large."));
-          return;
         }
-        chunks.push(chunk);
       });
       stream.on("limit", () => fail(badRequest("That file is too large.")));
       stream.on("error", fail);
-      stream.on("close", () => {
-        if (!failed) file = { buffer: Buffer.concat(chunks), filename: info.filename, mime: info.mimeType };
+      out.on("error", fail);
+      writeDone = new Promise<void>((res) => {
+        out.on("finish", () => {
+          if (!failed) file = { tempPath, filename: info.filename, mime: info.mimeType, bytes: total, head: Buffer.from(head) };
+          res();
+        });
       });
+      stream.pipe(out);
     });
     bb.on("error", fail);
     bb.on("finish", () => {
       if (failed) return;
-      if (!file) return reject(badRequest("No file was uploaded."));
-      return resolve(file);
+      void writeDone.then(() => {
+        if (failed) return;
+        if (!file) return reject(badRequest("No file was uploaded."));
+        return resolve(file);
+      });
     });
     req.on("aborted", () => fail(badRequest("The upload was interrupted.")));
     req.pipe(bb);
@@ -100,76 +126,145 @@ export function createMediaService(prisma: PrismaClient, config: Config) {
     return [v.webp, v.thumb].filter((k): k is string => typeof k === "string");
   };
 
-  async function writeBytes(abs: string, data: Buffer) {
-    await mkdir(join(abs, ".."), { recursive: true });
-    await writeFile(abs, data);
+  const variantKeysOf = (v: { webp?: string; thumb?: string }) => [v.webp, v.thumb].filter((k): k is string => typeof k === "string");
+
+  /** Hashes a stored file without ever loading it fully into memory. */
+  const checksumFile = (abs: string) =>
+    new Promise<string>((resolve, reject) => {
+      const h = createHash("sha256");
+      const s = createReadStream(abs);
+      s.on("error", reject);
+      s.on("data", (c) => h.update(c));
+      s.on("end", () => resolve(h.digest("hex")));
+    });
+
+  /** Deletes files the service just wrote when something later goes wrong — no orphaned bytes. */
+  async function removeFiles(keys: string[]) {
+    for (const key of keys) {
+      try {
+        await rm(absOf(key), { force: true });
+      } catch {
+        /* already gone */
+      }
+    }
   }
 
-  /** Uploads one file: checks what it really is, stores it, and records it. */
+  /** A file must belong to something real: a product that exists, or a story that exists. */
+  async function checkKindAndLinks(input: { kind: MediaKind; productId?: string; reviewId?: string }) {
+    if (PRODUCT_KINDS.has(input.kind) && !input.productId) throw badRequest("Say which product this file belongs to.");
+    if (REVIEW_KINDS.has(input.kind) && !input.reviewId) throw badRequest("Say which customer story this file belongs to.");
+    if (input.productId && !(await prisma.product.findUnique({ where: { id: input.productId }, select: { id: true } }))) {
+      throw notFound("That product doesn't exist.");
+    }
+    if (input.reviewId && !(await prisma.review.findUnique({ where: { id: input.reviewId }, select: { id: true } }))) {
+      throw notFound("That customer story doesn't exist.");
+    }
+  }
+
+  /** Uploads one file: streams it to disk, checks what it really is, then records it. */
   async function upload(req: Request, input: { kind: MediaKind; productId?: string; reviewId?: string; alt?: string; position?: number }, actor: MediaActor) {
     const isVideo = input.kind === "REVIEW_VIDEO";
     const maxBytes = isVideo ? config.media.maxVideoBytes : config.media.maxImageBytes;
-    const { buffer, filename, mime } = await readUpload(req, maxBytes);
-    if (!buffer.length) throw badRequest("That file is empty.");
+    await mkdir(join(root, "tmp"), { recursive: true });
+    const tempPath = join(root, "tmp", `${randomBytes(12).toString("hex")}.part`);
+    const { tempPath: written, filename, bytes, head } = await readUpload(req, maxBytes, tempPath);
 
-    const sig = SIGNATURES.find((s) => s.test(buffer));
-    if (!sig) throw badRequest("That file isn't a supported image or video. Use JPEG, PNG, WebP, GIF or MP4.");
-    if (sig.kind === "video" && isVideo === false) throw badRequest("A video can only be uploaded as a customer story video.");
-    if (sig.kind === "image" && isVideo) throw badRequest("A customer story video has to be a video file.");
+    const sig = SIGNATURES.find((s) => s.test(head));
+    if (!sig) {
+      await rm(written, { force: true });
+      throw badRequest("That file isn't a supported image or video. Use JPEG, PNG, WebP, GIF or MP4.");
+    }
+    if (!bytes) {
+      await rm(written, { force: true });
+      throw badRequest("That file is empty.");
+    }
+    if (sig.kind === "video" && !isVideo) {
+      await rm(written, { force: true });
+      throw badRequest("A video can only be uploaded as a customer story video.");
+    }
+    if (sig.kind === "image" && isVideo) {
+      await rm(written, { force: true });
+      throw badRequest("A customer story video has to be a video file.");
+    }
+    try {
+      await checkKindAndLinks(input);
+    } catch (e) {
+      await rm(written, { force: true });
+      throw e;
+    }
 
-    const checksum = createHash("sha256").update(buffer).digest("hex");
     const at = new Date();
     const folder = `${input.kind.toLowerCase()}/${at.getUTCFullYear()}/${String(at.getUTCMonth() + 1).padStart(2, "0")}`;
     const storageKey = `${folder}/${randomBytes(12).toString("hex")}${sig.ext}`;
-    await writeBytes(absOf(storageKey), buffer);
+    const abs = absOf(storageKey);
+    await mkdir(join(abs, ".."), { recursive: true });
+    await rename(written, abs);
+
+    let checksum: string;
+    try {
+      checksum = await checksumFile(abs);
+    } catch (e) {
+      await removeFiles([storageKey]);
+      throw e;
+    }
 
     const variants: { webp?: string; thumb?: string } = {};
     let width: number | null = null;
     let height: number | null = null;
     if (sig.kind === "image") {
       try {
-        const meta = await sharp(buffer).metadata();
+        const meta = await sharp(abs).metadata();
         width = meta.width ?? null;
         height = meta.height ?? null;
         if (meta.format !== "webp") {
           const webpKey = `${folder}/${randomBytes(12).toString("hex")}.webp`;
-          await writeBytes(absOf(webpKey), await sharp(buffer).webp({ quality: 82 }).toBuffer());
+          await sharp(abs).webp({ quality: 82 }).toFile(absOf(webpKey));
           variants.webp = webpKey;
         }
         if ((meta.width ?? 0) > 480) {
           const thumbKey = `${folder}/${randomBytes(12).toString("hex")}.thumb.webp`;
-          await writeBytes(absOf(thumbKey), await sharp(buffer).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer());
+          await sharp(abs).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 78 }).toFile(absOf(thumbKey));
           variants.thumb = thumbKey;
         }
       } catch {
         // A file that opens but won't be re-encoded is still stored as-is; the original is what the
         // shopper sees, so a missing thumbnail is never a reason to reject the upload.
+        await removeFiles(variantKeysOf(variants));
+        variants.webp = undefined;
+        variants.thumb = undefined;
       }
     }
 
-    const row = await prisma.mediaAsset.create({
-      data: {
-        kind: input.kind,
-        storageKey,
-        originalName: (filename || "upload").slice(0, 200),
-        mime: sig.mime,
-        bytes: buffer.length,
-        checksum,
-        width,
-        height,
-        alt: input.alt?.slice(0, 300) ?? null,
-        variants: Object.keys(variants).length ? (variants as never) : undefined,
-        productId: input.productId ?? null,
-        reviewId: input.reviewId ?? null,
-        uploadedBy: actor.userId,
-        position: input.position ?? 0,
-      },
-    });
+    let row: MediaAsset;
+    try {
+      row = await prisma.mediaAsset.create({
+        data: {
+          kind: input.kind,
+          storageKey,
+          originalName: (filename || "upload").slice(0, 200),
+          mime: sig.mime,
+          bytes,
+          checksum,
+          width,
+          height,
+          alt: input.alt?.slice(0, 300) ?? null,
+          variants: Object.keys(variants).length ? (variants as never) : undefined,
+          productId: input.productId ?? null,
+          reviewId: input.reviewId ?? null,
+          uploadedBy: actor.userId,
+          position: input.position ?? 0,
+        },
+      });
+    } catch (e) {
+      // the row never landed, so the bytes must not stay behind as an untracked file
+      await removeFiles([storageKey, ...variantKeysOf(variants)]);
+      throw e;
+    }
     await logActivity(prisma, actor, {
       action: "media.upload",
       entityType: "media",
       entityId: row.id,
-      summary: `Uploaded ${input.kind.toLowerCase().replace(/_/g, " ")} (${(buffer.length / 1024 / 1024).toFixed(1)} MB)`,
+      summary: `Uploaded ${input.kind.toLowerCase().replace(/_/g, " ")} (${(bytes / 1024 / 1024).toFixed(1)} MB)`,
     });
     return view(row);
   }
@@ -212,7 +307,8 @@ export function createMediaService(prisma: PrismaClient, config: Config) {
       const r = a.review;
       return Boolean(r && r.status === "PUBLISHED" && r.consentGiven && r.verifiedPurchase);
     }
-    return true;
+    // only shop imagery is public on its own — a poster or story file needs its story to be published
+    return PUBLIC_KINDS.has(a.kind);
   }
 
   /** Streams a file, honouring byte ranges so video playback can seek. */
@@ -229,7 +325,8 @@ export function createMediaService(prisma: PrismaClient, config: Config) {
     res.setHeader("Accept-Ranges", "bytes");
     res.setHeader("Content-Type", a.mime);
     res.setHeader("ETag", etag);
-    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    // shop imagery is fixed and can be cached for a year; story media can be withdrawn, so it isn't
+    res.setHeader("Cache-Control", a.reviewId ? "private, max-age=60, must-revalidate" : "public, max-age=31536000, immutable");
     if (req.headers["if-none-match"] === etag) {
       res.status(304);
       return res.end();
@@ -301,8 +398,13 @@ export function createMediaService(prisma: PrismaClient, config: Config) {
     if (a.productId && (await prisma.productImage.count({ where: { url: keyOf(id) } }))) {
       throw conflict("A product still shows this file, so it can't be purged yet.");
     }
-    if (a.reviewId && (await prisma.review.count({ where: { id: a.reviewId, media: { path: "$", array_contains: [{ mediaId: id }] } } }))) {
-      throw conflict("A customer story still shows this file, so it can't be purged yet.");
+    if (a.reviewId) {
+      // MySQL JSON path filters are unreliable here, so the story's own media list is read and checked
+      const rev = await prisma.review.findUnique({ where: { id: a.reviewId }, select: { media: true } });
+      const refs = Array.isArray(rev?.media) ? (rev.media as unknown[]) : [];
+      if (refs.some((m) => (m as { mediaId?: string }).mediaId === id)) {
+        throw conflict("A customer story still shows this file, so it can't be purged yet.");
+      }
     }
     for (const key of [a.storageKey, ...variantKeys(a)]) {
       await rm(absOf(key), { force: true });

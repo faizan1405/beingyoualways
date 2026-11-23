@@ -62,12 +62,12 @@ Open (needs the client / Hostinger — cannot be done from here):
 
 # Roadmap — Phase 3: real customer accounts, Google login & media (Hostinger)
 
-- [ ] Server: customer accounts — email/password sign-up + sign-in, Argon2id hashing, email verification, password recovery, httpOnly sessions, sign-out, rate limits, profile edit, saved addresses, order history, account deletion.
+- [x] Server: customer accounts — email/password sign-up + sign-in, Argon2id hashing, email verification, password recovery, httpOnly sessions, sign-out, rate limits, profile edit, saved addresses, order history, account deletion.
 - [ ] Server: Google sign-in — real OAuth (authorization code + PKCE), server-side verification, safe account linking, env-configured, honest "not configured" status.
-- [ ] Server: customer order access — signed-in order history, guest checkout still works, unguessable per-order access key, ownership-verified claiming of guest orders.
-- [ ] Server: media — upload product/gallery photos, testimonial photos/videos, thumbnails; type/size/content validation; WebP + thumbnails; video with seeking; MySQL metadata; no orphaned/unsafe deletes.
-- [ ] Server: customer stories (reviews) + website content + client approvals read/write the real database; public stories only when verified + consented + published.
-- [ ] Website: real sign-in/register, account pages, admin media upload, content + approvals screens.
-- [ ] Remove remaining Lovable-hosted media (28 files, ~47 MB) — keep the real files in the project.
-- [ ] Tests: real database integration tests + website suite; production build.
+- [x] Server: customer order access — signed-in order history, guest checkout still works, private order link reused for ownership-verified claiming of guest orders.
+- [ ] Server: media — upload product/gallery photos, testimonial photos/videos, thumbnails; type/size/content validation; WebP + thumbnails; video with seeking; MySQL metadata; no orphaned/unsafe deletes. (Built; hardening in progress: stream uploads to disk, verify linked product/review, safe purge + public-visibility rules.)
+- [x] Server: customer stories (reviews) + website content + client approvals read/write the real database; public stories only when verified + consented + published.
+- [ ] Website: real sign-in/register, account pages, admin media upload, content + approvals screens. (Sign-in, account pages and address/order screens done; admin media + content + approvals screens still to build.)
+- [x] Remove remaining Lovable-hosted media (28 files, ~47 MB) — the real files now live in the project.
+- [x] Tests: real database integration tests + website suite; production build.
 - [ ] Blocked: Google OAuth credentials, SMTP for verification emails, Hostinger deploy.

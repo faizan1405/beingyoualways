@@ -230,7 +230,7 @@ describe("3. stored files", () => {
   let mediaUrl = "";
 
   it("stores a real picture and serves it back, including a byte range", async () => {
-    const up = await upload("?kind=PRODUCT_IMAGE", PNG, "serum-shot.png");
+    const up = await upload("?kind=PRODUCT_IMAGE&productId=bya-1069", PNG, "serum-shot.png");
     expect(up.status).toBe(200);
     mediaId = up.body.media.id;
     mediaUrl = up.body.media.url;
@@ -254,6 +254,12 @@ describe("3. stored files", () => {
     expect(fake.body.message ?? JSON.stringify(fake.body)).toMatch(/isn't a supported image or video/);
     const wrongKind = await upload("?kind=REVIEW_VIDEO", PNG, "story.png");
     expect(wrongKind.status).toBe(400);
+    // a product picture has to say which product it belongs to, and that product has to exist
+    const loose = await upload("?kind=PRODUCT_IMAGE", PNG, "loose.png");
+    expect(loose.status).toBe(400);
+    expect(JSON.stringify(loose.body)).toMatch(/which product/);
+    const ghost = await upload("?kind=PRODUCT_IMAGE&productId=no-such-product", PNG, "ghost.png");
+    expect(ghost.status).toBe(404);
   });
 
   it("refuses a file that is too large", async () => {
