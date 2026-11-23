@@ -108,3 +108,15 @@ Open (needs the client / Hostinger — cannot be done from here):
 - [x] Website: no sample shopper data or demo sign-in codes on the real site; live profile saving; clear errors on admin product editor, campaign categories; public stories/text retry after a server hiccup.
 - [x] Tests: 133 server database tests, 57 server unit tests, 199 website tests; browser check of the bag reminder and account pages against a local store copy.
 - [ ] Blocked (owner): Hostinger deployment + live env, real Meta/Razorpay/Google/SMTP credentials, approved WhatsApp templates and a test number — only then can real sends, payments and emails be checked end to end.
+
+# Roadmap — Phase 6: Hostinger staging preparation (not deployed)
+
+- [x] Server: `STORE_ENVIRONMENT=staging|production` (required in production); staging forces test orders + Razorpay test keys, its own cookie names, host-only cookies.
+- [x] Server: staging sends WhatsApp only to `WHATSAPP_TEST_RECIPIENTS` and email only to `MAIL_ALLOWED_RECIPIENTS` (others held, never reported as sent).
+- [x] Server: database + media folder stamped with their environment at first start; a staging server refuses the production database/folder and vice versa.
+- [x] Server: API never indexed (`X-Robots-Tag`, robots.txt); `/api/health` names the environment.
+- [x] Server: `npm run deploy:check` — config, migrations, markers, media, live HTTPS/CORS/webhook probe, optional read-only provider checks (Razorpay, Google, Meta, SMTP); never prints secrets.
+- [x] Website: staging build (`VITE_SITE_ENV=staging`) is password-protected, noindex everywhere, robots.txt disallows all, visible staging strip.
+- [x] Docs: staging guide (GitHub → Hostinger steps, env names, provider setup, E2E test plan, backups/rollback), env templates.
+- [x] Verify: clean `npm ci` + build of both apps, start them with staging settings locally, tests.
+- [ ] Blocked (owner): Hostinger staging apps + database, DNS, real provider credentials; real end-to-end tests run on staging afterwards.

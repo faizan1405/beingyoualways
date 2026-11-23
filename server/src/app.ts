@@ -80,6 +80,9 @@ export function createApp({ config, prisma, logger, gateway, services }: { confi
   const approvals = createApprovalsService(prisma, config, commerce.settings, mailer, media);
   const otp = createWhatsAppOtp({ prisma, config, wa: commerce.wa, customers, logger });
 
+  // The API is never a page for search engines — staging or production.
+  app.use((_req, res, next) => { res.setHeader("X-Robots-Tag", "noindex, nofollow"); next(); });
+  app.get("/robots.txt", (_req, res) => { res.type("text/plain").send("User-agent: *\nDisallow: /\n"); });
   app.use(requestId);
   app.use(requestLog(logger));
   app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
@@ -95,7 +98,7 @@ export function createApp({ config, prisma, logger, gateway, services }: { confi
   app.use(loadSession(auth, config));
   app.use(loadCustomerSession(customers, config));
 
-  app.use("/api/health", healthRoutes(prisma));
+  app.use("/api/health", healthRoutes(prisma, config));
   app.use("/api/auth", authRoutes(auth, config));
   app.use("/api/auth/google", googleRoutes(google, customers, config));
   app.use("/api/auth/whatsapp", whatsappAuthRoutes(otp, config));

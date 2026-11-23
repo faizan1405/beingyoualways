@@ -15,6 +15,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ShopProvider } from "@/lib/shop-store";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { themePreInitScript } from "@/lib/theme-preview";
+import { IS_STAGING } from "@/lib/site-env";
+import { StagingBanner } from "@/components/StagingBanner";
 
 function NotFoundComponent() {
   return (
@@ -88,6 +90,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      // the staging copy must never appear in search results
+      ...(IS_STAGING ? [{ name: "robots", content: "noindex, nofollow" }] : []),
     ],
     links: [
       {
@@ -141,6 +145,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ShopProvider>
+        <StagingBanner />
         <Outlet />
         <Toaster position="bottom-center" />
       </ShopProvider>

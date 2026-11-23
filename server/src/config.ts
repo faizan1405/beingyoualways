@@ -10,7 +10,9 @@ const schema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   DATABASE_URL: z.string().regex(/^mysql:\/\//, "must be a mysql:// connection URL"),
   CORS_ORIGINS: z.string().default(""),
-  COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).default("bya_admin_session"),
+  /** Which copy of the store this is. Required with NODE_ENV=production; staging gets extra guard rails. */
+  STORE_ENVIRONMENT: z.enum(["production", "staging"]).optional(),
+  COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).optional(),
   COOKIE_DOMAIN: z.string().optional(),
   COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).default("lax"),
   COOKIE_SECURE: bool.optional(),
@@ -31,7 +33,7 @@ const schema = z.object({
   /** Staging/test database: every new order is flagged as a test order and never counted as a sale. */
   STORE_TEST_MODE: bool.optional(),
   // ── Phase 3: customer accounts (separate cookie from the admin session) ──
-  CUSTOMER_COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).default("bya_customer_session"),
+  CUSTOMER_COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).optional(),
   CUSTOMER_SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(180).default(30),
   CUSTOMER_SESSION_IDLE_DAYS: z.coerce.number().int().min(1).max(90).default(14),
   /** Where verification / recovery links point. */
@@ -56,6 +58,8 @@ const schema = z.object({
   SMTP_USER: z.string().trim().optional(),
   SMTP_PASSWORD: z.string().trim().optional(),
   MAIL_FROM: z.string().trim().default("Being You – Always <no-reply@beingyoualways.com>"),
+  /** Staging only: comma-separated addresses or @domains that may receive real email; everything else stays in the outbox. */
+  MAIL_ALLOWED_RECIPIENTS: z.string().default(""),
   // ── Phase 4: WhatsApp Business Cloud API (Meta). Older names from the first hand-over are accepted. ──
   WHATSAPP_APP_ID: z.string().trim().optional(),
   WHATSAPP_WABA_ID: z.string().trim().optional(),
@@ -73,8 +77,16 @@ const schema = z.object({
   WHATSAPP_WORKER: bool.optional(),
 });
 
+export type Deployment = "development" | "staging" | "production";
+
+/** Cookie names the live store uses; a staging copy must never reuse them (shared parent domains). */
+export const PRODUCTION_COOKIE_NAMES = { admin: "bya_admin_session", customer: "bya_customer_session" } as const;
+export const STAGING_COOKIE_NAMES = { admin: "bya_staging_admin_session", customer: "bya_staging_customer_session" } as const;
+
 export interface Config {
   env: "development" | "test" | "production";
+  /** development (local/tests), staging (test copy on Hostinger) or production (the real store). */
+  deployment: Deployment;
   port: number;
   databaseUrl: string;
   corsOrigins: string[];
@@ -98,6 +110,8 @@ export interface Config {
   mail: { transport: "outbox" | "smtp"; host: string; port: number; user: string; password: string; from: string } | null;
   /** the address shown on every message the store sends */
   mailFrom: string;
+  /** staging: lower-case addresses ("a@b.com") and domains ("@b.com") allowed to receive real email */
+  mailAllowList: string[];
   /** null until every WhatsApp credential is present — nothing is sent and status says "not configured". */
   whatsapp: {
     appId: string; wabaId: string; phoneNumberId: string; accessToken: string; appSecret: string; verifyToken: string;
@@ -119,6 +133,28 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     throw new ConfigError(`Invalid server configuration — ${problems}`);
   }
   const e = parsed.data;
+  if (e.NODE_ENV === "production" && !e.STORE_ENVIRONMENT) {
+    throw new ConfigError("Invalid server configuration — STORE_ENVIRONMENT is required in production: set it to staging or production");
+  }
+  const deployment: Deployment = e.STORE_ENVIRONMENT ?? "development";
+  const staging = deployment === "staging";
+  const cookieNames = staging ? STAGING_COOKIE_NAMES : PRODUCTION_COOKIE_NAMES;
+  const adminCookie = e.COOKIE_NAME ?? cookieNames.admin;
+  const customerCookie = e.CUSTOMER_COOKIE_NAME ?? cookieNames.customer;
+  if (staging) {
+    if (adminCookie === PRODUCTION_COOKIE_NAMES.admin || customerCookie === PRODUCTION_COOKIE_NAMES.customer || adminCookie === customerCookie) {
+      throw new ConfigError("Invalid server configuration — staging must use its own COOKIE_NAME and CUSTOMER_COOKIE_NAME (leave both unset for the staging defaults)");
+    }
+    if (e.COOKIE_DOMAIN?.trim()) {
+      throw new ConfigError("Invalid server configuration — leave COOKIE_DOMAIN empty on staging so its sign-in cookies stay on the staging API address");
+    }
+    if (e.STORE_TEST_MODE === false) {
+      throw new ConfigError("Invalid server configuration — STORE_TEST_MODE can't be false on staging: every staging order is a test order");
+    }
+    if (e.RAZORPAY_KEY_ID?.startsWith("rzp_live_")) {
+      throw new ConfigError("Invalid server configuration — staging accepts only Razorpay test keys (rzp_test_…)");
+    }
+  }
   const corsOrigins = e.CORS_ORIGINS.split(",").map((s) => s.trim().replace(/\/$/, "")).filter(Boolean);
   for (const o of corsOrigins) {
     if (!/^https?:\/\/[^/\s]+$/.test(o)) throw new ConfigError(`Invalid server configuration — CORS_ORIGINS entry is not an origin: ${o}`);
@@ -204,6 +240,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     if (!host || !user || !password) throw new ConfigError("Invalid server configuration — MAIL_TRANSPORT=smtp requires SMTP_HOST, SMTP_USER and SMTP_PASSWORD");
     mail = { transport: "smtp", host, port: e.SMTP_PORT, user, password, from: e.MAIL_FROM };
   }
+  const mailAllowList = e.MAIL_ALLOWED_RECIPIENTS.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  for (const a of mailAllowList) {
+    if (!/^([^@\s,]+)?@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(a)) throw new ConfigError("Invalid server configuration — MAIL_ALLOWED_RECIPIENTS must be email addresses or @domains separated by commas");
+  }
+  if (staging && mail && mailAllowList.length === 0) {
+    throw new ConfigError("Invalid server configuration — staging with MAIL_TRANSPORT=smtp needs MAIL_ALLOWED_RECIPIENTS (the test inboxes), so real customers are never emailed");
+  }
   // WhatsApp is all-or-nothing as well: half a configuration would accept webhooks it can't verify.
   const waId = pick(e.WHATSAPP_WABA_ID, e.WHATSAPP_BUSINESS_ACCOUNT_ID, "WHATSAPP_WABA_ID", "WHATSAPP_BUSINESS_ACCOUNT_ID");
   const waVerify = pick(e.WHATSAPP_WEBHOOK_VERIFY_TOKEN, e.WHATSAPP_VERIFY_TOKEN, "WHATSAPP_WEBHOOK_VERIFY_TOKEN", "WHATSAPP_VERIFY_TOKEN");
@@ -230,6 +273,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
       if (!wa) throw new ConfigError("Invalid server configuration — WHATSAPP_TEST_RECIPIENTS must be Indian mobile numbers separated by commas");
       return wa;
     });
+    if (staging && testRecipients.length === 0) {
+      throw new ConfigError("Invalid server configuration — staging with WhatsApp needs WHATSAPP_TEST_RECIPIENTS: staging only messages those numbers");
+    }
     whatsapp = {
       appId: waParts.WHATSAPP_APP_ID, wabaId: waId, phoneNumberId: waParts.WHATSAPP_PHONE_NUMBER_ID, accessToken: waParts.WHATSAPP_ACCESS_TOKEN,
       appSecret: waParts.WHATSAPP_APP_SECRET, verifyToken: waVerify, graphVersion: waVersion, testRecipients,
@@ -237,10 +283,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
   }
   return {
     env: e.NODE_ENV,
+    deployment,
     port: e.PORT,
     databaseUrl: e.DATABASE_URL,
     corsOrigins,
-    cookie: { name: e.COOKIE_NAME, domain: e.COOKIE_DOMAIN?.trim() || undefined, sameSite: e.COOKIE_SAMESITE, secure },
+    cookie: { name: adminCookie, domain: e.COOKIE_DOMAIN?.trim() || undefined, sameSite: e.COOKIE_SAMESITE, secure },
     session: { ttlMs: e.SESSION_TTL_HOURS * 3_600_000, idleMs: e.SESSION_IDLE_MINUTES * 60_000 },
     login: { maxAttempts: e.LOGIN_MAX_ATTEMPTS, lockMs: e.LOGIN_LOCK_MINUTES * 60_000 },
     trustProxy: e.TRUST_PROXY,
@@ -248,9 +295,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     razorpay,
     paymentHoldMs: e.PAYMENT_HOLD_MINUTES * 60_000,
     orderLinkSecret,
-    storeTestMode: e.STORE_TEST_MODE ?? false,
+    storeTestMode: staging ? true : e.STORE_TEST_MODE ?? false,
     customer: {
-      cookie: e.CUSTOMER_COOKIE_NAME,
+      cookie: customerCookie,
       ttlMs: e.CUSTOMER_SESSION_TTL_DAYS * 86_400_000,
       idleMs: e.CUSTOMER_SESSION_IDLE_DAYS * 86_400_000,
     },
@@ -260,6 +307,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, cwd: string = p
     media: { root: mediaRoot, maxImageBytes: e.MEDIA_MAX_IMAGE_BYTES, maxVideoBytes: e.MEDIA_MAX_VIDEO_BYTES },
     mail,
     mailFrom: e.MAIL_FROM,
+    mailAllowList,
     whatsapp,
     whatsappWorker: e.WHATSAPP_WORKER ?? e.NODE_ENV !== "test",
   };

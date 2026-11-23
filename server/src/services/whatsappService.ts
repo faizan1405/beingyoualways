@@ -239,6 +239,10 @@ export function createWhatsAppService(deps: { prisma: PrismaClient; config: Conf
       return { ok: false, messageId: row.id, reason, retrying: true };
     };
     if (!graph || !wa) return fail("WhatsApp isn't configured on the server.");
+    // Staging is a test copy: it may only message the owner's listed test numbers, never real customers.
+    if (config.deployment === "staging" && !wa.testRecipients.includes(row.phone)) {
+      return skip("Not sent: this is the staging store, which only messages numbers in WHATSAPP_TEST_RECIPIENTS.");
+    }
 
     const h = await health();
     if (h.accountBlocked) return opts.retry ? later(`Sending paused: Meta reported ${h.accountBlocked.event} for the WhatsApp account.`, 30 * 60_000, false) : fail(`Meta reported ${h.accountBlocked.event} for the WhatsApp account.`);

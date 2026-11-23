@@ -101,6 +101,10 @@ CSRF/origin checks and no credential leaks when the database is down.
 
 # Deploying on Hostinger (GitHub → Hostinger)
 
+**Start with the password-protected staging copy:** [`docs/hostinger-staging.md`](../docs/hostinger-staging.md)
+(separate database, media folder, secrets, test-only payments and messages, end-to-end test plan, backups and
+rollback). The steps below are the live store's; they're the same with `STORE_ENVIRONMENT=production`.
+
 Needs a Hostinger plan with **Node.js web apps** (Business / Cloud, or a VPS). Both apps deploy from this
 one GitHub repository and redeploy automatically on every push to the chosen branch:
 
@@ -129,7 +133,7 @@ The email outbox (`MEDIA_ROOT/outbox`) lives there too.
 hPanel → **Websites → Add website → Node.js app → Import Git repository** → pick the repo and branch.
 - Application root / directory: `server` · Node 20/22 · Build: `npm ci && npm run build` · Start: `npm start`
 - Environment variables (hPanel, never in Git) — every name in `.env.example`. At minimum:
-  `NODE_ENV=production`, `DATABASE_URL`, `CORS_ORIGINS=https://beingyoualways.com,https://www.beingyoualways.com`
+  `NODE_ENV=production`, `STORE_ENVIRONMENT=production`, `DATABASE_URL`, `CORS_ORIGINS=https://beingyoualways.com,https://www.beingyoualways.com`
   (drop `www` if unused), `PUBLIC_SITE_URL=https://beingyoualways.com`, `COOKIE_DOMAIN=.beingyoualways.com`,
   `ORDER_LINK_SECRET`, `MEDIA_ROOT`, plus the Google, email and Razorpay groups below when you switch them on.
 - Domain: attach `api.beingyoualways.com`, enable SSL (HTTPS is required: cookies are `Secure` in production).
@@ -144,7 +148,10 @@ Later deploys that add a migration: back up (see below), then `npm run db:migrat
 (Alternative: Start command `npm run start:migrate` applies pending migrations on every start.)
 **Never** run `prisma migrate dev`, `migrate reset` or `db push` against production.
 
-Check: `https://api.beingyoualways.com/api/health` → `{"status":"ok","database":"ok"}` (503 + `database: unreachable` if MySQL is down).
+Check: `npm run deploy:check -- --api-url https://api.beingyoualways.com --providers` (configuration,
+migrations, environment stamps, media folder, HTTPS/CORS/webhooks from outside, read-only Razorpay/Google/Meta/SMTP
+logins — never prints secrets; exits 1 when something needs fixing).
+`https://api.beingyoualways.com/api/health` → `{"status":"ok","database":"ok","environment":"production",…}` (503 + `database: unreachable` if MySQL is down).
 The start-up log line shows `env`, `google: on|off`, `mail: smtp|outbox` and `razorpay: test|live|off`.
 
 ## 4. Website app

@@ -59,3 +59,4 @@ use the editor.
 - Shopper account emails are built only in `server/src/services/emailTemplates.ts` (text + escaped HTML) and sent via the mailer, which writes to the outbox when SMTP is off — never report an email as sent unless SMTP accepted it.
 - Google callback outcomes redirect only to `PUBLIC_SITE_URL/login?google=…&reason=…`, worded in `src/lib/google-signin.ts` — no open redirects or raw API errors.
 - Route load failures render `PageLoadError` (classified by error name in `src/lib/load-error.ts`) so an unreachable server is named as such.
+- Staging builds (`VITE_SITE_ENV=staging`) are password-locked fail-closed by `staging-gate.ts` in `src/server.ts`, noindex, with `StagingBanner`; `robots.txt` is a route so it varies per build.

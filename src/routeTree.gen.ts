@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as SiteAccountRouteImport } from './routes/_site.account'
@@ -69,6 +70,11 @@ const SiteRoute = SiteRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
@@ -325,6 +331,7 @@ const SiteAccountOrdersIdRoute = SiteAccountOrdersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
   '/about': typeof SiteAboutRoute
   '/account': typeof SiteAccountRouteWithChildren
   '/cart': typeof SiteCartRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/account/orders/$id': typeof SiteAccountOrdersIdRoute
 }
 export interface FileRoutesByTo {
+  '/robots.txt': typeof RobotsDottxtRoute
   '/about': typeof SiteAboutRoute
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
@@ -430,6 +438,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
   '/_site/about': typeof SiteAboutRoute
   '/_site/account': typeof SiteAccountRouteWithChildren
   '/_site/cart': typeof SiteCartRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/robots.txt'
     | '/about'
     | '/account'
     | '/cart'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/account/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/robots.txt'
     | '/about'
     | '/cart'
     | '/checkout'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_site'
     | '/admin'
+    | '/robots.txt'
     | '/_site/about'
     | '/_site/account'
     | '/_site/cart'
@@ -645,6 +657,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   AdminLoginRoute: typeof AdminLoginRoute
 }
 
@@ -662,6 +675,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_site/': {
@@ -1144,6 +1164,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport

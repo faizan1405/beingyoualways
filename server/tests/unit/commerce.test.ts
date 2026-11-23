@@ -102,7 +102,7 @@ describe("Razorpay signatures and credentials", () => {
     expect(loadConfig({ ...base, RAZORPAY_KEY_ID: "rzp_test_abc", RAZORPAY_KEY_SECRET: "s", RAZORPAY_WEBHOOK_SECRET: "w" }).razorpay?.mode).toBe("test");
     expect(() => loadConfig({ ...base, RAZORPAY_KEY_ID: "rzp_live_abc", RAZORPAY_KEY_SECRET: "s", RAZORPAY_WEBHOOK_SECRET: "w" })).toThrow(/live Razorpay keys/);
     expect(() => loadConfig({ ...base, RAZORPAY_KEY_ID: "rzp_test_abc", RAZORPAY_KEY_SECRET: "s" })).toThrow(/WEBHOOK_SECRET/);
-    expect(() => loadConfig({ ...base, NODE_ENV: "production", CORS_ORIGINS: "https://a.example", RAZORPAY_KEY_ID: "rzp_live_abc", RAZORPAY_KEY_SECRET: "s", RAZORPAY_WEBHOOK_SECRET: "w", ORDER_LINK_SECRET: "x".repeat(32), STORE_TEST_MODE: "true" })).toThrow(/STORE_TEST_MODE/);
+    expect(() => loadConfig({ ...base, NODE_ENV: "production", STORE_ENVIRONMENT: "production", CORS_ORIGINS: "https://a.example", RAZORPAY_KEY_ID: "rzp_live_abc", RAZORPAY_KEY_SECRET: "s", RAZORPAY_WEBHOOK_SECRET: "w", ORDER_LINK_SECRET: "x".repeat(32), STORE_TEST_MODE: "true" })).toThrow(/STORE_TEST_MODE/);
     expect(loadConfig(base).razorpay).toBeNull();
   });
   it("order links can't be guessed or reused for another order", () => {

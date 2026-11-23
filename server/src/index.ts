@@ -2,6 +2,7 @@ import { createApp, createServices } from "./app.js";
 import { ConfigError, loadConfig } from "./config.js";
 import { createPrisma } from "./db.js";
 import { createLogger } from "./logger.js";
+import { ensureDatabaseMarker, ensureMediaMarker } from "./services/environmentMarker.js";
 import { checkMediaFolder } from "./startupChecks.js";
 
 const boot = createLogger("info");
@@ -19,11 +20,29 @@ if (!media.ok) {
   process.exit(1);
 }
 
+const mediaMarker = await ensureMediaMarker(config.media.root, config.deployment);
+if (!mediaMarker.ok) {
+  boot.error(`Refusing to start — ${mediaMarker.message}`);
+  process.exit(1);
+}
+
 const logger = createLogger(config.logLevel);
 const prisma = createPrisma(config.databaseUrl);
+try {
+  const dbMarker = await ensureDatabaseMarker(prisma, config.deployment);
+  if (!dbMarker.ok) {
+    boot.error(`Refusing to start — ${dbMarker.message}`);
+    process.exit(1);
+  }
+  if (dbMarker.created || mediaMarker.created) logger.info("environment stamped", { deployment: config.deployment, database: dbMarker.created, media: mediaMarker.created });
+} catch (e) {
+  // database down at start: Hostinger restarts the app; never start unchecked
+  boot.error(`Refusing to start — could not check the database (${e instanceof Error ? e.message.split("\n")[0] : "unknown error"})`);
+  process.exit(1);
+}
 const services = createServices({ config, prisma, logger });
 const app = createApp({ config, prisma, logger, services });
-const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, google: config.google ? "on" : "off", mail: config.mail ? "smtp" : "outbox", razorpay: config.razorpay?.mode ?? "off", whatsapp: config.whatsapp ? "on" : "off", testOrders: config.storeTestMode }));
+const server = app.listen(config.port, () => logger.info("api listening", { port: config.port, env: config.env, deployment: config.deployment, google: config.google ? "on" : "off", mail: config.mail ? "smtp" : "outbox", razorpay: config.razorpay?.mode ?? "off", whatsapp: config.whatsapp ? "on" : "off", testOrders: config.storeTestMode }));
 
 // WhatsApp: sends queued messages, finishes webhook processing, bag reminders and campaigns (all stored in MySQL).
 if (config.whatsappWorker) services.worker.start();

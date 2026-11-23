@@ -16,7 +16,7 @@ const base = { DATABASE_URL: "mysql://u:p@h:3306/d" };
 const CLIENT_ID = "1234567890-abcdefghij.apps.googleusercontent.com";
 const GOOGLE = { AUTH_GOOGLE_ID: CLIENT_ID, AUTH_GOOGLE_SECRET: "google-client-secret-value", GOOGLE_REDIRECT_URL: "https://api.beingyoualways.com/api/auth/google/callback" };
 const PROD = {
-  ...base, NODE_ENV: "production", ORDER_LINK_SECRET: "o".repeat(40), CORS_ORIGINS: "https://beingyoualways.com,https://www.beingyoualways.com",
+  ...base, NODE_ENV: "production", STORE_ENVIRONMENT: "production", ORDER_LINK_SECRET: "o".repeat(40), CORS_ORIGINS: "https://beingyoualways.com,https://www.beingyoualways.com",
   PUBLIC_SITE_URL: "https://beingyoualways.com", MEDIA_ROOT: "/home/u1/bya-media",
 };
 const APP_DIR = "/home/u1/domains/api.beingyoualways.com/public_html";

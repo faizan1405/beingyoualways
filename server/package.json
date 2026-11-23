@@ -2,7 +2,7 @@
   "name": "being-you-always-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Being You – Always production API (Express + Prisma + MySQL) for Hostinger Node.js hosting.",
+  "description": "Being You \u2013 Always production API (Express + Prisma + MySQL) for Hostinger Node.js hosting.",
   "type": "module",
   "main": "dist/src/index.js",
   "engines": {
@@ -21,6 +21,8 @@
     "admin:create": "node dist/scripts/create-admin.js",
     "admin:reset-password": "node dist/scripts/reset-admin-password.js",
     "admin:create:dev": "tsx scripts/create-admin.ts",
+    "deploy:check": "node dist/scripts/preflight.js",
+    "deploy:check:dev": "tsx scripts/preflight.ts",
     "test": "vitest run tests/unit",
     "test:db": "vitest run tests/integration --no-file-parallelism"
   },

@@ -26,6 +26,14 @@ export interface MailResult {
  * written to `<MEDIA_ROOT>/outbox` so the text is real and inspectable — a link is never reported as
  * sent when nothing was sent.
  */
+/** true when `to` is listed exactly or its domain is listed as "@domain". */
+export function mailAllowed(allow: string[], to: string): boolean {
+  const addr = to.trim().toLowerCase();
+  const at = addr.lastIndexOf("@");
+  if (at < 1) return false;
+  return allow.includes(addr) || allow.includes(addr.slice(at));
+}
+
 export function createMailer(config: Config, logger: Logger) {
   const transporter = config.mail
     ? nodemailer.createTransport({
@@ -36,7 +44,19 @@ export function createMailer(config: Config, logger: Logger) {
       })
     : null;
 
+  async function toOutbox(msg: MailMessage, note?: string): Promise<MailResult> {
+    const dir = join(config.media.root, "outbox");
+    await mkdir(dir, { recursive: true });
+    const file = join(dir, `${Date.now()}-${msg.subject.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}.txt`);
+    await writeFile(file, `To: ${msg.to}\nSubject: ${msg.subject}\n${note ? `Held: ${note}\n` : ""}\n${msg.text}\n`, "utf8");
+    return { delivered: false, transport: "outbox", detail: file };
+  }
+
   async function send(msg: MailMessage): Promise<MailResult> {
+    // Staging never emails real customers: only the listed test inboxes get SMTP mail, the rest stays in the outbox.
+    if (transporter && config.deployment === "staging" && !mailAllowed(config.mailAllowList, msg.to)) {
+      return toOutbox(msg, "staging store — this address isn't in MAIL_ALLOWED_RECIPIENTS, so it was not sent");
+    }
     if (transporter && config.mail) {
       try {
         const info = await transporter.sendMail({
@@ -53,11 +73,7 @@ export function createMailer(config: Config, logger: Logger) {
         return { delivered: false, transport: "smtp", detail: "the mail server refused the message" };
       }
     }
-    const dir = join(config.media.root, "outbox");
-    await mkdir(dir, { recursive: true });
-    const file = join(dir, `${Date.now()}-${msg.subject.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}.txt`);
-    await writeFile(file, `To: ${msg.to}\nSubject: ${msg.subject}\n\n${msg.text}\n`, "utf8");
-    return { delivered: false, transport: "outbox", detail: file };
+    return toOutbox(msg);
   }
 
   return {
