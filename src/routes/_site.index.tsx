@@ -5,14 +5,15 @@ import { Testimonials } from "@/components/home/Testimonials";
 import { ScrollStory } from "@/components/home/ScrollStory";
 import { VideoReviews } from "@/components/home/VideoReviews";
 
-import { FaqList, faqs } from "@/components/home/FaqList";
+import { FaqList } from "@/components/home/FaqList";
+import { PromoBanner } from "@/components/home/PromoBanner";
+import { useSiteContent } from "@/hooks/use-demo-store";
 import { Hero } from "@/components/home/Hero";
 import { CategoryShop } from "@/components/home/CategoryShop";
 import { ProductCard, ProductGridSkeleton } from "@/components/shop/ProductCard";
 import { useHighDemand } from "@/hooks/use-high-demand";
 import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Newsletter } from "@/components/site/SiteFooter";
-import { contactConfig } from "@/config/business";
 import { Button } from "@/components/ui/button";
 import { ImageReveal, Parallax, RevealOnScroll, StaggerContainer, TextReveal } from "@/components/motion/Reveal";
 import { productImages } from "@/lib/product-images";
@@ -49,15 +50,22 @@ function SectionHead({ id, eyebrow, title, link }: { id?: string | undefined; ey
 function Home() {
   const { highDemand: initialHighDemand, products } = Route.useLoaderData();
   const highDemand = useHighDemand(initialHighDemand);
+  // Sections can be hidden in Admin → Website content (hero always shows).
+  const content = useSiteContent();
+  const show = content.sections;
+  const phone = content.contact.phones[0];
+  const shownCollections = collections.filter((c) => !content.hiddenCollections.includes(c.name));
   return (
     <>
       <Hero />
 
-      <ShopByConcern />
+      <PromoBanner />
 
-      <CategoryShop products={products} />
+      {show.shopByConcern && <ShopByConcern />}
 
-      <section className="border-t border-border/60 bg-page pt-20 pb-20 md:pt-28 md:pb-28" aria-labelledby="best-seller-h">
+      {show.categoryShop && <CategoryShop products={products} />}
+
+      {show.bestSeller && <section className="border-t border-border/60 bg-page pt-20 pb-20 md:pt-28 md:pb-28" aria-labelledby="best-seller-h">
         <div className="container-lux">
         <SectionHead id="best-seller-h" eyebrow="Favourite picks" title="Best Seller" link={{ to: "/shop", label: "Shop all" }} />
         {highDemand.list.length > 0 ? (
@@ -76,9 +84,9 @@ function Home() {
           </div>
         )}
         </div>
-      </section>
+      </section>}
 
-      <section className="border-t border-border/60 bg-page">
+      {show.ourStory && <section className="border-t border-border/60 bg-page">
         <div className="container-lux grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
           <div className="relative mx-auto w-full max-w-lg pb-16 pr-10 md:pb-20 md:pr-16">
             <Parallax speed={-0.05}><ImageReveal className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]"><img src={productImages("toner")[0]} alt="Being You toner among fresh fennel flowers" loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover" /></ImageReveal></Parallax>
@@ -93,15 +101,15 @@ function Home() {
             <RevealOnScroll delay={420}><Button variant="luxOutline" size="xl" className="group mt-8" asChild><Link to="/about">Read our story <ArrowRight className="arrow-nudge" /></Link></Button></RevealOnScroll>
           </div>
         </div>
-      </section>
+      </section>}
 
-      <ScrollStory />
+      {show.scrollStory && <ScrollStory />}
 
-      <section className="container-lux py-20 md:py-28">
+      {show.collections && shownCollections.length > 0 && <section className="container-lux py-20 md:py-28">
         <SectionHead eyebrow="Featured collections" title="Explore the range" link={{ to: "/shop", label: "Shop all" }} />
         <StaggerContainer step={70} className="grid grid-cols-2 gap-4 md:grid-cols-5">
-          {collections.map((c, i) => (
-            <Link key={c.name} to={c.to} className={`group relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl p-6 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift md:min-h-[340px] ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
+          {shownCollections.map((c, i) => (
+            <Link key={c.name} to={c.to} className={`group relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl p-6 text-primary-foreground shadow-[var(--shadow-soft)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-lift md:min-h-[340px] ${i === 4 && shownCollections.length === 5 ? "col-span-2 md:col-span-1" : ""}`}>
               <div className={`absolute inset-0 -z-10 grid overflow-hidden ${c.images.length > 1 ? "grid-rows-2" : ""}`}>
                 {c.images.map((src, j) => (
                   <img key={j} src={src} alt="" loading="lazy" decoding="async" style={{ objectPosition: c.pos }} className={`${"zoom" in c ? "h-[135%]" : "h-full"} w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]`} />
@@ -115,35 +123,35 @@ function Home() {
             </Link>
           ))}
         </StaggerContainer>
-      </section>
+      </section>}
 
-      <Testimonials />
+      {show.testimonials && <Testimonials />}
 
-      <VideoReviews />
+      {show.videos && <VideoReviews />}
 
-      <GlobalStandards />
+      {show.globalStandards && <GlobalStandards />}
 
-      <WhyChooseUs />
+      {show.whyChooseUs && <WhyChooseUs />}
 
-      <FounderQuote />
+      {show.founder && <FounderQuote />}
 
-      <section className="container-lux grid gap-10 py-20 md:grid-cols-[1fr_1.5fr] md:py-28">
+      {show.faq && <section className="container-lux grid gap-10 py-20 md:grid-cols-[1fr_1.5fr] md:py-28">
         <div>
           <RevealOnScroll as="p" kind="fade" className="eyebrow">Questions</RevealOnScroll>
           <TextReveal text="Good to know" className="mt-3 text-4xl md:text-5xl" />
           <p className="mt-4 text-sm text-muted-foreground">Provisional answers — final policies will be confirmed before launch.</p>
           <Button variant="link" asChild className="mt-4 px-0 uppercase tracking-[0.14em] text-xs"><Link to="/faq">All FAQs →</Link></Button>
         </div>
-        <RevealOnScroll kind="slide-right" delay={150}><FaqList items={faqs.slice(0, 4)} /></RevealOnScroll>
-      </section>
+        <RevealOnScroll kind="slide-right" delay={150}><FaqList limit={4} /></RevealOnScroll>
+      </section>}
 
-      <section className="container-lux py-20 text-center md:py-24">
+      {show.contact && <section className="container-lux py-20 text-center md:py-24">
         <RevealOnScroll as="p" kind="fade" className="eyebrow">We're here for you</RevealOnScroll>
         <TextReveal text="Questions about your routine?" className="mt-3 text-4xl md:text-5xl" />
-        <p className="mt-4 text-sm text-muted-foreground">Call <a className="font-semibold text-foreground hover:underline" href={`tel:${contactConfig.phones[0].tel}`}>{contactConfig.phones[0].display}</a> or email <a className="font-semibold text-foreground hover:underline" href={`mailto:${contactConfig.email}`}>{contactConfig.email}</a></p>
+        <p className="mt-4 text-sm text-muted-foreground">{phone && <>Call <a className="font-semibold text-foreground hover:underline" href={`tel:${phone.tel}`}>{phone.display}</a> or email </>}<a className="font-semibold text-foreground hover:underline" href={`mailto:${content.contact.email}`}>{content.contact.email}</a></p>
         <Button variant="luxOutline" size="xl" className="mt-6" asChild><Link to="/contact">Contact us <ArrowRight /></Link></Button>
-      </section>
-      <Newsletter />
+      </section>}
+      {show.newsletter && <Newsletter />}
     </>
   );
 }

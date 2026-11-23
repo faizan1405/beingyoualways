@@ -46,8 +46,8 @@ describe("checkout draft privacy", () => {
 describe("client approval checklist", () => {
   const items = buildApprovalChecklist({ products, publicReviewCount: 0 });
   const status = (id: string) => items.find((i) => i.id === id)?.status;
-  it("lists all fourteen required items", () =>
-    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "sheet-claims", "product-review", "infographics", "theme"]));
+  it("lists all fifteen required items (incl. WhatsApp Business API)", () =>
+    expect(items.map((i) => i.id)).toEqual(["sizes", "ingredients", "usage", "inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "whatsapp-api", "claims", "sheet-claims", "product-review", "infographics", "theme"]));
   it("shows infographic sets as done once every live product has its four slides", () => expect(status("infographics")).toBe("confirmed"));
   it("keeps unconfirmed facts waiting on the client", () => {
     for (const id of ["inventory", "shipping", "cod", "policies", "reviews", "whatsapp", "claims", "sheet-claims", "product-review"]) expect(status(id)).toBe("waiting");

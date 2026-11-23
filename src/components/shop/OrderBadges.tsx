@@ -10,7 +10,7 @@ const tone: Record<string, string> = {
 };
 
 const statusTone: Record<OrderStatus, keyof typeof tone> = {
-  placed: "warn", confirmed: "info", packed: "info", shipped: "info", delivered: "good", cancelled: "bad",
+  new: "warn", confirmed: "info", processing: "info", shipped: "info", delivered: "good", cancelled: "bad", returned: "muted",
 };
 const payTone: Record<PaymentStatus, keyof typeof tone> = {
   paid: "good", pending: "warn", failed: "bad", refunded: "muted", cod: "info",

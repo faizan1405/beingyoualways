@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { brandConfig, navigationConfig } from "@/config/business";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useShop } from "@/lib/shop-store";
+import { useSiteContent } from "@/hooks/use-demo-store";
 
 const headerNav = navigationConfig.header;
 const moreNav = [
@@ -38,6 +39,7 @@ export function SiteHeader() {
   const [bump, setBump] = useState(0);
   const prev = useRef(count);
   useEffect(() => { if (count > prev.current) setBump((b) => b + 1); prev.current = count; }, [count]);
+  const { announcement } = useSiteContent();
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 24);
@@ -47,6 +49,9 @@ export function SiteHeader() {
 
   return (
     <>
+      {announcement.enabled && announcement.text.trim() && (
+        <p role="note" className="border-b border-border/50 bg-page py-2 text-center text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{announcement.text}</p>
+      )}
       <header className={`sticky top-0 z-40 border-b bg-page transition-[box-shadow,border-color] duration-500 ${scrolled ? "border-border/70 shadow-soft" : "border-border/50"}`}>
         <div className={`container-lux grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-[padding] duration-500 ${scrolled ? "py-2" : "py-3 md:py-5"}`}>
           <div className="-ml-2 flex items-center gap-0.5">

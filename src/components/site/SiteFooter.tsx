@@ -4,7 +4,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 import { buttonVariants } from "@/components/ui/button";
-import { brandConfig, contactConfig, mapsUrl, navigationConfig, policyLinks } from "@/config/business";
+import { brandConfig, contactConfig as verifiedContact, navigationConfig, policyLinks } from "@/config/business";
+import { useSiteContent } from "@/hooks/use-demo-store";
+import { mapsUrlFor } from "@/services/contentService";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
@@ -41,6 +43,8 @@ const cols = [
 ];
 
 export function SiteFooter() {
+  const contactConfig = useSiteContent().contact;
+  const mapsUrl = mapsUrlFor(contactConfig.addressLines);
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container-lux grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-[1.3fr_0.8fr_0.8fr_0.9fr_1.4fr]">
@@ -50,7 +54,7 @@ export function SiteFooter() {
           <p className="mt-5 max-w-xs text-sm leading-relaxed opacity-75">{brandConfig.shortDescription}</p>
           <p className="mt-3 font-serif text-lg italic opacity-90">{brandConfig.tagline}</p>
           <div className="mt-6 flex gap-3">
-            {contactConfig.socials.map((s) => {
+            {verifiedContact.socials.map((s) => {
               const I = icons[s.label];
               return <a key={s.href} href={s.href} target="_blank" rel="noreferrer" aria-label={`Being You – Always on ${s.label}`} className="press grid size-9 place-items-center rounded-full border border-primary-foreground/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-foreground/10"><I className="size-4" /></a>;
             })}

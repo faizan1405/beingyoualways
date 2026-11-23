@@ -2,11 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { AlertTriangle, ArrowUpRight, Check, ChevronRight, Circle, Mail, Phone } from "lucide-react";
 
 import { ImageReveal, Parallax, RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
-import { contactConfig, policyLinks } from "@/config/business";
+import { policyLinks } from "@/config/business";
+import { useSiteContent } from "@/hooks/use-demo-store";
 import { policies, policyChecklist, policyHero, policyReview, withHeadingIds, type PolicyKey } from "@/content/policies";
 
 /** Renders a policy migrated verbatim from the original website. Text is static, trusted, script-free HTML from src/content. */
 export function PolicyPage({ title, policy }: { title: string; policy: PolicyKey }) {
+  const contactConfig = useSiteContent().contact;
   const p = policies[policy];
   const review = policyReview[policy];
   const hero = policyHero[policy];
@@ -83,7 +85,7 @@ export function PolicyPage({ title, policy }: { title: string; policy: PolicyKey
         <div className="mt-10 rounded-2xl bg-secondary p-6 text-sm md:p-8">
           <p className="font-serif text-2xl">Questions?</p>
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-muted-foreground">
-            <a href={`tel:${contactConfig.phones[0].tel}`} className="inline-flex items-center gap-2 hover:text-foreground"><Phone className="size-4" />{contactConfig.phones[0].display}</a>
+            {contactConfig.phones[0] && <a href={`tel:${contactConfig.phones[0].tel}`} className="inline-flex items-center gap-2 hover:text-foreground"><Phone className="size-4" />{contactConfig.phones[0].display}</a>}
             <a href={`mailto:${contactConfig.email}`} className="inline-flex items-center gap-2 hover:text-foreground"><Mail className="size-4" />{contactConfig.email}</a>
             <Link to="/contact" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">Contact page <ArrowUpRight className="size-4" /></Link>
           </div>

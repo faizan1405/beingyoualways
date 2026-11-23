@@ -105,3 +105,23 @@ export function withExtraImage(images: string[] | undefined, src: string): strin
   const list = images ?? [];
   return list.includes(src) ? list : [...list, src];
 }
+/** Labels of the approved four-slide gallery, in order. */
+export const GALLERY_SLOT_LABELS = ["Product photo", "Who is it for?", "What's inside?", "How to use"] as const;
+export const slotLabel = (i: number) => GALLERY_SLOT_LABELS[i] ?? `Extra photo ${i - 3}`;
+/** Swap the image in one slot (other slots keep their place). */
+export function withImageAt(images: string[] | undefined, i: number, src: string): string[] {
+  const list = [...(images ?? [])];
+  if (i >= list.length) return withExtraImage(list, src);
+  list[i] = src;
+  return list.filter((x, j) => j === i || x !== src);
+}
+/** Move one image to another position. */
+export function movedImage(images: string[] | undefined, from: number, to: number): string[] {
+  const list = [...(images ?? [])];
+  if (from < 0 || from >= list.length || to < 0 || to >= list.length) return list;
+  const [x] = list.splice(from, 1);
+  list.splice(to, 0, x!);
+  return list;
+}
+/** Remove the image at `i`. */
+export const withoutImageAt = (images: string[] | undefined, i: number): string[] => (images ?? []).filter((_, j) => j !== i);

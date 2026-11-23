@@ -379,3 +379,14 @@ body { overflow-x: clip; }
   --accent-foreground: oklch(0.99 0.004 88);
   --gradient-hero: radial-gradient(ellipse at 70% 40%, oklch(0.93 0.02 75) 0%, var(--secondary) 45%, var(--background) 100%);
 }
+
+/* Admin: "Print summary" prints only the page content. */
+@media print {
+  [data-admin] aside,
+  [data-admin] header,
+  [data-admin] [data-print-hide],
+  [data-admin] .page-enter > div:first-child button,
+  [data-sonner-toaster] { display: none !important; }
+  [data-admin] { background: #fff !important; display: block !important; }
+  [data-admin] main { padding: 0 !important; }
+}

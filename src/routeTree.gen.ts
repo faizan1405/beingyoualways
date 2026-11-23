@@ -37,12 +37,15 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAbandonedCartRouteImport } from './routes/admin.abandoned-cart'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminDiscountsRouteImport } from './routes/admin.discounts'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
 import { Route as AdminWhatsappRouteImport } from './routes/admin.whatsapp'
+import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as SiteAccountIndexRouteImport } from './routes/_site.account.index'
 import { Route as SiteAccountAddressesRouteImport } from './routes/_site.account.addresses'
 import { Route as SiteAccountOrdersRouteImport } from './routes/_site.account.orders'
@@ -194,9 +197,19 @@ const AdminChatbotRoute = AdminChatbotRouteImport.update({
   path: '/chatbot',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
+  id: '/discounts',
+  path: '/discounts',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
@@ -223,6 +236,11 @@ const AdminWhatsappRoute = AdminWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin_/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SiteAccountIndexRoute = SiteAccountIndexRouteImport.update({
   id: '/',
@@ -307,12 +325,15 @@ export interface FileRoutesByFullPath {
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
   '/account/orders': typeof SiteAccountOrdersRoute
@@ -350,12 +371,15 @@ export interface FileRoutesByTo {
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin/login': typeof AdminLoginRoute
   '/': typeof SiteIndexRoute
   '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof SiteAccountAddressesRoute
@@ -398,12 +422,15 @@ export interface FileRoutesById {
   '/admin/abandoned-cart': typeof AdminAbandonedCartRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/whatsapp': typeof AdminWhatsappRoute
+  '/admin_/login': typeof AdminLoginRoute
   '/_site/': typeof SiteIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_site/account/addresses': typeof SiteAccountAddressesRoute
@@ -447,12 +474,15 @@ export interface FileRouteTypes {
     | '/admin/abandoned-cart'
     | '/admin/approvals'
     | '/admin/chatbot'
+    | '/admin/content'
     | '/admin/customers'
+    | '/admin/discounts'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin/login'
     | '/admin/'
     | '/account/addresses'
     | '/account/orders'
@@ -490,12 +520,15 @@ export interface FileRouteTypes {
     | '/admin/abandoned-cart'
     | '/admin/approvals'
     | '/admin/chatbot'
+    | '/admin/content'
     | '/admin/customers'
+    | '/admin/discounts'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin/login'
     | '/'
     | '/admin'
     | '/account/addresses'
@@ -537,12 +570,15 @@ export interface FileRouteTypes {
     | '/admin/abandoned-cart'
     | '/admin/approvals'
     | '/admin/chatbot'
+    | '/admin/content'
     | '/admin/customers'
+    | '/admin/discounts'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
     | '/admin/testimonials'
     | '/admin/whatsapp'
+    | '/admin_/login'
     | '/_site/'
     | '/admin/'
     | '/_site/account/addresses'
@@ -561,6 +597,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -761,11 +798,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChatbotRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
       fullPath: '/admin/customers'
       preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/discounts': {
+      id: '/admin/discounts'
+      path: '/discounts'
+      fullPath: '/admin/discounts'
+      preLoaderRoute: typeof AdminDiscountsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/orders': {
@@ -802,6 +853,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/whatsapp'
       preLoaderRoute: typeof AdminWhatsappRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin_/login': {
+      id: '/admin_/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_site/account/': {
       id: '/_site/account/'
@@ -965,7 +1023,9 @@ interface AdminRouteChildren {
   AdminAbandonedCartRoute: typeof AdminAbandonedCartRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminChatbotRoute: typeof AdminChatbotRoute
+  AdminContentRoute: typeof AdminContentRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -981,7 +1041,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAbandonedCartRoute: AdminAbandonedCartRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminChatbotRoute: AdminChatbotRoute,
+  AdminContentRoute: AdminContentRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminDiscountsRoute: AdminDiscountsRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -998,6 +1060,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

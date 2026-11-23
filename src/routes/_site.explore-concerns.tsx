@@ -131,7 +131,7 @@ function ExploreConcerns() {
         ]}
         products={hair} ctaLabel="Explore haircare collection" ctaTo="/haircare" />
 
-      <Testimonials id="stories" />
+      <Testimonials id="stories" placement="explore" />
       <VideoReviews />
     </>
   );

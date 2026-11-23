@@ -4,12 +4,13 @@ import { testimonialService } from "./testimonialService";
 const base = { id: "t1", category: "Skin" as const, name: "A", city: "B", quote: "Q", verified: true, consent: true, published: true };
 
 describe("testimonials", () => {
-  it("hides a review that is not verified", () => {
-    testimonialService.save({ ...base, id: "x1", verified: false });
+  it("refuses to publish a review that is not verified", () => {
+    expect(() => testimonialService.save({ ...base, id: "x1", verified: false })).toThrow();
+    testimonialService.save({ ...base, id: "x1", verified: false, published: false });
     expect(testimonialService.publicList().some((t) => t.id === "x1")).toBe(false);
   });
-  it("hides a review without customer consent", () => {
-    testimonialService.save({ ...base, id: "x2", consent: false });
+  it("refuses to publish a review without customer consent", () => {
+    expect(() => testimonialService.save({ ...base, id: "x2", consent: false })).toThrow();
     expect(testimonialService.publicList().some((t) => t.id === "x2")).toBe(false);
   });
   it("shows a verified, consented, published review", () => {

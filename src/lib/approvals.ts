@@ -23,7 +23,9 @@ export interface ApprovalItem {
   affects: string;
   /** Products still missing this fact (names), when relevant. */
   missing?: string[];
-  adminLink?: "/admin/products" | "/admin/testimonials" | "/admin/settings";
+  /** Storefront pages this item affects. */
+  pages?: string[];
+  adminLink?: "/admin/products" | "/admin/testimonials" | "/admin/settings" | "/admin/whatsapp";
 }
 
 interface Inputs {
@@ -36,6 +38,9 @@ interface Inputs {
   claimsConfirmed?: boolean;
   themeConfirmed?: boolean;
   sheetClaimsConfirmed?: boolean;
+  /** Values typed into Admin → Settings (demo). Entered ≠ live: they show as "partly done". */
+  entered?: { shippingFee: number | null; shippingConfirmedByClient: boolean; cod: "pending" | "offered" | "not-offered"; codConfirmedByClient: boolean; whatsappNumber: string };
+  whatsappApiConnected?: boolean;
 }
 
 const productStatus = (missing: number, total: number): ApprovalStatus =>
@@ -51,7 +56,12 @@ export function buildApprovalChecklist({
   claimsConfirmed = BRAND_CLAIMS_CONFIRMED,
   themeConfirmed = THEME_CHOICE_CONFIRMED,
   sheetClaimsConfirmed = PRODUCT_SHEET_CLAIMS_CONFIRMED,
+  entered,
+  whatsappApiConnected = false,
 }: Inputs): ApprovalItem[] {
+  const shipEntered = entered?.shippingFee != null && entered.shippingConfirmedByClient;
+  const codEntered = !!entered && entered.cod !== "pending" && entered.codConfirmedByClient;
+  const waEntered = whatsappNumber ?? (entered?.whatsappNumber.trim() || null);
   const live = products.filter((p) => p.status === "active");
   const n = live.length;
   const noSize = live.filter((p) => p.variants.some((v) => v.kind === "size" && isUnconfirmed(v.label)));
@@ -91,37 +101,43 @@ export function buildApprovalChecklist({
       id: "inventory", title: "Actual inventory", status: inventoryConnected ? "confirmed" : "waiting",
       current: "Stock numbers are demo values. Shoppers only see \"Available to order\" or \"Currently unavailable\"; bags are capped at a demo limit per item.",
       needed: "Real stock levels per size/shade, and how inventory will be updated (Hostinger backend).",
-      affects: "Availability messages and the per-item bag limit.", adminLink: "/admin/products",
+      affects: "Availability messages and the per-item bag limit.", pages: ["Product pages", "Bag"], adminLink: "/admin/products",
     },
     {
-      id: "shipping", title: "Shipping charges", status: shippingConfirmed ? "confirmed" : "waiting",
-      current: shippingConfirmed ? "Shipping rates confirmed." : "Shipping shows as \"Pending confirmation\" and no final total is shown. Sample ₹79 / free above ₹999 is admin-only.",
+      id: "shipping", title: "Shipping charges", status: shippingConfirmed ? "confirmed" : shipEntered ? "partial" : "waiting",
+      current: shippingConfirmed ? "Shipping rates confirmed." : shipEntered ? `Client-confirmed rate entered in Settings (₹${entered!.shippingFee}). Checkout keeps showing "Pending" until it goes live with the backend.` : "Shipping shows as \"Pending confirmation\" and no final total is shown. Sample ₹79 / free above ₹999 is admin-only.",
       needed: "Shipping fee, free-shipping threshold (if any) and delivery timelines.",
-      affects: "Bag and checkout totals, shipping policy.",
+      affects: "Bag and checkout totals, shipping policy.", pages: ["Bag", "Checkout", "Shipping Policy"], adminLink: "/admin/settings",
     },
     {
-      id: "cod", title: "COD eligibility", status: codConfirmed ? "confirmed" : "waiting",
-      current: "Cash on Delivery is shown as an option marked \"pending approval\".",
+      id: "cod", title: "COD eligibility", status: codConfirmed ? "confirmed" : codEntered ? "partial" : "waiting",
+      current: codEntered ? `Client decision entered in Settings (COD ${entered!.cod === "offered" ? "offered" : "not offered"}). Checkout keeps it "pending approval" until the backend is live.` : "Cash on Delivery is shown as an option marked \"pending approval\".",
       needed: "Whether COD is offered, any order-value or PIN-code limits, and any COD charge.",
-      affects: "Payment step at checkout.",
+      affects: "Payment step at checkout.", pages: ["Checkout"], adminLink: "/admin/settings",
     },
     {
       id: "policies", title: "Refund and privacy policies", status: policiesOk ? "confirmed" : "waiting",
       current: `Migrated word-for-word from the old site but not legally approved. Refund: ${policyReview.refund.flags.length} issue(s); Privacy: ${policyReview.privacy.flags.length} issue(s).`,
       needed: "Real refund/return/cancellation terms and a privacy policy covering orders, payments, phone numbers and WhatsApp — approved by the client.",
-      affects: "Refund & Returns and Privacy Policy pages, checkout and sign-in links.",
+      affects: "Refund & Returns and Privacy Policy pages, checkout and sign-in links.", pages: ["Refund Policy", "Privacy Policy", "Checkout"],
     },
     {
       id: "reviews", title: "Verified customer reviews", status: publicReviewCount > 0 ? "partial" : "waiting",
       current: publicReviewCount > 0 ? `${publicReviewCount} review(s) marked verified + consented + published.` : "No reviews are published — the homepage shows an empty state.",
       needed: "Genuine reviews with each customer's written permission (and photo/video consent where used).",
-      affects: "Homepage customer stories.", adminLink: "/admin/testimonials",
+      affects: "Homepage customer stories.", pages: ["Homepage", "Explore by Concern"], adminLink: "/admin/testimonials",
     },
     {
-      id: "whatsapp", title: "WhatsApp Business number", status: whatsappNumber ? "confirmed" : "waiting",
-      current: whatsappNumber ? `Set to ${whatsappNumber}.` : "Not set — no WhatsApp buttons link to a number yet.",
-      needed: "Which number is registered on WhatsApp Business (and API access, for automated messages).",
-      affects: "WhatsApp contact links, OTP sign-in and marketing tools.", adminLink: "/admin/settings",
+      id: "whatsapp", title: "WhatsApp Business number", status: whatsappNumber ? "confirmed" : waEntered ? "partial" : "waiting",
+      current: whatsappNumber ? `Set to ${whatsappNumber}.` : waEntered ? `${waEntered} entered in Settings — not verified until the WhatsApp API is connected.` : "Not set — no WhatsApp buttons link to a number yet.",
+      needed: "Which number is registered on WhatsApp Business.",
+      affects: "WhatsApp contact links, OTP sign-in and marketing tools.", pages: ["Contact", "Sign in"], adminLink: "/admin/settings",
+    },
+    {
+      id: "whatsapp-api", title: "WhatsApp Business API", status: whatsappApiConnected ? "confirmed" : "waiting",
+      current: "Not connected. Campaigns, abandoned-cart reminders and the chatbot are drafts / previews only — nothing is sent.",
+      needed: "An approved WhatsApp Business API account (Meta) and approved message templates, connected through the Hostinger backend.",
+      affects: "WhatsApp campaigns, 6-hour cart reminders, chatbot, order updates, OTP sign-in.", pages: ["Admin → WhatsApp", "Abandoned Cart", "Chatbot", "Sign in"], adminLink: "/admin/whatsapp",
     },
     {
       id: "claims", title: "Brand claims & ingredient sourcing", status: claimsConfirmed ? "confirmed" : "waiting",

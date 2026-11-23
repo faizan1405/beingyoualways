@@ -20,7 +20,7 @@ function claimPlayback(v: HTMLVideoElement) {
 }
 
 export function VideoReviews() {
-  const all = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.videoReviews, customerMediaService.videoReviews);
+  const all = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.videoReviews, customerMediaService.serverVideoReviews);
   const videos = all.filter(isPublicMedia);
   const track = useRef<HTMLDivElement>(null);
   if (videos.length === 0) return null;

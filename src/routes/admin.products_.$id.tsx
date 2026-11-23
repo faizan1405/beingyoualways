@@ -1,18 +1,21 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ExternalLink, Plus, Trash2, Upload, X } from "lucide-react";
+import { AlertTriangle, Eye, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AdminPage, Panel, adminInput, adminLabel } from "@/components/admin/AdminUI";
-import { ProductVisual } from "@/components/shop/ProductVisual";
+import { ProductImageManager } from "@/components/admin/ProductImageManager";
+import { ProductCard } from "@/components/shop/ProductCard";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useAllProducts } from "@/hooks/use-demo-store";
+import { inr } from "@/lib/format";
 import { categories } from "@/lib/mock-data";
 import { concerns as concernList, productConcerns } from "@/lib/concerns";
 import type { Product, ProductVariant } from "@/lib/types";
-import { productService } from "@/services/productService";
-import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
-import { galleryImages, infographicImages, originalImages, withExtraImage, withMainImage } from "@/lib/product-images";
+import { productService, validateProduct } from "@/services/productService";
+import { galleryImages, infographicImages, originalImages, withExtraImage } from "@/lib/product-images";
 import { infographicFor } from "@/content/infographics";
 import { isUnconfirmed } from "@/lib/variants";
 import { PRODUCT_SHEET_SOURCE, claimFlagLabels, pendingPhotos, sheetFor } from "@/content/product-sheet";
@@ -37,11 +40,13 @@ function EditProduct() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["admin", "product", id], queryFn: () => (isNew ? Promise.resolve(blank()) : productService.getById(id)) });
   const [p, setP] = useState<Product | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const all = useAllProducts();
   // Raw text so commas/new lines can be typed; parsed into a list on save.
   const [ingText, setIngText] = useState("");
   const [keyText, setKeyText] = useState("");
-  useEffect(() => { if (data) { setP(data); setIngText(data.ingredients.join(", ")); setKeyText((data.keyIngredients ?? []).join(", ")); } }, [data]);
+  const [benefitText, setBenefitText] = useState("");
+  useEffect(() => { if (data) { setP(data); setIngText(data.ingredients.join(", ")); setKeyText((data.keyIngredients ?? []).join(", ")); setBenefitText((data.benefits ?? []).join("\n")); } }, [data]);
 
   const save = useMutation({
     mutationFn: (x: Product) => productService.save(x),
@@ -61,16 +66,15 @@ function EditProduct() {
   const upV = (i: number, patch: Partial<ProductVariant>) => up({ variants: p.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
 
   return (
-    <AdminPage title={isNew ? "Add product" : `Edit: ${p.name}`} subtitle="Demo — saved in this browser only. Use Reset demo data on the products list to restore the original catalogue.">
+    <AdminPage title={isNew ? "Add product" : `Edit: ${p.name}`} subtitle="Demo — saved in this browser only. Use Reset catalogue on the products list to restore the original products.">
       <form
         className="grid gap-4 xl:grid-cols-[1fr_340px]"
         onSubmit={(e) => {
           e.preventDefault();
-          if (p.name.trim().length < 2) { toast.error("Product name is required"); return; }
-          if (p.variants.some((v) => !v.label.trim() || v.price <= 0)) { toast.error("Each size or shade needs a label and a selling price"); return; }
-          if (p.variants.some((v) => v.compareAtPrice != null && v.compareAtPrice <= v.price)) { toast.error("MRP must be higher than the selling price — or leave it blank"); return; }
-          if (p.variants.some((v) => v.stock < 0 || !Number.isFinite(v.stock))) { toast.error("Stock can't be negative"); return; }
-          save.mutate({ ...p, ingredients: splitList(ingText), keyIngredients: splitList(keyText), slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") });
+          const next = { ...p, ingredients: splitList(ingText), keyIngredients: splitList(keyText), benefits: benefitText.split("\n").map((x) => x.trim()).filter(Boolean), slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") };
+          const errors = validateProduct(next, all);
+          if (errors.length) { toast.error(errors[0]!); return; }
+          save.mutate(next);
         }}
       >
         <div className="space-y-4">
@@ -90,6 +94,8 @@ function EditProduct() {
                 <p className={hint}>Separate with commas or new lines. Leave blank until the client confirms — blank sections stay hidden on the shop.</p></div>
               <div className="sm:col-span-2"><label htmlFor="pdir" className={adminLabel}>How to use</label><textarea id="pdir" rows={3} className={`${adminInput} h-auto py-2`} value={isUnconfirmed(p.directions) ? "" : p.directions} placeholder="Awaiting usage instructions from the client" onChange={(e) => up({ directions: e.target.value })} />
                 <p className={hint}>Shown on the product page only once filled in.</p></div>
+              <div className="sm:col-span-2"><label htmlFor="pb" className={adminLabel}>Benefits</label><textarea id="pb" rows={3} className={`${adminInput} h-auto py-2`} value={benefitText} placeholder="One benefit per line — only what the brand states for this product" onChange={(e) => setBenefitText(e.target.value)} />
+                <p className={hint}>Shown as a “Benefits” section on the product page when filled in. Don't add results the client hasn't confirmed.</p></div>
               <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!p.bestSeller} onChange={(e) => up({ bestSeller: e.target.checked })} /> Best Seller</label>
                 <p className={hint}>Shows this product in the homepage Best Seller section (when visible in shop).</p></div>
               <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={p.featured} onChange={(e) => up({ featured: e.target.checked })} /> Featured</label>
@@ -105,6 +111,19 @@ function EditProduct() {
                 return (
                   <button key={c.slug} type="button" aria-pressed={on} onClick={() => up({ concerns: on ? current.filter((x) => x !== c.slug) : [...current, c.slug] })}
                     className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${on ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary"}`}>{c.name}</button>
+                );
+              })}
+            </div>
+          </Panel>
+          <Panel title="Related products">
+            <p className="mb-3 text-xs text-muted-foreground">Pick up to 4 products to show under “You may also like” on this product page. Leave empty to show more from the same category.</p>
+            <div className="flex flex-wrap gap-2">
+              {all.filter((x) => x.id !== p.id && x.status === "active").map((x) => {
+                const cur = p.relatedSlugs ?? [];
+                const on = cur.includes(x.slug);
+                return (
+                  <button key={x.id} type="button" aria-pressed={on} disabled={!on && cur.length >= 4} onClick={() => up({ relatedSlugs: on ? cur.filter((s) => s !== x.slug) : [...cur, x.slug] })}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${on ? "border-primary bg-primary text-primary-foreground" : "border-input hover:border-primary"}`}>{x.name}</button>
                 );
               })}
             </div>
@@ -150,43 +169,8 @@ function EditProduct() {
           )}
         </div>
         <div className="space-y-4">
-          <Panel title="Images">
-            {preview ? <img src={preview} alt="Uploaded preview" className="aspect-[4/5] w-full rounded-md object-cover" /> : <ProductVisual src={p.images?.[0]} shape={p.shape} tint={p.tint} label={p.name || "New product"} className="rounded-md" />}
-            {(p.images?.length ?? 0) > 1 && (
-              <div className="mt-3 grid grid-cols-4 gap-2" aria-label="Choose main image">
-                {p.images!.map((src, i) => (
-                  <button key={src} type="button" title={i === 0 ? "Main image" : "Make main image"} onClick={() => { setPreview(null); up({ images: [src, ...p.images!.filter((x) => x !== src)] }); }}
-                    className={`overflow-hidden rounded border ${i === 0 ? "border-primary ring-2 ring-primary" : "border-border"}`}>
-                    <img src={src} alt="" className="aspect-square w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-            {(p.images?.length ?? 0) > 1 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {p.images!.slice(1).map((src, i) => (
-                  <button key={src} type="button" onClick={() => up({ images: p.images!.filter((x) => x !== src) })} className="inline-flex items-center gap-1 rounded-full border border-input px-2 py-0.5 text-[11px] text-muted-foreground hover:border-destructive hover:text-destructive"><X className="size-3" /> Remove photo {i + 2}</button>
-                ))}
-              </div>
-            )}
-            {preview ? (
-              <div className="mt-3 grid gap-2" role="group" aria-label="Use the uploaded photo">
-                <Button type="button" size="sm" onClick={() => { up({ images: withMainImage(p.images, preview) }); setPreview(null); toast("Main photo replaced — press Save changes to keep it"); }}>Replace main photo</Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => { up({ images: withExtraImage(p.images, preview) }); setPreview(null); toast("Photo added — press Save changes to keep it"); }}>Add as extra photo</Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => setPreview(null)}>Discard upload</Button>
-              </div>
-            ) : (
-              <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground hover:border-primary">
-                <Upload className="size-4" /> Upload new photo
-                <input type="file" accept="image/*" className="sr-only" onChange={async (e) => {
-                  const f = e.target.files?.[0]; e.target.value = "";
-                  if (!f) return;
-                  const bad = checkImageFile(f); if (bad) { toast.error(bad); return; }
-                  try { setPreview(await fileToDemoImage(f)); } catch { toast.error("That image couldn't be read — try a JPG or PNG."); }
-                }} />
-              </label>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">Demo: photos are saved in this browser only, until storage is connected. Replacing photos never changes the product ID, prices or sizes.</p>
+          <Panel title="Images · 4-slide gallery" action={<Button type="button" variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye /> Preview</Button>}>
+            <ProductImageManager product={p} onChange={(images) => up({ images })} />
           </Panel>
           {pending.length > 0 && (
             <Panel title="Supplied photos awaiting confirmation">
@@ -269,6 +253,14 @@ function EditProduct() {
           <Button variant="ghost" className="w-full" type="button" onClick={() => navigate({ to: "/admin/products" })}>Cancel</Button>
         </div>
       </form>
+      <Dialog open={previewing} onOpenChange={setPreviewing}>
+        <DialogContent className="max-w-sm">
+          <DialogTitle className="font-serif text-2xl">Shop preview</DialogTitle>
+          <DialogDescription>How this card looks with your unsaved changes. {p.status === "active" ? "It's visible in the shop once saved." : "Hidden — shoppers won't see it until you set it to visible."}</DialogDescription>
+          <div className="pointer-events-none"><ProductCard product={{ ...p, benefits: benefitText.split("\n").filter(Boolean) }} index={0} /></div>
+          <p className="text-xs text-muted-foreground">From {inr(Math.min(...p.variants.map((v) => v.price)))} · {p.variants.length} size/shade option{p.variants.length === 1 ? "" : "s"}</p>
+        </DialogContent>
+      </Dialog>
     </AdminPage>
   );
 }

@@ -5,14 +5,14 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { productService } from "@/services/productService";
 
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
-import { customerMediaService, isPublicMedia, testimonialCategories, testimonialService, type PhotoStory, type TestimonialCategory } from "@/services/testimonialService";
+import { customerMediaService, isPublic, isPublicMedia, showsOn, testimonialCategories, testimonialService, type PhotoStory, type TestimonialCategory, type TestimonialPlacement } from "@/services/testimonialService";
 
 
 /** Public customer stories. Shows only verified, consented, published entries — never placeholder copy. */
-export function Testimonials({ id }: { id?: string } = {}) {
-  const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.all);
-  const stories = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.photoStories, customerMediaService.photoStories).filter(isPublicMedia);
-  const list = all.filter((t) => t.verified && t.consent && t.published);
+export function Testimonials({ id, placement = "home" }: { id?: string; placement?: TestimonialPlacement } = {}) {
+  const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.server);
+  const stories = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.photoStories, customerMediaService.serverPhotoStories).filter(isPublicMedia);
+  const list = all.filter((t) => isPublic(t) && showsOn(t, placement));
   const tabs = testimonialCategories.filter((c) => list.some((t) => t.category === c));
   const [picked, setTab] = useState<TestimonialCategory>("Skin");
   const tab = tabs.includes(picked) ? picked : (tabs[0] ?? picked);
@@ -55,6 +55,15 @@ export function Testimonials({ id }: { id?: string } = {}) {
                         <span className="absolute inset-0 grid place-items-center"><span className="grid size-16 place-items-center rounded-full bg-background/90 text-primary shadow-lift transition-transform duration-300 group-hover:scale-110"><Play className="ml-1 size-6 fill-current" /></span></span>
                         <span className="absolute left-3 top-3 rounded-full bg-background/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground">Video · {s.category}</span>
                       </button>
+                    ) : s.beforePhoto && s.afterPhoto ? (
+                      <div className="mb-5 grid grid-cols-2 gap-2">
+                        {([["Before", s.beforePhoto], ["After", s.afterPhoto]] as const).map(([l, src]) => (
+                          <div key={l} className="relative overflow-hidden rounded-xl bg-secondary">
+                            <img src={src} alt={`${s.name}, ${l.toLowerCase()}`} loading="lazy" className="aspect-[3/4] w-full object-cover object-top" />
+                            <span className="absolute inset-x-2 bottom-2 rounded-full bg-background/90 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">{l}</span>
+                          </div>
+                        ))}
+                      </div>
                     ) : s.photo && <img src={s.photo} alt={`${s.name}, customer`} loading="lazy" className="mb-5 aspect-[4/3] w-full rounded-xl object-cover object-top" />}
                     <div className="flex items-center justify-between">
                       {s.rating ? <div className="flex gap-0.5 text-accent" aria-label={`${s.rating} out of 5`}>{Array.from({ length: s.rating }).map((_, i) => <Star key={i} className="size-3.5 fill-current" />)}</div> : <span />}

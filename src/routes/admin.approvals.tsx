@@ -1,13 +1,13 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, CircleDashed, CircleDot } from "lucide-react";
-import { useSyncExternalStore } from "react";
 
 import { AdminPage, Panel } from "@/components/admin/AdminUI";
 import { buildApprovalChecklist, type ApprovalStatus } from "@/lib/approvals";
 import { cn } from "@/lib/utils";
-import { productService } from "@/services/productService";
-import { isPublic, testimonialService } from "@/services/testimonialService";
+import { useAllProducts, useDemoStore } from "@/hooks/use-demo-store";
+import { settingsStore } from "@/services/settingsService";
+import { WHATSAPP_CONNECTED } from "@/services/whatsappService";
+import { isPublic, testimonialStore } from "@/services/testimonialService";
 
 export const Route = createFileRoute("/admin/approvals")({
   head: () => ({
@@ -31,11 +31,13 @@ const STATUS: Record<ApprovalStatus, { label: string; I: typeof CheckCircle2; cl
 };
 
 function Approvals() {
-  const { data: products = [] } = useQuery({ queryKey: ["admin", "products", "approvals"], queryFn: () => productService.list({ includeInactive: true }) });
-  // `all` returns a stable reference; filtering inside the snapshot would loop.
-  const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.all);
-  const reviews = all.filter(isPublic);
-  const items = buildApprovalChecklist({ products, publicReviewCount: reviews.length });
+  const products = useAllProducts();
+  const reviews = useDemoStore(testimonialStore).filter(isPublic);
+  const st = useDemoStore(settingsStore);
+  const items = buildApprovalChecklist({
+    products, publicReviewCount: reviews.length, whatsappApiConnected: WHATSAPP_CONNECTED,
+    entered: { shippingFee: st.shipping.fee, shippingConfirmedByClient: st.shipping.clientConfirmed, cod: st.payments.cod, codConfirmedByClient: st.payments.clientConfirmed, whatsappNumber: st.whatsappNumber },
+  });
   const done = items.filter((i) => i.status === "confirmed").length;
 
   return (
@@ -59,9 +61,9 @@ function Approvals() {
                   <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", s.cls)}><s.I className="size-3.5" />{s.label}</span>
                 </div>
                 <dl className="mt-3 grid gap-3 text-sm md:grid-cols-3">
-                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today</dt><dd className="mt-1">{it.current}</dd></div>
-                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Needed from client</dt><dd className="mt-1">{it.needed}</dd></div>
-                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Affects</dt><dd className="mt-1">{it.affects}</dd></div>
+                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Current status</dt><dd className="mt-1">{it.current}</dd></div>
+                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Missing information</dt><dd className="mt-1">{it.status === "confirmed" ? "Nothing — confirmed." : it.needed}</dd></div>
+                  <div><dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Related products / pages</dt><dd className="mt-1">{it.affects}{it.pages?.length ? <span className="mt-1 block text-xs text-muted-foreground">Pages: {it.pages.join(", ")}</span> : null}</dd></div>
                 </dl>
                 {(it.missing?.length ?? 0) > 0 && (
                   <details className="mt-3 text-sm">

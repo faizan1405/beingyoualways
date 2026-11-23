@@ -1,6 +1,8 @@
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import { ClipboardCheck, Quote, BarChart3, Bot, Menu, MessageCircle, Package, Settings, ShoppingCart, Timer, Users, X } from "lucide-react";
-import { useState } from "react";
+import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ClipboardCheck, Quote, BarChart3, Bot, LayoutTemplate, LogOut, Menu, MessageCircle, Package, Settings, ShoppingCart, Tag, Timer, Users, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { adminAuthService, type AdminSession } from "@/services/adminAuthService";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -24,12 +26,21 @@ const nav = [
   { to: "/admin/whatsapp", label: "WhatsApp Marketing", I: MessageCircle },
   { to: "/admin/abandoned-cart", label: "Abandoned Cart", I: Timer },
   { to: "/admin/chatbot", label: "Chatbot", I: Bot },
+  { to: "/admin/content", label: "Website Content", I: LayoutTemplate },
+  { to: "/admin/discounts", label: "Discounts", I: Tag },
   { to: "/admin/approvals", label: "Client Approvals", I: ClipboardCheck },
   { to: "/admin/settings", label: "Settings", I: Settings },
 ] as const;
 
 function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  // Demo gate only (not security): sends the tab to the sign-in screen first.
+  const [session, setSession] = useState<AdminSession | null>(null);
+  useEffect(() => {
+    const s = adminAuthService.current();
+    if (s) setSession(s); else navigate({ to: "/admin/login", replace: true });
+  }, [navigate]);
   const side = (
     <nav aria-label="Admin" className="flex flex-col gap-1 p-4">
       {nav.map(({ to, label, I, ...rest }) => (
@@ -41,6 +52,7 @@ function AdminLayout() {
       ))}
     </nav>
   );
+  if (!session) return <div data-admin className="grid min-h-screen place-items-center bg-secondary/50 text-sm text-muted-foreground">Opening admin…</div>;
   return (
     <div data-admin className="min-h-screen bg-secondary/50 lg:grid lg:grid-cols-[250px_1fr]">
       <aside className="hidden bg-sidebar lg:sticky lg:top-0 lg:block lg:h-screen">
@@ -63,8 +75,11 @@ function AdminLayout() {
       <div className="min-w-0">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur md:px-8">
           <button className="lg:hidden" aria-label="Open admin menu" onClick={() => setOpen(true)}><Menu /></button>
-          <p className="text-xs text-muted-foreground">UI demonstration only — admin is <strong>not secured</strong> until backend auth is added.</p>
-          <Link to="/" className="hidden text-xs font-semibold text-primary hover:underline sm:block">View store →</Link>
+          <p className="min-w-0 px-2 text-xs text-muted-foreground">Demo mode only — admin is <strong>not secured</strong> until server sign-in is added.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="hidden text-xs font-semibold text-primary hover:underline sm:block">View store →</Link>
+            <button type="button" onClick={() => { adminAuthService.signOut(); navigate({ to: "/admin/login" }); }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><LogOut className="size-3.5" /> Exit demo</button>
+          </div>
         </header>
         <main className="p-4 md:p-8"><Outlet /></main>
       </div>

@@ -38,7 +38,7 @@ export const adminLabel = "mb-1.5 block text-xs font-semibold uppercase tracking
 
 export function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full min-w-[560px] text-sm">
         <thead><tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">{head.map((h) => <th key={h} className="px-3 py-3 font-semibold">{h}</th>)}</tr></thead>
         <tbody className="divide-y divide-border [&>tr]:transition-colors [&>tr]:duration-150 [&>tr:hover]:bg-secondary/50">{children}</tbody>

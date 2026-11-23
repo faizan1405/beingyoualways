@@ -46,7 +46,7 @@ function OrderDetail() {
       </ul>
       <dl className="ml-auto mt-4 max-w-xs space-y-2 text-sm">
         <div className="flex justify-between"><dt>Subtotal</dt><dd>{inr(o.subtotal)}</dd></div>
-        <div className="flex justify-between"><dt>Shipping</dt><dd>{o.shipping ? inr(o.shipping) : "Free"}</dd></div>
+        <div className="flex justify-between"><dt>Shipping</dt><dd>{o.shipping === null ? "Pending confirmation" : o.shipping === 0 ? "Free" : inr(o.shipping)}</dd></div>
         <div className="flex justify-between font-semibold"><dt>Total</dt><dd>{inr(o.total)}</dd></div>
       </dl>
       <div className="mt-8 rounded-lg bg-secondary p-5 text-sm">

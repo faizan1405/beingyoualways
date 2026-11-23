@@ -5,6 +5,7 @@ import { ProductVisual } from "@/components/shop/ProductVisual";
 import { Button } from "@/components/ui/button";
 import { ImageReveal, Parallax, RevealOnScroll, StaggerContainer, TextReveal } from "@/components/motion/Reveal";
 import { aboutContent, founderContent } from "@/config/business";
+import { useSiteContent } from "@/hooks/use-demo-store";
 import { productImages } from "@/lib/product-images";
 
 export const Route = createFileRoute("/_site/about")({
@@ -31,7 +32,9 @@ const values = [
 ];
 
 function About() {
-  const [lead, ...rest] = aboutContent.story;
+  // Story, mission and vision are editable in Admin → Website content.
+  const about = useSiteContent().about;
+  const [lead, ...rest] = about.story;
   return (
     <>
       <section className="bg-page py-24 text-center md:py-32">
@@ -48,13 +51,13 @@ function About() {
           <p className="eyebrow">Naturally you</p>
           <h2 className="text-4xl leading-tight text-foreground md:text-5xl">More than a routine.</h2>
           {rest.map((p) => <p key={p}>{p}</p>)}
-          <p className="font-serif text-2xl italic text-foreground">{aboutContent.signoff}</p>
+          <p className="font-serif text-2xl italic text-foreground">{about.signoff}</p>
         </RevealOnScroll>
       </section>
 
       <section className="border-y border-border bg-page">
         <div className="container-lux grid gap-0 md:grid-cols-2">
-          {[["Our Mission", aboutContent.mission], ["Our Vision", aboutContent.vision]].map(([t, d], i) => (
+          {[["Our Mission", about.mission], ["Our Vision", about.vision]].map(([t, d], i) => (
             <RevealOnScroll key={t} delay={i * 120} className={`px-2 py-16 md:px-12 md:py-24 ${i === 0 ? "md:border-r md:border-border" : "border-t border-border md:border-t-0"}`}>
               <p className="eyebrow">{t}</p>
               <p className="mt-5 font-serif text-3xl leading-snug md:text-4xl">{d}</p>

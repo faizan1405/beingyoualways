@@ -6,6 +6,7 @@ import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { chipVariants } from "@/components/ui/button";
 import { useLiveProducts } from "@/hooks/use-live-products";
+import { useSiteContent } from "@/hooks/use-demo-store";
 import { homeCategoryGroups } from "@/lib/concerns";
 import type { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,9 @@ export const productsForGroup = (all: Product[], slugs: string[]): Product[] =>
 /** Homepage "Shop by category": tabs of real products grouped as the client listed them. */
 export function CategoryShop({ products: initial }: { products: Product[] }) {
   const all = useLiveProducts(initial, activeOnly);
-  const groups = homeCategoryGroups.map((g) => ({ ...g, list: productsForGroup(all, g.slugs) })).filter((g) => g.list.length > 0);
+  const { categoryOrder } = useSiteContent();
+  const rank = (k: string) => { const i = categoryOrder.indexOf(k); return i < 0 ? 99 : i; };
+  const groups = [...homeCategoryGroups].sort((a, b) => rank(a.key) - rank(b.key)).map((g) => ({ ...g, list: productsForGroup(all, g.slugs) })).filter((g) => g.list.length > 0);
   const first = groups[0];
   if (!first) return null;
 
@@ -30,7 +33,7 @@ export function CategoryShop({ products: initial }: { products: Product[] }) {
         <TextReveal id="category-shop-h" text="Shop by category" className="mt-3 text-4xl md:text-5xl" delay={80} />
       </div>
 
-      <TabsPrimitive.Root defaultValue={first.key} className="mt-8 md:mt-10">
+      <TabsPrimitive.Root key={groups.map((g) => g.key).join()} defaultValue={first.key} className="mt-8 md:mt-10">
         <TabsPrimitive.List aria-label="Product categories" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {groups.map((g) => (
             <TabsPrimitive.Trigger

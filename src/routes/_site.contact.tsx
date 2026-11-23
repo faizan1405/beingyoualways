@@ -5,7 +5,8 @@ import { useState } from "react";
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/button";
-import { contactConfig, mapsUrl } from "@/config/business";
+import { useSiteContent } from "@/hooks/use-demo-store";
+import { mapsUrlFor } from "@/services/contentService";
 
 export const Route = createFileRoute("/_site/contact")({
   head: () => ({
@@ -21,9 +22,6 @@ export const Route = createFileRoute("/_site/contact")({
   component: Contact,
 });
 
-const addressQuery = encodeURIComponent(contactConfig.addressLines.join(", "));
-const embedUrl = `https://maps.google.com/maps?q=${addressQuery}&z=16&output=embed`;
-const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${addressQuery}`;
 
 const fields = [
   ["cname", "Name", "text", true],
@@ -34,6 +32,12 @@ const fields = [
 
 function Contact() {
   const [attempted, setAttempted] = useState(false);
+  // Contact details are editable in Admin → Website content.
+  const contactConfig = useSiteContent().contact;
+  const addressQuery = encodeURIComponent(contactConfig.addressLines.join(", "));
+  const embedUrl = `https://maps.google.com/maps?q=${addressQuery}&z=16&output=embed`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${addressQuery}`;
+  const mapsUrl = mapsUrlFor(contactConfig.addressLines);
   return (
     <>
       <section className="bg-page py-20 text-center md:py-28">

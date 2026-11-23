@@ -48,6 +48,10 @@ export interface Product {
   status: ProductStatus;
   isSample: true | boolean;
   sourceUrl?: string | undefined; // product page on the client's original website
+  /** Benefits the brand states for this product (admin-entered; hidden while empty). */
+  benefits?: string[] | undefined;
+  /** Hand-picked "related products" (slugs); falls back to same category when empty. */
+  relatedSlugs?: string[] | undefined;
 }
 
 export interface CartItem {
@@ -85,6 +89,8 @@ export interface Address {
   isDefault?: boolean | undefined;
 }
 
+export type CustomerStatus = "active" | "blocked";
+
 export interface Customer {
   id: string;
   name: string;
@@ -93,12 +99,20 @@ export interface Customer {
   joinedAt: string;
   addresses: Address[];
   segment: "new" | "repeat" | "vip" | "inactive";
+  /** Worked out from this customer's orders by customerService (never typed in). */
   totalSpent: number;
   orderCount: number;
+  status: CustomerStatus;
+  /** Internal admin note (demo, this tab only). */
+  notes: string;
+  /** How the customer signs in, once Google / WhatsApp OTP is connected on the backend. */
+  signInMethod: "google" | "whatsapp" | null;
+  isDemo: boolean;
 }
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "cod";
-export type OrderStatus = "placed" | "confirmed" | "packed" | "shipped" | "delivered" | "cancelled";
+export const ORDER_STATUSES = ["new", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type PaymentMethod = "razorpay" | "cod";
 
 export interface OrderItem {
@@ -110,49 +124,64 @@ export interface OrderItem {
   quantity: number;
 }
 
+export interface OrderNote {
+  id: string;
+  at: string;
+  text: string;
+}
+
+export interface OrderEvent {
+  at: string;
+  label: string;
+}
+
 export interface Order {
   id: string;
   customerId: string;
   customerName: string;
+  customerEmail: string;
+  customerPhone: string;
   createdAt: string;
   items: OrderItem[];
   subtotal: number;
-  shipping: number;
+  discount: number;
+  discountCode?: string | undefined;
+  /** null = shipping charges not confirmed yet (shown as "Pending"). */
+  shipping: number | null;
   total: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
   shippingAddress: Address;
+  notes: OrderNote[];
+  timeline: OrderEvent[];
+  /** Every order in this prototype is simulated — nothing was really bought or paid. */
+  isDemo: true;
 }
 
-export type CampaignStatus = "draft" | "scheduled" | "sent";
+export type CampaignSegment = "all" | "previous-buyers" | "new" | "abandoned";
+export type CampaignStatus = "draft" | "scheduled";
 
 export interface WhatsAppCampaign {
   id: string;
   name: string;
   template: string;
-  segment: Customer["segment"] | "all";
+  body: string;
+  segment: CampaignSegment;
   scheduledFor?: string | undefined;
+  /** "scheduled" is a simulation only — nothing is sent until the WhatsApp API is connected. */
   status: CampaignStatus;
-  recipients: number;
-}
-
-export interface WhatsAppMessage {
-  id: string;
-  to: string;
-  template: string;
-  sentAt: string;
-  status: "queued" | "sent" | "delivered" | "read" | "failed";
+  createdAt: string;
+  updatedAt: string;
+  history: OrderEvent[];
 }
 
 export interface AbandonedCart {
   id: string;
   customerName: string;
   phone: string;
-  items: number;
-  value: number;
+  items: { productId: string; variantId: string; quantity: number }[];
   abandonedAt: string;
-  reminderDueAt: string;
 }
 
 export interface AbandonedCartSettings {
@@ -163,9 +192,41 @@ export interface AbandonedCartSettings {
   discountCode: string;
 }
 
-export interface ChatbotMenuItem {
+export interface ChatbotOption {
   id: string;
-  keyword: string;
   label: string;
   response: string;
+  /** Optional menu to open after this reply (lets one menu link to another). */
+  next?: string | undefined;
+}
+
+export interface ChatbotMenu {
+  id: string;
+  name: string;
+  enabled: boolean;
+  greeting: string;
+  options: ChatbotOption[];
+}
+
+export interface ChatbotConfig {
+  entryMenuId: string;
+  handoff: boolean;
+  supportHours: string;
+  menus: ChatbotMenu[];
+}
+
+export type DiscountType = "percent" | "fixed";
+
+export interface Discount {
+  id: string;
+  code: string;
+  type: DiscountType;
+  value: number;
+  minOrder?: number | undefined;
+  maxDiscount?: number | undefined;
+  startsAt?: string | undefined;
+  endsAt?: string | undefined;
+  usageLimit?: number | undefined;
+  used: number;
+  active: boolean;
 }

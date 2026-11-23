@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import {
   availabilityOf, checkVariant, initialVariantId, isUnconfirmed, mrpOf, productInfoSections, requiresChoice, variantKindLabel,
 } from "@/lib/variants";
-import { productService } from "@/services/productService";
+import { productService, relatedFor } from "@/services/productService";
 import { StaggerContainer, TextReveal } from "@/components/motion/Reveal";
 import { useLiveProduct, useLiveProducts } from "@/hooks/use-live-products";
 
@@ -55,7 +55,8 @@ export const Route = createFileRoute("/_site/product/$slug")({
 function ProductPage() {
   const { product: loaded, related: loadedRelated, alsoLike: loadedAlsoLike } = Route.useLoaderData();
   const p = useLiveProduct(loaded);
-  const related = useLiveProducts(loadedRelated);
+  // Admin "related products" picks are saved in this browser, so re-pick after mount.
+  const related = useLiveProducts(loadedRelated, (all) => relatedFor(all, all.find((x) => x.id === loaded.id) ?? loaded));
   const alsoLike = useLiveProducts(loadedAlsoLike);
   const { add, toggleWish, isWished, qtyInBag, items } = useShop();
   const navigate = useNavigate();
@@ -272,6 +273,12 @@ function ProductPage() {
             {info.description && (
               <AccordionItem value="desc"><AccordionTrigger className="font-serif text-xl font-normal">Description</AccordionTrigger>
                 <AccordionContent className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{info.description}</AccordionContent></AccordionItem>
+            )}
+            {(p.benefits?.length ?? 0) > 0 && (
+              <AccordionItem value="benefits"><AccordionTrigger className="font-serif text-xl font-normal">Benefits</AccordionTrigger>
+                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                  <ul className="list-disc space-y-1 pl-5">{p.benefits!.map((b) => <li key={b}>{b}</li>)}</ul>
+                </AccordionContent></AccordionItem>
             )}
             {info.keyIngredients.length > 0 && (
               <AccordionItem value="key"><AccordionTrigger className="font-serif text-xl font-normal">Key ingredients</AccordionTrigger>

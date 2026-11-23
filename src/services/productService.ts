@@ -93,6 +93,45 @@ export function recommendByConcern(list: Product[], p: Product, exclude: string[
     .map((r) => r.x);
 }
 
+/** Related products: admin picks (in their order) first, else same category. Active only. */
+export function relatedFor(list: Product[], p: Product, limit = 4): Product[] {
+  if (p.relatedSlugs?.length) return p.relatedSlugs.flatMap((s) => list.filter((x) => x.slug === s && x.id !== p.id && x.status === "active")).slice(0, limit);
+  return list.filter((x) => x.category === p.category && x.id !== p.id && x.status === "active").slice(0, limit);
+}
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/** A hidden draft copy with new ids — never shown in the shop until published. */
+export function duplicateOf(p: Product, existing: Product[], stamp = Date.now()): Product {
+  let slug = `${p.slug}-copy`;
+  for (let n = 2; existing.some((x) => x.slug === slug); n++) slug = `${p.slug}-copy-${n}`;
+  return {
+    ...structuredClone(p), id: `p${stamp}`, slug, name: `${p.name} (copy)`, status: "draft", bestSeller: false, featured: false, isSample: true,
+    variants: p.variants.map((v, i) => ({ ...v, id: `v${stamp}-${i}` })),
+  };
+}
+
+const looksLikeProduct = (x: unknown): x is Product => {
+  const p = x as Product;
+  return !!p && typeof p.id === "string" && typeof p.slug === "string" && typeof p.name === "string" && Array.isArray(p.variants) && p.variants.length > 0;
+};
+
+export function validateProduct(p: Product, all: Product[]): string[] {
+  const e: string[] = [];
+  if (p.name.trim().length < 2) e.push("Product name is required.");
+  const slug = p.slug || slugify(p.name);
+  if (!slug) e.push("Product web address can't be empty.");
+  if (all.some((x) => x.id !== p.id && x.slug === slug)) e.push("Another product already uses this web address — change the name or address.");
+  if (p.variants.length === 0) e.push("Add at least one size or shade.");
+  if (p.variants.some((v) => !v.label.trim())) e.push("Each size or shade needs a label.");
+  if (p.variants.some((v) => !(v.price >= 0))) e.push("Prices can't be negative.");
+  // Unpriced products may be saved as hidden drafts, but never shown in the shop.
+  if (p.status === "active" && p.variants.some((v) => !(v.price > 0))) e.push("A product visible in the shop needs a selling price for every size or shade — or keep it hidden.");
+  if (p.variants.some((v) => v.compareAtPrice != null && v.compareAtPrice <= v.price)) e.push("MRP must be higher than the selling price — or leave it blank.");
+  if (p.variants.some((v) => !(v.stock >= 0) || !Number.isFinite(v.stock))) e.push("Stock can't be negative.");
+  return e;
+}
+
 export const productService = {
   list: (query: ProductQuery = {}) => delay(filterProducts(store, query)),
   featured: () => delay(store.filter((p) => p.featured && p.status === "active")),
@@ -109,8 +148,8 @@ export const productService = {
   /** Storefront lookup: hidden drafts/archived products are not reachable by URL. */
   getBySlug: (slug: string) => delay(store.find((p) => p.slug === slug && p.status === "active") ?? null),
   getById: (id: string) => delay(store.find((p) => p.id === id) ?? null),
-  /** More from the same category. */
-  related: (p: Product) => delay(store.filter((x) => x.category === p.category && x.id !== p.id && x.status === "active").slice(0, 4)),
+  /** Hand-picked related products when set in admin, otherwise more from the same category. */
+  related: (p: Product) => delay(relatedFor(store, p)),
   /** Products sharing at least one verified concern tag, most shared first. */
   alsoLike: (p: Product, exclude: string[] = []) => delay(recommendByConcern(store, p, exclude)),
   categories: () => delay(categories),
@@ -118,7 +157,10 @@ export const productService = {
   bySlugs: (slugs: string[]) => delay(store.filter((p) => p.status === "active" && slugs.includes(p.slug))),
   getCategory: (slug: string) => delay(categories.find((c) => c.slug === slug) ?? null),
   // Admin (demo — saved in this browser only)
-  save: (product: Product) => {
+  save: (input: Product) => {
+    const product = { ...input, slug: input.slug || slugify(input.name) };
+    const errors = validateProduct(product, store);
+    if (errors.length) return Promise.reject(new Error(errors.join(" ")));
     const before = store;
     const i = store.findIndex((p) => p.id === product.id);
     store = i >= 0 ? store.map((p) => (p.id === product.id ? product : p)) : [product, ...store];
@@ -129,6 +171,20 @@ export const productService = {
     }
     notify();
     return delay(product);
+  },
+  duplicate: (id: string) => {
+    const p = store.find((x) => x.id === id);
+    if (!p) return Promise.reject(new Error("Product not found"));
+    return productService.save(duplicateOf(p, store));
+  },
+  /** Replace the whole demo catalogue from a backup file (shape-checked). */
+  importAll: (list: unknown[]) => {
+    if (!list.length || !list.every(looksLikeProduct)) return Promise.reject(new Error("The backup's product list is not valid."));
+    const before = store;
+    store = structuredClone(list as Product[]);
+    try { persist(); if (typeof window !== "undefined") localStorage.setItem(REV_KEY, CATALOGUE_REVISION); } catch { store = before; return Promise.reject(new Error("Not enough browser storage for this backup.")); }
+    notify();
+    return delay(true);
   },
   remove: (id: string) => {
     store = store.filter((p) => p.id !== id);
@@ -145,4 +201,6 @@ export const productService = {
   },
   /** Synchronous lookup used by the cart to render line items. */
   peekAll: () => store,
+  /** Imported catalogue (server render / first hydration pass). */
+  seedAll: () => seed,
 };
