@@ -5,12 +5,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { productService } from "@/services/productService";
 
 import { RevealOnScroll, TextReveal } from "@/components/motion/Reveal";
+import { isBackendConfigured } from "@/services/api";
+import { liveStoriesStore } from "@/services/liveStories";
 import { customerMediaService, isPublic, isPublicMedia, showsOn, testimonialCategories, testimonialService, type PhotoStory, type TestimonialCategory, type TestimonialPlacement } from "@/services/testimonialService";
 
 
 /** Public customer stories. Shows only verified, consented, published entries — never placeholder copy. */
 export function Testimonials({ id, placement = "home" }: { id?: string; placement?: TestimonialPlacement } = {}) {
-  const all = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.server);
+  const demoAll = useSyncExternalStore(testimonialService.subscribe, testimonialService.all, testimonialService.server);
+  const liveAll = useSyncExternalStore(liveStoriesStore.subscribe, liveStoriesStore.get, liveStoriesStore.server);
+  const all = isBackendConfigured() ? liveAll : demoAll;
   const stories = useSyncExternalStore(customerMediaService.subscribe, customerMediaService.photoStories, customerMediaService.serverPhotoStories).filter(isPublicMedia);
   const list = all.filter((t) => isPublic(t) && showsOn(t, placement));
   const tabs = testimonialCategories.filter((c) => list.some((t) => t.category === c));

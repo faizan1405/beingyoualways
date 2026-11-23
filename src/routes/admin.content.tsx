@@ -5,28 +5,30 @@ import { toast } from "sonner";
 
 import { AdminPage, Panel, adminInput, adminLabel } from "@/components/admin/AdminUI";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { LiveContent } from "@/components/admin/live/LiveContent";
 import { collections } from "@/components/home/HomeSections";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAllProducts, useDemoStore } from "@/hooks/use-demo-store";
 import { homeCategoryGroups } from "@/lib/concerns";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
+import { isBackendConfigured } from "@/services/api";
 import { HOME_SECTIONS, PROMO_LINKS, contentService, contentStore, type PromoLink, type SiteContent } from "@/services/contentService";
 import { productService } from "@/services/productService";
 
 export const Route = createFileRoute("/admin/content")({
   head: () => ({
     meta: [
-      { title: "Website Content (Demo) | Being You – Always Admin" },
-      { name: "description", content: "Edit homepage sections, About Us, contact details and FAQs (demo)." },
+      { title: "Website Content | Being You – Always Admin" },
+      { name: "description", content: "Edit homepage sections, About Us, contact details and FAQs." },
       { property: "og:title", content: "Website Content | Being You – Always Admin" },
-      { property: "og:description", content: "Storefront content manager (demo)." },
+      { property: "og:description", content: "Storefront content manager." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: ContentAdmin,
+  component: () => (isBackendConfigured() ? <LiveContent /> : <ContentAdmin />),
 });
 
 const ta = `${adminInput} h-auto py-2`;

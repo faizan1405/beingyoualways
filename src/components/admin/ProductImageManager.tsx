@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Eye, ImagePlus, RefreshCw, RotateCcw, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, ImagePlus, Loader2, RefreshCw, RotateCcw, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -7,34 +7,67 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
 import { isBackendConfigured } from "@/services/api";
+import { adminContent } from "@/services/adminContentService";
+import { absoluteMediaUrl } from "@/services/liveStories";
 import { infographicImages, movedImage, originalImages, slotLabel, withExtraImage, withImageAt, withoutImageAt } from "@/lib/product-images";
 import type { Product } from "@/lib/types";
 
+/** The server's own file URLs look like …/api/media/<id> — the id lets us archive the file. */
+const serverMediaId = (src: string): string | null => /\/api\/media\/([A-Za-z0-9_-]+)$/.exec(src)?.[1] ?? null;
+
 /**
  * Four-slide gallery manager (Product photo · Who is it for? · What's inside? · How to use).
- * Only the image list changes — never the product's id, prices or sizes. Uploads are resized
- * data URLs kept in this browser until the Hostinger media API is connected.
+ * Only the image list changes — never the product's id, prices or sizes.
+ * Demo: uploads are resized data URLs kept in this browser. Live (serverProductId set): files
+ * upload to the server's storage, the product keeps the file's URL, and removed files are
+ * archived on the server (hidden everywhere, bytes kept until purged).
  */
-export function ProductImageManager({ product, onChange }: { product: Product; onChange: (images: string[]) => void }) {
+export function ProductImageManager({ product, onChange, serverProductId }: { product: Product; onChange: (images: string[]) => void; serverProductId?: string | undefined }) {
   const images = product.images ?? [];
   const file = useRef<HTMLInputElement>(null);
   const target = useRef<number | null>(null); // slot being replaced; null = add new
   const [view, setView] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
   const slides = infographicImages(product.slug);
   const originals = originalImages(product.slug);
+  const live = isBackendConfigured();
 
   const pick = (slot: number | null) => { target.current = slot; file.current?.click(); };
+
+  const archiveQuietly = (src: string | undefined) => {
+    const id = src ? serverMediaId(src) : null;
+    if (id) adminContent.archiveMedia(id).catch(() => toast.error("The old file couldn't be hidden on the server — it's unused but still stored."));
+  };
+
   const onFile = async (f: File | undefined) => {
     if (!f) return;
-    // Live mode: browser-only photos can't be saved to the database; Hostinger media uploads come in a later phase.
-    if (isBackendConfigured()) { toast.error("Photo uploads to Hostinger storage aren't connected yet. You can reorder or remove existing catalogue photos."); return; }
+    const slot = target.current;
+    if (live) {
+      if (!serverProductId) { toast.error("Save the product first — then its photos can be uploaded to the server."); return; }
+      const bad = checkImageFile(f); if (bad) { toast.error(bad); return; }
+      setProgress(0);
+      try {
+        const media = await adminContent.uploadMedia(f, { kind: "PRODUCT_IMAGE", productId: serverProductId, alt: `${product.name} — ${slotLabel(slot ?? images.length)}`, position: slot ?? images.length }, setProgress);
+        const url = absoluteMediaUrl(media.url);
+        const old = slot == null ? undefined : images[slot];
+        onChange(slot == null ? withExtraImage(images, url) : withImageAt(images, slot, url));
+        archiveQuietly(old);
+        toast.success(slot == null ? "Photo uploaded to the server — press Save changes to keep it" : `${slotLabel(slot)} replaced — press Save changes to keep it`);
+      } catch (e) { toast.error(e instanceof Error ? e.message : "The upload failed."); }
+      finally { setProgress(null); }
+      return;
+    }
     const bad = checkImageFile(f); if (bad) { toast.error(bad); return; }
     try {
       const src = await fileToDemoImage(f);
-      const slot = target.current;
       onChange(slot == null ? withExtraImage(images, src) : withImageAt(images, slot, src));
       toast(slot == null ? "Photo added — press Save changes to keep it" : `${slotLabel(slot)} replaced — press Save changes to keep it`);
     } catch { toast.error("That image couldn't be read — try a JPG or PNG."); }
+  };
+
+  const removeAt = (i: number) => {
+    if (live) archiveQuietly(images[i]);
+    onChange(withoutImageAt(images, i));
   };
 
   return (
@@ -59,7 +92,7 @@ export function ProductImageManager({ product, onChange }: { product: Product; o
                   </div>
                   <div className="flex">
                     <Button type="button" variant="ghost" size="icon" className="size-7" aria-label={`Replace ${slotLabel(i)}`} onClick={() => pick(i)}><RefreshCw className="size-3.5" /></Button>
-                    <Button type="button" variant="ghost" size="icon" className="size-7" disabled={images.length === 1} aria-label={`Remove ${slotLabel(i)}`} onClick={() => onChange(withoutImageAt(images, i))}><Trash2 className="size-3.5 text-destructive" /></Button>
+                    <Button type="button" variant="ghost" size="icon" className="size-7" disabled={images.length === 1} aria-label={`Remove ${slotLabel(i)}`} onClick={() => removeAt(i)}><Trash2 className="size-3.5 text-destructive" /></Button>
                   </div>
                 </div>
               </div>
@@ -67,8 +100,14 @@ export function ProductImageManager({ product, onChange }: { product: Product; o
           ))}
         </ol>
       )}
+      {progress != null && (
+        <div className="mt-3" role="status" aria-label="Upload progress">
+          <div className="h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
+          <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Uploading to the server… {progress}%</p>
+        </div>
+      )}
       <div className="mt-3 grid gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => pick(null)}><Upload /> Upload new photo</Button>
+        <Button type="button" variant="outline" size="sm" disabled={progress != null} onClick={() => pick(null)}><Upload /> Upload new photo</Button>
         {slides.length === 4 && !slides.every((x, i) => images[i] === x) && (
           <Button type="button" variant="outline" size="sm" onClick={() => { onChange([...slides]); toast("Original four slides restored — press Save changes to keep them"); }}><RotateCcw /> Restore the original four slides</Button>
         )}
@@ -76,7 +115,11 @@ export function ProductImageManager({ product, onChange }: { product: Product; o
           <Button type="button" variant="ghost" size="sm" onClick={() => { onChange([...originals]); toast("Original website photos restored — press Save changes to keep them"); }}><ImagePlus /> Use original website photos</Button>
         )}
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">The first photo is the shop card and main image. Demo: uploads stay in this browser until media storage is connected.</p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {live
+          ? "The first photo is the shop card and main image. Uploads go to the server's storage; removed files are hidden, not erased."
+          : "The first photo is the shop card and main image. Demo: uploads stay in this browser until media storage is connected."}
+      </p>
       <Dialog open={view != null} onOpenChange={(o) => !o && setView(null)}>
         <DialogContent className="max-w-xl p-3">
           <DialogTitle className="px-2 pt-1 text-sm font-semibold">{view != null ? `${view + 1}. ${slotLabel(view)}` : "Preview"}</DialogTitle>

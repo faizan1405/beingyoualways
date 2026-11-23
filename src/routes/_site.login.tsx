@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { DemoNotice } from "@/components/shop/DemoNotice";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { API_ENDPOINTS, HOSTINGER_API_BASE_URL, isBackendConfigured } from "@/services/api";
 import { authService } from "@/services/authService";
 import { customerAuthService } from "@/services/customerAuthService";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ function GoogleIcon() {
 }
 
 export const Route = createFileRoute("/_site/login")({
+  validateSearch: (s: Record<string, unknown>): { google?: string } => (typeof s["google"] === "string" ? { google: s["google"] } : {}),
   head: () => ({
     meta: [
       { title: "Login or Register | Being You – Always" },
@@ -44,6 +46,28 @@ function Login() {
   const [emailNote, setEmailNote] = useState<string | null>(null);
   const [emailBusy, setEmailBusy] = useState(false);
   const navigate = useNavigate();
+  const { google } = Route.useSearch();
+
+  /** Real Google sign-in: the server holds the credentials and redirects back here when done. */
+  const startGoogle = async () => {
+    if (!isBackendConfigured() || !HOSTINGER_API_BASE_URL) {
+      const r = await authService.signInWithGoogle();
+      if (!r.ok) setGoogleNote(true);
+      toast("Google sign-in needs backend integration — you have not been signed in.");
+      return;
+    }
+    try {
+      const status = await customerAuthService.googleStatus();
+      if (!status.configured) {
+        setGoogleNote(true);
+        toast("Google sign-in isn't configured on the server yet — you have not been signed in.");
+        return;
+      }
+      window.location.assign(`${HOSTINGER_API_BASE_URL}${API_ENDPOINTS.googleStart}`);
+    } catch {
+      toast.error("Can't reach the store server right now — try again in a moment.");
+    }
+  };
 
   const looksLikeEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim());
 
@@ -84,15 +108,13 @@ function Login() {
         </div>
         <button
           type="button"
-          onClick={async () => {
-            const r = await authService.signInWithGoogle();
-            if (!r.ok) setGoogleNote(true);
-            toast("Google sign-in needs backend integration — you have not been signed in.");
-          }}
+          onClick={() => void startGoogle()}
           className={buttonVariants({ variant: "outline", size: "xl", className: "mt-8 w-full gap-3 bg-card font-semibold" })}
         >
           <GoogleIcon /> {mode === "login" ? "Continue with Google" : "Sign up with Google"}
         </button>
+        {google === "connected" && <DemoNotice className="mt-3">Google sign-in finished — <Link to="/account" className="font-semibold underline">go to your account</Link>.</DemoNotice>}
+        {google === "failed" && <DemoNotice className="mt-3">Google sign-in didn't finish. Nothing was signed in — please try again or use your email and password.</DemoNotice>}
         {googleNote && <DemoNotice className="mt-3">Google sign-in is ready in the design but not connected yet. No Google account was accessed and you are <strong>not signed in</strong>.</DemoNotice>}
         <div className="my-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground"><span className="h-px flex-1 bg-border" /> or continue with WhatsApp <span className="h-px flex-1 bg-border" /></div>
         <form

@@ -10,17 +10,19 @@ import resultBefore from "@/assets/testimonials/result-before.webp";
 import resultAfter from "@/assets/testimonials/result-after.webp";
 import { AdminPage, Panel, adminInput, adminLabel } from "@/components/admin/AdminUI";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { LiveTestimonials } from "@/components/admin/live/LiveTestimonials";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAllProducts, useDemoStore } from "@/hooks/use-demo-store";
 import { checkImageFile, fileToDemoImage } from "@/lib/image-upload";
 import { newId } from "@/lib/demo-store";
+import { isBackendConfigured } from "@/services/api";
 import {
   customerMediaService, isPublic, isPublicMedia, isTemporaryVideo, testimonialCategories, testimonialPlacements, testimonialService, testimonialStore,
   type Testimonial, type TestimonialCategory, type TestimonialPlacement,
 } from "@/services/testimonialService";
 
-export const Route = createFileRoute("/admin/testimonials")({ component: Testimonials });
+export const Route = createFileRoute("/admin/testimonials")({ component: () => (isBackendConfigured() ? <LiveTestimonials /> : <Testimonials />) });
 
 /** Client-supplied photos — selectable here; never public until permission is confirmed. */
 const suppliedPhotos = [

@@ -25,10 +25,10 @@ describe("API address", () => {
   });
 });
 
-describe("Phase 2 admin areas", () => {
-  it("overview, products, orders, customers, discounts and settings use the real database; the rest stay switched off", () => {
-    for (const p of ["/admin", "/admin/", "/admin/products", "/admin/products/bya-1069", "/admin/orders", "/admin/orders/abc", "/admin/customers", "/admin/customers/abc", "/admin/discounts", "/admin/settings"]) expect(isLiveAdminPath(p)).toBe(true);
-    for (const p of ["/admin/whatsapp", "/admin/whatsapp-api", "/admin/testimonials", "/admin/content", "/admin/chatbot", "/admin/abandoned-cart", "/admin/approvals", "/admin/products-old"]) expect(isLiveAdminPath(p)).toBe(false);
+describe("live admin areas", () => {
+  it("overview, products, orders, customers, discounts, settings, content, stories and approvals use the real database; the rest stay switched off", () => {
+    for (const p of ["/admin", "/admin/", "/admin/products", "/admin/products/bya-1069", "/admin/orders", "/admin/orders/abc", "/admin/customers", "/admin/customers/abc", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals"]) expect(isLiveAdminPath(p)).toBe(true);
+    for (const p of ["/admin/whatsapp", "/admin/whatsapp-api", "/admin/chatbot", "/admin/abandoned-cart", "/admin/products-old"]) expect(isLiveAdminPath(p)).toBe(false);
   });
 });
 

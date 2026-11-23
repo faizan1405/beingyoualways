@@ -171,7 +171,7 @@ function EditProduct() {
         </div>
         <div className="space-y-4">
           <Panel title="Images · 4-slide gallery" action={<Button type="button" variant="outline" size="sm" onClick={() => setPreviewing(true)}><Eye /> Preview</Button>}>
-            <ProductImageManager product={p} onChange={(images) => up({ images })} />
+            <ProductImageManager product={p} onChange={(images) => up({ images })} serverProductId={isBackendConfigured() && !isNew ? p.id : undefined} />
           </Panel>
           {pending.length > 0 && (
             <Panel title="Supplied photos awaiting confirmation">

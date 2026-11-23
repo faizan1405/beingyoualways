@@ -58,16 +58,21 @@ export const API_ENDPOINTS = {
   customerOrders: "/api/customer/orders",                      // GET order history
   customerClaimOrder: "/api/customer/orders/claim",            // POST { orderNumber, token } — token is the private link's key
   googleStatus: "/api/auth/google/status",                     // GET { configured } — never starts a flow by itself
+  googleStart: "/api/auth/google/start",                       // GET — full-page redirect into Google's sign-in
   publicReviews: "/api/reviews",                               // GET published, consented customer stories
   publicContent: "/api/content",                               // GET website wording
+  media: "/api/admin/media",                                   // GET list, POST /upload (multipart)
+  mediaItem: "/api/admin/media/:id",                           // PATCH alt/position, POST /delete (archive) or /purge
+  mediaUpload: "/api/admin/media/upload",                      // POST multipart file; kind/productId/reviewId as query
+  reviews: "/api/admin/reviews",                               // GET list, POST create
+  reviewItem: "/api/admin/reviews/:id",                        // PATCH update, POST /delete
+  content: "/api/admin/content",                               // GET all, PUT bulk, POST one key
+  contentKey: "/api/admin/content/:id",                        // POST /delete — back to built-in wording
+  approvals: "/api/admin/approvals",                           // GET the pre-launch checklist from live data
   // ── Later phases (not on the server yet) ──
-  productMedia: "/api/admin/products/:id/media",
-  reviews: "/api/admin/reviews",
-  media: "/api/admin/media",
   campaigns: "/api/admin/whatsapp/campaigns",
   abandonedCart: "/api/admin/whatsapp/abandoned-cart",
   chatbot: "/api/admin/whatsapp/chatbot",
-  content: "/api/admin/content",
   // WhatsApp Cloud API (all Meta calls happen on the server with the token from server env)
   otpRequest: "/api/auth/whatsapp/request-otp",       // POST { phone } → { expiresInSeconds, resendInSeconds }
   otpVerify: "/api/auth/whatsapp/verify-otp",         // POST { phone, code } → sets httpOnly session cookie
@@ -95,7 +100,7 @@ export const isDemoMode = () => DEMO_MODE;
 export const isUnconnectedProduction = () => !isBackendConfigured() && !DEMO_MODE;
 
 /** Admin areas that read and write the real database. Every other admin area stays disabled when connected. */
-export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/customers", "/admin/discounts", "/admin/settings"] as const;
+export const LIVE_ADMIN_PATHS = ["/admin/products", "/admin/orders", "/admin/customers", "/admin/discounts", "/admin/settings", "/admin/content", "/admin/testimonials", "/admin/approvals"] as const;
 export const isLiveAdminPath = (pathname: string) => pathname.replace(/\/$/, "") === "/admin" || LIVE_ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 export class BackendNotConnectedError extends Error {
@@ -150,6 +155,33 @@ export const toQuery = (q: Record<string, string | number | boolean | undefined 
   const s = p.toString();
   return s ? `?${s}` : "";
 };
+
+/**
+ * Authenticated file upload (admin media). Uses XMLHttpRequest because fetch can't report upload
+ * progress. The file goes as multipart form data; settings travel as query parameters. The server
+ * checks the file's real bytes, never its name.
+ */
+export function apiUpload<T>(path: string, file: File, query: Record<string, string | number | undefined>, onProgress?: (percent: number) => void): Promise<T> {
+  if (!HOSTINGER_API_BASE_URL) return Promise.reject(new BackendNotConnectedError());
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${HOSTINGER_API_BASE_URL}${path}${toQuery(query)}`);
+    xhr.withCredentials = true;
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100)); };
+    xhr.onload = () => {
+      let body: { error?: { code?: string; message?: string } } = {};
+      try { body = JSON.parse(xhr.responseText) as typeof body; } catch { /* not JSON (e.g. a proxy error page) */ }
+      if (xhr.status >= 200 && xhr.status < 300) { resolve(body as T); return; }
+      const e = body.error;
+      reject(new ApiError(xhr.status, e?.code ?? "server_error", e?.message ?? (xhr.status === 401 ? "Your admin session has ended — please sign in again." : "The upload failed. Nothing was saved.")));
+    };
+    xhr.onerror = () => reject(new BackendOfflineError());
+    const form = new FormData();
+    form.append("file", file);
+    xhr.send(form);
+  });
+}
 
 /** Authenticated file download (e.g. the orders CSV) — same cookie rules as apiRequest. */
 export async function apiDownload(path: string, filename: string): Promise<void> {

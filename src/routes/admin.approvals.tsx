@@ -2,9 +2,11 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, CircleDashed, CircleDot } from "lucide-react";
 
 import { AdminPage, Panel } from "@/components/admin/AdminUI";
+import { LiveApprovals } from "@/components/admin/live/LiveApprovals";
 import { buildApprovalChecklist, type ApprovalStatus } from "@/lib/approvals";
 import { cn } from "@/lib/utils";
 import { useAllProducts, useDemoStore } from "@/hooks/use-demo-store";
+import { isBackendConfigured } from "@/services/api";
 import { settingsStore } from "@/services/settingsService";
 import { WHATSAPP_CONNECTED } from "@/services/whatsappService";
 import { isPublic, testimonialStore } from "@/services/testimonialService";
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/admin/approvals")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: Approvals,
+  component: () => (isBackendConfigured() ? <LiveApprovals /> : <Approvals />),
 });
 
 const STATUS: Record<ApprovalStatus, { label: string; I: typeof CheckCircle2; cls: string }> = {

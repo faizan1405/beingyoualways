@@ -68,6 +68,53 @@ export const contentStore = createDemoStore<SiteContent>({
 export const telFrom = (display: string) => { const d = display.replace(/[^0-9+]/g, ""); return d.startsWith("+") ? d : `+91${d}`; };
 export const mapsUrlFor = (lines: string[]) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lines.join(", "))}`;
 
+const strList = (v: unknown): string[] | null => (Array.isArray(v) && v.every((x) => typeof x === "string") ? (v as string[]) : null);
+
+/**
+ * Merges wording stored on the server over the built-in copy. Anything missing or the wrong shape
+ * falls back to the default, so a partial or old stored document can never blank out the site.
+ */
+export function mergeSiteContent(stored: unknown): SiteContent {
+  const base = defaultContent();
+  if (!isObject(stored)) return base;
+  const s = stored as Record<string, unknown>;
+  const phones = Array.isArray((s["contact"] as Record<string, unknown> | undefined)?.["phones"])
+    ? ((s["contact"] as Record<string, unknown>)["phones"] as unknown[]).filter((p): p is ContactPhone => isObject(p) && typeof p["label"] === "string" && typeof p["display"] === "string")
+    : null;
+  const faqs = Array.isArray(s["faqs"])
+    ? (s["faqs"] as unknown[]).filter((f): f is { q: string; a: string } => isObject(f) && typeof f["q"] === "string" && typeof f["a"] === "string")
+    : null;
+  const contact = isObject(s["contact"]) ? (s["contact"] as Record<string, unknown>) : null;
+  const about = isObject(s["about"]) ? (s["about"] as Record<string, unknown>) : null;
+  return {
+    announcement: isObject(s["announcement"])
+      ? { enabled: Boolean((s["announcement"] as Record<string, unknown>)["enabled"]), text: String((s["announcement"] as Record<string, unknown>)["text"] ?? "") }
+      : base.announcement,
+    promo: isObject(s["promo"])
+      ? { ...base.promo, ...(s["promo"] as Record<string, unknown>) } as SiteContent["promo"]
+      : base.promo,
+    categoryOrder: strList(s["categoryOrder"]) ?? base.categoryOrder,
+    hiddenCollections: strList(s["hiddenCollections"]) ?? base.hiddenCollections,
+    sections: isObject(s["sections"]) ? ({ ...base.sections, ...(s["sections"] as Record<string, unknown>) } as SiteContent["sections"]) : base.sections,
+    about: about
+      ? {
+          story: strList(about["story"]) ?? base.about.story,
+          mission: typeof about["mission"] === "string" ? about["mission"] : base.about.mission,
+          vision: typeof about["vision"] === "string" ? about["vision"] : base.about.vision,
+          signoff: typeof about["signoff"] === "string" ? about["signoff"] : base.about.signoff,
+        }
+      : base.about,
+    contact: contact
+      ? {
+          phones: phones && phones.length ? phones.map((p) => ({ ...p, tel: p.tel || telFrom(p.display) })) : base.contact.phones,
+          email: typeof contact["email"] === "string" ? contact["email"] : base.contact.email,
+          addressLines: strList(contact["addressLines"]) ?? base.contact.addressLines,
+        }
+      : base.contact,
+    faqs: faqs ?? base.faqs,
+  };
+}
+
 export function validateContent(c: SiteContent): string[] {
   const e: string[] = [];
   if (c.announcement.enabled && !c.announcement.text.trim()) e.push("Write the announcement text, or switch it off.");
