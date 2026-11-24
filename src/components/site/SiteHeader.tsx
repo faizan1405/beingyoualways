@@ -16,7 +16,9 @@ const moreNav = [
 
 export function Wordmark({ className = "", compact = false, tagline = false }: { className?: string | undefined; compact?: boolean; tagline?: boolean }) {
   return (
-    <Link to="/" className={`flex shrink-0 flex-col items-center text-center leading-none ${className}`} aria-label="Being You – Always, home">
+    <Link to="/" className={`flex shrink-0 items-center gap-2.5 text-center leading-none ${className}`} aria-label="Being You – Always, home">
+      <img src="/apple-touch-icon.png" alt="Being You logo" className={`rounded-full object-cover shrink-0 transition-all duration-500 ${compact ? "h-7 w-7" : "h-9 w-9"}`} />
+      <span className="flex flex-col items-center">
       <span className={`font-serif tracking-wide transition-[font-size] duration-500 ${compact ? "text-xl md:text-2xl" : "text-2xl md:text-[2rem]"}`}>Being You</span>
       <span className="mt-1 pl-[0.42em] text-[9px] font-semibold uppercase tracking-[0.42em] text-muted-foreground">— Always —</span>
       {tagline && (
@@ -24,6 +26,7 @@ export function Wordmark({ className = "", compact = false, tagline = false }: {
           {brandConfig.headerTagline}
         </span>
       )}
+      </span>
     </Link>
   );
 }
